@@ -19337,6 +19337,12 @@ const insUn   = (t, c) => (insumo(t, c) || {}).un   || 'un';
 const cliente = n => CLIENTES.find(c => c.nome === n);
 const deposito= id => DEPOSITOS.find(d => d.id === id);
 const maquina = id => MAQUINAS.find(m => m.id === id);
+/* WP-1.1: definição canônica e testada em prototype/core/qPerda.mjs (idêntica a
+   esta linha). Mantida aqui, duplicada, porque o bloco de seed de DB.serie logo
+   abaixo chama qPerda no nível superior do script, de forma síncrona durante o
+   parse do documento — um <script type="module"> é sempre adiado pelo navegador
+   para depois do documento inteiro ter sido interpretado, então a versão
+   importada só estaria disponível tarde demais para esse caminho de chamada. */
 const qPerda  = l => l.qtd * (1 + (l.perda || 0) / 100);
 
 /* ============================================================
@@ -19503,10 +19509,9 @@ function custoProc(tipo, cod, prof){
 function custoDe(tipo, cod){
   return custoMat(tipo, cod) + custoProc(tipo, cod) + custoMO(tipo, cod);
 }
-function custoAberto(tipo, cod){
-  const mat = custoMat(tipo, cod), pro = custoProc(tipo, cod), mo = custoMO(tipo, cod);
-  return {mat, pro, mo, total:mat + pro + mo};
-}
+/* WP-1.1: extraída para prototype/core/custoAberto.mjs (testada por
+   custoAberto.test.mjs); reexposta em window.custoAberto pelo <script
+   type="module"> no fim deste arquivo. */
 /* tempo total de fabricação em minutos, somando os componentes filhos */
 function tempoDe(tipo, cod, prof){
   prof = prof || 0;
@@ -19515,19 +19520,9 @@ function tempoDe(tipo, cod, prof){
   return (f.tempo || 0) + f.ficha.reduce((s, l) => s + qPerda(l) * tempoDe(l.tipo, l.cod, prof + 1), 0);
 }
 /* explosão recursiva até material, com quantidade acumulada e perda composta */
-function explodir(tipo, cod, qtd, saida, prof){
-  saida = saida || {}; prof = prof || 0;
-  if(prof > 6) return saida;
-  if(tipo === 'material'){
-    const k = cod;
-    saida[k] = saida[k] || {cod:cod, un:(item(cod)||{}).un || 'un', qtd:0, dep:(item(cod)||{}).dep};
-    saida[k].qtd += qtd;
-    return saida;
-  }
-  const f = ficha(cod); if(!f) return saida;
-  f.ficha.forEach(l => explodir(l.tipo, l.cod, qPerda(l) * qtd, saida, prof + 1));
-  return saida;
-}
+/* WP-1.1: extraída para prototype/core/explodir.mjs (testada por
+   explodir.test.mjs); reexposta em window.explodir pelo <script
+   type="module"> no fim deste arquivo. */
 /* necessidade total de materiais de uma ordem, considerando todos os seus itens */
 function necessidadeOrdem(o){
   const acc = {};
@@ -21531,29 +21526,9 @@ function baixar(nome, conteudo, mime){
    ============================================================ */
 /* o que uma operação da ordem consome ao ser concluída. A programação usa a
    mesma conta para projetar o consumo do dia antes de ele acontecer. */
-function matDaOperacao(o, setor){
-  const acc = {};
-  const add = (cod, dep, q) => {
-    const k = cod + '|' + dep;
-    acc[k] = acc[k] || {cod:cod, dep:dep, qtd:0};
-    acc[k].qtd += q;
-  };
-  (o.itens || []).forEach(oi => {
-    const f = ficha(oi.cod); if(!f) return;
-    /* materiais consumidos diretamente nas linhas cujo setor é o da operação */
-    f.ficha.forEach(l => {
-      if(l.tipo === 'material' && l.setor === setor) add(l.cod, l.dep, qPerda(l) * oi.qtd);
-    });
-    /* materiais dos componentes fabricados neste setor */
-    f.ficha.filter(l => l.tipo === 'componente').forEach(l => {
-      const c = comp(l.cod); if(!c || c.setor !== setor) return;
-      c.ficha.forEach(cl => {
-        if(cl.tipo === 'material') add(cl.cod, cl.dep, qPerda(cl) * qPerda(l) * oi.qtd);
-      });
-    });
-  });
-  return Object.keys(acc).map(k => acc[k]).filter(x => x.qtd > 0);
-}
+/* WP-1.1: extraída para prototype/core/matDaOperacao.mjs (testada por
+   matDaOperacao.test.mjs); reexposta em window.matDaOperacao pelo <script
+   type="module"> no fim deste arquivo. */
 function baixaAutomatica(o, op){
   const baixas = PARAM.baixaAutomatica ? matDaOperacao(o, op.setor) : [];
   /* P0-04: marcas do início para permitir estorno exato do apontamento */
@@ -26082,6 +26057,34 @@ try{
 }catch(_){}
 route(S.auth ? undefined : 'login');
 a11yTabelas();
+</script>
+
+<script type="module">
+  /* WP-1.1 — reexposição global das regras extraídas para prototype/core/*.mjs.
+     Script type="module" é sempre adiado pelo navegador para depois do documento
+     inteiro ter sido interpretado (ver relatório da sprint) — por isso os
+     wrappers abaixo leem window.item/ficha/comp/custoMat/custoProc/custoMO no
+     momento da chamada, nunca no momento do import: essas funções só existem
+     depois que o <script> legado acima executa. */
+  import { qPerda } from './core/qPerda.mjs';
+  import { createExplodir } from './core/explodir.mjs';
+  import { createMatDaOperacao } from './core/matDaOperacao.mjs';
+  import { createCustoAberto } from './core/custoAberto.mjs';
+
+  window.qPerda = qPerda;
+  window.explodir = createExplodir({
+    item: cod => window.item(cod),
+    ficha: cod => window.ficha(cod)
+  });
+  window.matDaOperacao = createMatDaOperacao({
+    ficha: cod => window.ficha(cod),
+    comp: cod => window.comp(cod)
+  });
+  window.custoAberto = createCustoAberto({
+    custoMat: (tipo, cod, prof) => window.custoMat(tipo, cod, prof),
+    custoProc: (tipo, cod, prof) => window.custoProc(tipo, cod, prof),
+    custoMO: (tipo, cod, prof) => window.custoMO(tipo, cod, prof)
+  });
 </script>
 
 </body>
