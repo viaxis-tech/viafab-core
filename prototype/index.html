@@ -15710,9 +15710,14 @@ const DB = {
   cfg: null, snapshot: null, seqCfg: 1197, seqSnap: 780, seqOrd: 2440
 };
 /* o reservado de cada item é derivado das reservas vigentes, não digitado (US-11, US-13) */
+/* WP-1.3: mesma fórmula de prototype/core/saldoGuardiao.mjs (aplicarSaldo com
+   estoqueNegativo:false para res), duplicada aqui pelo mesmo motivo de
+   qPerda (:19340): este bloco roda de forma síncrona durante o parse do
+   documento, antes do <script type="module"> (que expõe window.aplicarSaldo)
+   ser executado. */
 DB.reservas.forEach(r => {
   const i = ITENS.find(x => x.cod === r.item);
-  if(i) i.res = Math.round((i.res + r.res) * 100) / 100;
+  if(i) i.res = Math.max(0, Math.round((i.res + r.res) * 100) / 100);
 });
 /* auditoria é a única lista de DB persistida entre sessões (decisão consciente:
    ordens, reservas e estornos ficam só na sessão, SPEC 2.1.3). Se não houver
@@ -16374,7 +16379,7 @@ function desbloquearOperacao(ordemId, op, origem){
         mat.forEach(b => {
           const it = item(b.cod); if(!it) return;
           const q = Math.round(b.qtd * 100) / 100;
-          it.fis += q;
+          it.fis = window.aplicarSaldo(it.fis, q, { estoqueNegativo: PARAM.estoqueNegativo });
           DB.movimentos.unshift({ts:now(), tipo:'Estorno de baixa por desbloqueio', item:b.cod, dep:b.dep,
             qtd:q, resp:S.usuario, sinc:'ok'});
         });
@@ -16474,7 +16479,7 @@ function liberarReserva(id, avisar){
   let n = 0;
   reservasAtivas(id).forEach(r => {
     const it = item(r.item);
-    if(it) it.res = Math.max(0, Math.round((it.res - r.res) * 100) / 100);
+    if(it) it.res = window.aplicarSaldo(it.res, -r.res, { estoqueNegativo: false });
     r.liberada_em = ts;
     n++;
   });
@@ -16503,7 +16508,7 @@ function reservarMaterial(id){
     const disp = Math.max(0, it.fis - it.res);
     const res = Math.round(Math.min(disp, n.nec) * 100) / 100;
     const falta = Math.round(Math.max(0, n.nec - res) * 100) / 100;
-    it.res = Math.round((it.res + res) * 100) / 100;
+    it.res = window.aplicarSaldo(it.res, res, { estoqueNegativo: false });
     totNec += n.nec; totRes += res; totFalta += falta;
     if(falta > 0.001) faltaItens.push(n.item);
     DB.reservas.push({ordem:id, item:n.item, dep:n.dep, nec:n.nec, res:res,
@@ -16590,7 +16595,9 @@ function initEstoque(){
     if(q > restante){ showErr('#e-sp-qtd', `Quantidade acima do reservado disponível (${nf(restante, 2)}).`); return; }
     showErr('#e-sp-qtd', null);
     DB.separacoes.push({ts:now(), ordem:id, item:cod, dep:$('#sp-dep').value, qtd:q, resp:S.usuario});
-    const it = item(cod); it.fis -= q; it.res -= q;
+    const it = item(cod);
+    it.fis = window.aplicarSaldo(it.fis, -q, { estoqueNegativo: PARAM.estoqueNegativo });
+    it.res = window.aplicarSaldo(it.res, -q, { estoqueNegativo: false });
     evento(id, 'Separação registrada', `${cod} · ${nf(q, 2)} ${it.un} · ${$('#sp-dep').value}`, 'Almoxarifado');
     audit('Estoque', 'Separação registrada', id + ' / ' + cod, nf(q, 2) + ' ' + it.un);
     renderEstoque(); atualizarItensSeparacao(); toast('Separação registrada.');
@@ -16629,7 +16636,10 @@ function initEstoque(){
     }
     DB.movimentos.push({ts:now(), tipo, item:cod, dep:dep, qtd:q, resp:S.usuario,
       sinc:off ? 'pendente' : 'ok', lote:entrada && !off ? lt : '', doc:ids[0] || ''});
-    if(!off) item(cod).fis += q;
+    if(!off){
+      const it = item(cod);
+      it.fis = window.aplicarSaldo(it.fis, q, { estoqueNegativo: PARAM.estoqueNegativo });
+    }
     audit('Estoque', tipo, cod + ' / ' + dep,
       `quantidade = ${q > 0 ? '+' : ''}${nf(q, 2)}${entrada && !off ? ' · lote ' + lt : ''}${ids.length ? ' · ' + ids.length + ' documento(s)' : ''}${off ? ' (pendente)' : ''}`);
     limparAnexos();
@@ -16950,7 +16960,7 @@ function initChao(){
     const cod = $('#pd-item').value, q = +$('#pd-qtd').value;
     $('#e-pd-qtd').hidden = q > 0; if(q <= 0 || !cod) return;
     DB.perdas.push({ordem:CF.ordem, op:CF.op.op, item:cod, qtd:q, motivo:$('#pd-mot').value});
-    const it = item(cod); it.res = Math.max(0, it.res - q);
+    const it = item(cod); it.res = window.aplicarSaldo(it.res, -q, { estoqueNegativo: false });
     evento(CF.ordem, 'Perda registrada', `${cod} · ${nf(q, 2)} ${it.un} · ${$('#pd-mot').value}`, 'Produção');
     audit('Produção', 'Perda registrada', CF.ordem + ' / ' + cod, `${nf(q, 2)} ${it.un} · ${$('#pd-mot').value}`);
     $('#pd-qtd').value = 0; renderChao(); toast('Perda registrada e refletida no estoque reservado.');
@@ -17041,7 +17051,10 @@ function corrigirApontamento(){
      <p class="mo-nota">A correção fica registrada em estorno_apontamento e na auditoria com o responsável.</p>`,
     'Confirmar correção', () => {
       /* devolve saldo físico e reservado */
-      u.rev.itens.forEach(x => { const it = item(x.cod); if(it){ it.fis += x.q; it.res += x.q; } });
+      u.rev.itens.forEach(x => { const it = item(x.cod); if(it){
+        it.fis = window.aplicarSaldo(it.fis, x.q, { estoqueNegativo: PARAM.estoqueNegativo });
+        it.res = window.aplicarSaldo(it.res, x.q, { estoqueNegativo: false });
+      } });
       /* devolve o saldo aos lotes exatamente como saiu */
       DB.rastreio.splice(DB.rastreio.length - u.rev.rastreio, u.rev.rastreio).forEach(r => {
         const l = DB.lotes.find(x => x.lote === r.lote && x.item === r.item);
@@ -21537,8 +21550,8 @@ function baixaAutomatica(o, op){
   baixas.forEach(b => {
     const it = item(b.cod); if(!it) return;
     const q = Math.round(b.qtd * 100) / 100;
-    it.fis = PARAM.estoqueNegativo ? it.fis - q : Math.max(0, it.fis - q);
-    it.res = Math.max(0, it.res - q);
+    it.fis = window.aplicarSaldo(it.fis, -q, { estoqueNegativo: PARAM.estoqueNegativo });
+    it.res = window.aplicarSaldo(it.res, -q, { estoqueNegativo: false });
     revItens.push({cod:b.cod, q:q});
     const lotes = baixarLote(b.cod, b.dep, q, o.id, op.op);
     DB.consumos.push({ordem:o.id, op:op.op, item:b.cod, qtd:q, auto:true, lotes:lotes.join(', ')});
@@ -26070,8 +26083,10 @@ a11yTabelas();
   import { createExplodir } from './core/explodir.mjs';
   import { createMatDaOperacao } from './core/matDaOperacao.mjs';
   import { createCustoAberto } from './core/custoAberto.mjs';
+  import { aplicarSaldo } from './core/saldoGuardiao.mjs';
 
   window.qPerda = qPerda;
+  window.aplicarSaldo = aplicarSaldo;
   window.explodir = createExplodir({
     item: cod => window.item(cod),
     ficha: cod => window.ficha(cod)
