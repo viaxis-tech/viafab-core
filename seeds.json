@@ -1,0 +1,4671 @@
+﻿{
+  "startDate": "2026-07-27",
+  "horizon": 12,
+  "modo": "demanda",
+  "materiais": [
+    {
+      "um": "und",
+      "fornec": "",
+      "custo": 0.18,
+      "estoque": 13000,
+      "seg": 600,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-001",
+      "nome": "ARRUELA LISA GALV. 1/2\""
+    },
+    {
+      "um": "und",
+      "fornec": "",
+      "custo": 0.06,
+      "estoque": 14000,
+      "seg": 600,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-002",
+      "nome": "ARRUELA LISA GALV. 1/4\""
+    },
+    {
+      "um": "und",
+      "fornec": "",
+      "custo": 0.07,
+      "estoque": 28000,
+      "seg": 600,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-003",
+      "nome": "ARRUELA LISA GALV. 5/16\""
+    },
+    {
+      "um": "m",
+      "fornec": "",
+      "custo": 13.28,
+      "estoque": 178,
+      "seg": 12,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-004",
+      "nome": "BARRA CHATA ALUM. 1.1/2\" X 1/4\""
+    },
+    {
+      "um": "m",
+      "fornec": "",
+      "custo": 11.32,
+      "estoque": 780,
+      "seg": 120,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-005",
+      "nome": "BARRA CHATA FERRO 1.1/2\" X 1/4\""
+    },
+    {
+      "um": "m",
+      "fornec": "",
+      "custo": 7.05,
+      "estoque": 11950,
+      "seg": 360,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-006",
+      "nome": "BARRA ROSC. GALV. 1/2\" 13 FIOS"
+    },
+    {
+      "um": "m",
+      "fornec": "",
+      "custo": 13.81,
+      "estoque": 1100,
+      "seg": 120,
+      "lead": 5,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.02,
+      "sku": "MAT-007",
+      "nome": "CANT. AÇO 1.1/2\" X 1/8\""
+    },
+    {
+      "um": "m",
+      "fornec": "",
+      "custo": 8.5,
+      "estoque": 5970,
+      "seg": 720,
+      "lead": 5,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.02,
+      "sku": "MAT-008",
+      "nome": "CANT. AÇO 1.1/4\" X 1/8\""
+    },
+    {
+      "um": "m",
+      "fornec": "",
+      "custo": 6,
+      "estoque": 0,
+      "seg": 36,
+      "lead": 5,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.02,
+      "sku": "MAT-009",
+      "nome": "CANT. AÇO 3/4\" X 1/8\""
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 62,
+      "estoque": 6790,
+      "seg": 600,
+      "lead": 5,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.1,
+      "sku": "MAT-010",
+      "nome": "CHAPA ACM 3MM PRETO FOSCO UV"
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 71.69,
+      "estoque": 396,
+      "seg": 300,
+      "lead": 13,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.1,
+      "sku": "MAT-011",
+      "nome": "CHAPA AÇO GALV. #18 1,25MM"
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 150.39,
+      "estoque": 36,
+      "seg": 24,
+      "lead": 13,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.1,
+      "sku": "MAT-012",
+      "nome": "CHAPA ALUM.  #14"
+    },
+    {
+      "um": "und",
+      "fornec": "",
+      "custo": 7,
+      "estoque": 30,
+      "seg": 24,
+      "lead": 5,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-013",
+      "nome": "DOBR. GONZO C/ ABA 7/8\""
+    },
+    {
+      "um": "m",
+      "fornec": "",
+      "custo": 4.75,
+      "estoque": 9720,
+      "seg": 900,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.01,
+      "sku": "MAT-014",
+      "nome": "FITA VHB 25MM X 1,5MM"
+    },
+    {
+      "um": "und",
+      "fornec": "",
+      "custo": 0.64,
+      "estoque": 13465,
+      "seg": 600,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-015",
+      "nome": "PARAF. FRANCÊS GALV. 5/16\" X 5.1/2\""
+    },
+    {
+      "um": "und",
+      "fornec": "",
+      "custo": 0.58,
+      "estoque": 3800,
+      "seg": 300,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-016",
+      "nome": "PARAF. SEXT. GALV. 1/2\" X 1\""
+    },
+    {
+      "um": "und",
+      "fornec": "",
+      "custo": 0.01,
+      "estoque": 8320,
+      "seg": 900,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-017",
+      "nome": "PARAF. SEXT. GALV. 1/4\" X 2\""
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 23.93,
+      "estoque": 140,
+      "seg": 60,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.1,
+      "sku": "MAT-018",
+      "nome": "PEL. ADES. VINIL BRANCA"
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 47,
+      "estoque": 1784,
+      "seg": 800,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.1,
+      "sku": "MAT-019",
+      "nome": "PEL. OVERLAY TRANSL. INCOLOR"
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 36.08,
+      "estoque": 113,
+      "seg": 60,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.1,
+      "sku": "MAT-020",
+      "nome": "PEL. REFLET. COMERCIAL PRETA"
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 65.03,
+      "estoque": 0,
+      "seg": 60,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.1,
+      "sku": "MAT-021",
+      "nome": "PEL. REFLET. PRISM. TIPO I BRANCA"
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 88.2,
+      "estoque": 223,
+      "seg": 350,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.1,
+      "sku": "MAT-022",
+      "nome": "PEL. REFLET. PRISM. TIPO III AMARELA"
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 88.2,
+      "estoque": 4685,
+      "seg": 800,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.1,
+      "sku": "MAT-023",
+      "nome": "PEL. REFLET. PRISM. TIPO III BRANCA"
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 121.67,
+      "estoque": 1004,
+      "seg": 350,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.1,
+      "sku": "MAT-024",
+      "nome": "PEL. REFLET. PRISM. TIPO X AMARELA"
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 121.66,
+      "estoque": 836,
+      "seg": 350,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.1,
+      "sku": "MAT-025",
+      "nome": "PEL. REFLET. PRISM. TIPO X BRANCA"
+    },
+    {
+      "um": "m",
+      "fornec": "",
+      "custo": 12.28,
+      "estoque": 0,
+      "seg": 80,
+      "lead": 13,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.02,
+      "sku": "MAT-026",
+      "nome": "PERF. ALUM. L 421"
+    },
+    {
+      "um": "m",
+      "fornec": "",
+      "custo": 49.34,
+      "estoque": 124,
+      "seg": 9,
+      "lead": 13,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-027",
+      "nome": "PERF. ALUM. L 463"
+    },
+    {
+      "um": "m",
+      "fornec": "",
+      "custo": 14.27,
+      "estoque": 20,
+      "seg": 18,
+      "lead": 10,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-028",
+      "nome": "PERF. MET. 70X25X15"
+    },
+    {
+      "um": "m",
+      "fornec": "",
+      "custo": 5.16,
+      "estoque": 380,
+      "seg": 20,
+      "lead": 5,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.02,
+      "sku": "MAT-029",
+      "nome": "PERF. METALON 20X20 #18"
+    },
+    {
+      "um": "m",
+      "fornec": "",
+      "custo": 6.54,
+      "estoque": 126,
+      "seg": 90,
+      "lead": 5,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.02,
+      "sku": "MAT-030",
+      "nome": "PERF. METALON 25X25 #18"
+    },
+    {
+      "um": "und",
+      "fornec": "",
+      "custo": 0.35,
+      "estoque": 134460,
+      "seg": 900,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-031",
+      "nome": "PORCA SEXT. GALV. 1/2\""
+    },
+    {
+      "um": "und",
+      "fornec": "",
+      "custo": 0.04,
+      "estoque": 13190,
+      "seg": 900,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-032",
+      "nome": "PORCA SEXT. GALV. 1/4\""
+    },
+    {
+      "um": "und",
+      "fornec": "",
+      "custo": 0.08,
+      "estoque": 14006,
+      "seg": 600,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-033",
+      "nome": "PORCA SEXT. GALV. 5/16\""
+    },
+    {
+      "um": "L",
+      "fornec": "",
+      "custo": 0.27,
+      "estoque": 9,
+      "seg": 4,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.005,
+      "sku": "MAT-034",
+      "nome": "PRIMER VHB 940ML"
+    },
+    {
+      "um": "L",
+      "fornec": "",
+      "custo": 48.77,
+      "estoque": 36,
+      "seg": 1,
+      "lead": 5,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.01,
+      "sku": "MAT-035",
+      "nome": "TINTA NITROCEL. LARANJA"
+    },
+    {
+      "um": "L",
+      "fornec": "",
+      "custo": 27.04,
+      "estoque": 7.2,
+      "seg": 4,
+      "lead": 5,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.01,
+      "sku": "MAT-036",
+      "nome": "TINTA NITROCEL. PRETA FOSCA"
+    },
+    {
+      "um": "kg",
+      "fornec": "",
+      "custo": 29,
+      "estoque": 275,
+      "seg": 26,
+      "lead": 10,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.02,
+      "sku": "MAT-037",
+      "nome": "TINTA PÓ ELETROST. LARANJA"
+    },
+    {
+      "um": "kg",
+      "fornec": "",
+      "custo": 18,
+      "estoque": 250,
+      "seg": 76,
+      "lead": 10,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0.02,
+      "sku": "MAT-038",
+      "nome": "TINTA PÓ ELETROST. PRETA"
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 12.5,
+      "estoque": 4000,
+      "seg": 0,
+      "lead": 0,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-039",
+      "nome": "IMPRESSÃO DIGITAL "
+    },
+    {
+      "um": "m²",
+      "fornec": "",
+      "custo": 65.83,
+      "estoque": 100,
+      "seg": 55,
+      "lead": 7,
+      "loteMin": 0,
+      "loteMult": 0,
+      "perda": 0,
+      "sku": "MAT-040",
+      "nome": "PEL. REFLET. PRISM. TIPO I AMARELA"
+    }
+  ],
+  "componentes": [
+    {
+      "um": "m²",
+      "setor": "Metalúrgica",
+      "maquina": "SOLDA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-001",
+      "nome": "QUADRO - ACO - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 4,
+          "perda": 0.005,
+          "ref": "MAT-008"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        },
+        {
+          "liq": 4,
+          "perda": 0.005,
+          "ref": "MAT-014"
+        },
+        {
+          "liq": 0.4,
+          "perda": 0.005,
+          "ref": "MAT-007"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Metalúrgica",
+      "maquina": "SOLDA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-002",
+      "nome": "QUADRO ALUMINIO - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 4,
+          "perda": 0.02,
+          "ref": "MAT-026"
+        },
+        {
+          "liq": 0.4,
+          "perda": 0,
+          "ref": "MAT-027"
+        },
+        {
+          "liq": 16,
+          "perda": 0,
+          "ref": "MAT-017"
+        },
+        {
+          "liq": 16,
+          "perda": 0,
+          "ref": "MAT-032"
+        },
+        {
+          "liq": 16,
+          "perda": 0,
+          "ref": "MAT-002"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-016"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-031"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-001"
+        },
+        {
+          "liq": 0.4,
+          "perda": 0.005,
+          "ref": "MAT-004"
+        },
+        {
+          "liq": 3,
+          "perda": 0.005,
+          "ref": "MAT-028"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        },
+        {
+          "liq": 4,
+          "perda": 0.005,
+          "ref": "MAT-014"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Metalúrgica",
+      "maquina": "CORTE",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-003",
+      "nome": "RECORTE CHAPA ACM - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-010"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Metalúrgica",
+      "maquina": "CORTE",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-004",
+      "nome": "RECORTE CHAPA ALUMINIO - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.05,
+          "ref": "MAT-012"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Metalúrgica",
+      "maquina": "CORTE",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-005",
+      "nome": "RECORTE CHAPA ACO - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.05,
+          "ref": "MAT-011"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-006",
+      "nome": "SINAL IMPRESSO - AIP - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-023"
+        },
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-007",
+      "nome": "SINAL IMPRESSO - GD - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.1,
+          "ref": "MAT-025"
+        },
+        {
+          "liq": 1,
+          "perda": 0.1,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-008",
+      "nome": "SINAL IMPRESSO - GTP - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-021"
+        },
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-009",
+      "nome": "SINAL IMPRESSO - VINIL - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-018"
+        },
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Gráfico",
+      "maquina": "PLOTTER",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-010",
+      "nome": "RECORTE - AIP + AIP - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 1.5,
+          "perda": 0.15,
+          "ref": "MAT-023"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Gráfico",
+      "maquina": "PLOTTER",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-011",
+      "nome": "RECORTE - GTP + AIP - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-021"
+        },
+        {
+          "liq": 0.5,
+          "perda": 0.15,
+          "ref": "MAT-022"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Gráfico",
+      "maquina": "PLOTTER",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-012",
+      "nome": "RECORTE - GTP + GTP - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 1.5,
+          "perda": 0.15,
+          "ref": "MAT-021"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Gráfico",
+      "maquina": "PLOTTER",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-013",
+      "nome": "RECORTE - AIP + GD - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-023"
+        },
+        {
+          "liq": 0.5,
+          "perda": 0.15,
+          "ref": "MAT-025"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "Gráfico",
+      "maquina": "PLOTTER",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-014",
+      "nome": "RECORTE - GTP + COM - 1,00 X 1,00",
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-021"
+        },
+        {
+          "liq": 0.5,
+          "perda": 0.15,
+          "ref": "MAT-020"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "und",
+      "setor": "Almox",
+      "maquina": "ALMOX",
+      "deposito": "DEP-04",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-015",
+      "nome": "FIXAÇÃO SOLO - ABRAC",
+      "comp": [
+        {
+          "liq": 2,
+          "perda": 0,
+          "ref": "FT-018"
+        },
+        {
+          "liq": 4,
+          "perda": 0,
+          "ref": "FT-020"
+        },
+        {
+          "liq": 8,
+          "perda": 0,
+          "ref": "MAT-001"
+        },
+        {
+          "liq": 8,
+          "perda": 0,
+          "ref": "MAT-031"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "und",
+      "setor": "Almox",
+      "maquina": "ALMOX",
+      "deposito": "DEP-04",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-016",
+      "nome": "FIXAÇÃO SOLO - DER",
+      "comp": [
+        {
+          "liq": 2,
+          "perda": 0,
+          "ref": "MAT-015"
+        },
+        {
+          "liq": 2,
+          "perda": 0,
+          "ref": "MAT-033"
+        },
+        {
+          "liq": 2,
+          "perda": 0,
+          "ref": "MAT-003"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "und",
+      "setor": "Almox",
+      "maquina": "ALMOX",
+      "deposito": "DEP-04",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-017",
+      "nome": "FIXAÇÃO AEREA - PORT",
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-019"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-021"
+        },
+        {
+          "liq": 3,
+          "perda": 0,
+          "ref": "MAT-031"
+        },
+        {
+          "liq": 3,
+          "perda": 0,
+          "ref": "MAT-001"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "CORTE",
+      "deposito": "DEP-04",
+      "estoque": 0,
+      "seg": 500,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-018",
+      "nome": "BARRA CHATA 1.1/2 X  1/4 - 200 mm",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.2,
+          "perda": 0.001,
+          "ref": "MAT-005"
+        },
+        {
+          "liq": 0.15,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "CORTE",
+      "deposito": "DEP-04",
+      "estoque": 0,
+      "seg": 50,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-019",
+      "nome": "BARRA CHATA 1.1/2 X  1/4 - 1000 mm",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-005"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "CORTE",
+      "deposito": "DEP-04",
+      "estoque": 0,
+      "seg": 800,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-020",
+      "nome": "BARRA ROSCADA 1/2 - 200 mm",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.2,
+          "perda": 0,
+          "ref": "MAT-006"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "CORTE",
+      "deposito": "DEP-04",
+      "estoque": 0,
+      "seg": 100,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-021",
+      "nome": "BARRA ROSCADA 1/2 - 1000 mm",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-006"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "SOLDA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 50,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-022",
+      "nome": "QUADRO - ACO - 0,40 X 0,40",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1.6,
+          "perda": 0.01,
+          "ref": "MAT-008"
+        },
+        {
+          "liq": 0.4,
+          "perda": 0.01,
+          "ref": "MAT-007"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        },
+        {
+          "liq": 1.6,
+          "perda": 0.01,
+          "ref": "MAT-014"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "SOLDA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 10,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-023",
+      "nome": "QUADRO - ACO - 0,50 X 0,50",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 2,
+          "perda": 0.01,
+          "ref": "MAT-008"
+        },
+        {
+          "liq": 0.4,
+          "perda": 0.01,
+          "ref": "MAT-007"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        },
+        {
+          "liq": 2,
+          "perda": 0.01,
+          "ref": "MAT-014"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "SOLDA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 10,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-024",
+      "nome": "QUADRO - ACO - 0,60 X 0,60",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 2.4,
+          "perda": 0.01,
+          "ref": "MAT-008"
+        },
+        {
+          "liq": 0.4,
+          "perda": 0.01,
+          "ref": "MAT-007"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        },
+        {
+          "liq": 2.4,
+          "perda": 0.01,
+          "ref": "MAT-014"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 10,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-025",
+      "nome": "CIRCULAR  - ACM - 1,20 X 1,20",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1.44,
+          "perda": 0.12,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 50,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-026",
+      "nome": "CIRCULAR  - ACM - 1,00 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 10,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-027",
+      "nome": "CIRCULAR  - ACM - 0,80 X 0,80",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.64,
+          "perda": 0.2,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "PLASMA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-028",
+      "nome": "CIRCULAR  - AÇO - 1,20 X 1,20",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1.44,
+          "perda": 0.12,
+          "ref": "MAT-011"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "PLASMA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 10,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-029",
+      "nome": "CIRCULAR  - AÇO - 1,00 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.1,
+          "ref": "MAT-011"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "PLASMA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 5,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-030",
+      "nome": "CIRCULAR - AÇO - 0,80 X 0,80",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.64,
+          "perda": 0.2,
+          "ref": "MAT-011"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-031",
+      "nome": "LOSANGULAR - ACM - 1,20 X 1,20",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1.44,
+          "perda": 0.05,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 50,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-032",
+      "nome": "LOSANGULAR - ACM - 1,00 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.1,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 5,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-033",
+      "nome": "LOSANGULAR - ACM - 0,80 X 0,80",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.64,
+          "perda": 0.12,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "GUILHOTINA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-034",
+      "nome": "LOSANGULAR - AÇO - 1,20 X 1,20",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1.44,
+          "perda": 0.05,
+          "ref": "MAT-011"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "GUILHOTINA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 10,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-035",
+      "nome": "LOSANGULAR - AÇO - 1,00 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.1,
+          "ref": "MAT-011"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "GUILHOTINA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-036",
+      "nome": "LOSANGULAR - AÇO - 0,80 X 0,80",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.64,
+          "perda": 0.12,
+          "ref": "MAT-011"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 5,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-037",
+      "nome": "OCTAGONAL - ACM - 1,00 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.12,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 5,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-038",
+      "nome": "OCTAGONAL - ACM - 0,80 X 0,80",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.64,
+          "perda": 0.15,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 5,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-039",
+      "nome": "TRIANGULAR - ACM - 1,00 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.05,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-040",
+      "nome": "TRIANGULAR - ACM - 0,80 X 0,80",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.64,
+          "perda": 0.07,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-041",
+      "nome": "CIRCULAR  - ACM - 0,60 X 0,60",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.36,
+          "perda": 0.15,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 100,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-042",
+      "nome": "MA - ACM -  0,50 X 0,60 ",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.3,
+          "perda": 0.1,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "GUILHOTINA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-043",
+      "nome": "MA - AÇO -  0,50 X 0,60 ",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.3,
+          "perda": 0.1,
+          "ref": "MAT-011"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-044",
+      "nome": "MP - ACM -  0,30 X 0,90 ",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.27,
+          "perda": 0.1,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "GUILHOTINA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-045",
+      "nome": "MP - AÇO -  0,30 X 0,90 ",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.27,
+          "perda": 0.1,
+          "ref": "MAT-011"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "ROUTER",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-046",
+      "nome": "MQ - ACM -  0,60 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.6,
+          "perda": 0.1,
+          "ref": "MAT-010"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "GUILHOTINA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-047",
+      "nome": "MQ - AÇO-  0,60 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.6,
+          "perda": 0.1,
+          "ref": "MAT-011"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Metalúrgica",
+      "maquina": "SOLDA",
+      "deposito": "DEP-02",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-048",
+      "nome": "QUADRO - ACO - 0,60 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 3.2,
+          "perda": 0.02,
+          "ref": "MAT-008"
+        },
+        {
+          "liq": 0.4,
+          "perda": 0.02,
+          "ref": "MAT-007"
+        },
+        {
+          "liq": 0.165,
+          "perda": 0.02,
+          "ref": "MAT-038"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-049",
+      "nome": "CIRCULAR  - TIPO III (AIP) - 0,80 X 0,80",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.64,
+          "perda": 0.2,
+          "ref": "MAT-023"
+        },
+        {
+          "liq": 0.64,
+          "perda": 0.2,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 0.64,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-050",
+      "nome": "CIRCULAR  - TIPO III (AIP) - 1,00 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.18,
+          "ref": "MAT-023"
+        },
+        {
+          "liq": 1,
+          "perda": 0.18,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-051",
+      "nome": "CIRCULAR  - TIPO III (AIP) - 1,20 X 1,20",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1.44,
+          "perda": 0.15,
+          "ref": "MAT-023"
+        },
+        {
+          "liq": 1.44,
+          "perda": 0.15,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 1.44,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-052",
+      "nome": "LOSANGULAR - TIPO III (AIP) - 0,80 X 0,80",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.64,
+          "perda": 0.15,
+          "ref": "MAT-022"
+        },
+        {
+          "liq": 0.64,
+          "perda": 0.1,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 0.64,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-053",
+      "nome": "LOSANGULAR - TIPO III (AIP) - 1,00 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-022"
+        },
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-054",
+      "nome": "LOSANGULAR - TIPO III (AIP) - 1,20 X 1,20",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1.44,
+          "perda": 0.1,
+          "ref": "MAT-022"
+        },
+        {
+          "liq": 1.44,
+          "perda": 0.1,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 1.44,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "PLOTTER",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-055",
+      "nome": "CIRCULAR  - TIPO I (GTP) - 1,00 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-021"
+        },
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "PLOTTER",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-056",
+      "nome": "LOSANGULAR - TIPO I (GTP) - 1,00 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.1,
+          "ref": "MAT-040"
+        },
+        {
+          "liq": 1,
+          "perda": 0.1,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-057",
+      "nome": "R-1 - TIPO X (GD) - 1,00 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-025"
+        },
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 1,
+          "perda": 0.15,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-058",
+      "nome": "R-1 - TIPO X (GD) - 0,80 X 0,80",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.64,
+          "perda": 0.2,
+          "ref": "MAT-025"
+        },
+        {
+          "liq": 0.64,
+          "perda": 0.2,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 0.64,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-059",
+      "nome": "R-2 - TIPO III (AIP) - 1,00 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0.1,
+          "ref": "MAT-023"
+        },
+        {
+          "liq": 1,
+          "perda": 0.1,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-060",
+      "nome": "R-2 - TIPO III (AIP) - 0,80 X 0,80",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.64,
+          "perda": 0.15,
+          "ref": "MAT-023"
+        },
+        {
+          "liq": 0.64,
+          "perda": 0.1,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 0.64,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 100,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-061",
+      "nome": "MA - TIPO X (GD) - 0,50 X 0,60",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.3,
+          "perda": 0.1,
+          "ref": "MAT-024"
+        },
+        {
+          "liq": 0.3,
+          "perda": 0.1,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 0.3,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-062",
+      "nome": "MA - TIPO III (AIP) - 0,50 X 0,60",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.3,
+          "perda": 0.1,
+          "ref": "MAT-022"
+        },
+        {
+          "liq": 0.3,
+          "perda": 0.1,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 0.3,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-063",
+      "nome": "MP - TIPO X (GD) - 0,30 X 0,90",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.27,
+          "perda": 0.1,
+          "ref": "MAT-024"
+        },
+        {
+          "liq": 0.27,
+          "perda": 0.1,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 0.27,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-064",
+      "nome": "MP - TIPO III (AIP) - 0,30 X 0,90",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.27,
+          "perda": 0.1,
+          "ref": "MAT-022"
+        },
+        {
+          "liq": 0.27,
+          "perda": 0.1,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 0.27,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Gráfico",
+      "maquina": "IMPRESSORAS",
+      "deposito": "DEP-03",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-065",
+      "nome": "MQ - TIPO III (AIP) - 0,60 X 1,00",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 0.6,
+          "perda": 0.1,
+          "ref": "MAT-023"
+        },
+        {
+          "liq": 0.6,
+          "perda": 0.1,
+          "ref": "MAT-019"
+        },
+        {
+          "liq": 0.6,
+          "perda": 0,
+          "ref": "MAT-039"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "Almox",
+      "maquina": "ALMOX",
+      "deposito": "DEP-04",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "FT-066",
+      "nome": "FIXAÇÃO SOLO - COL",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 2,
+          "perda": 0,
+          "ref": "FT-018"
+        },
+        {
+          "liq": 4,
+          "perda": 0,
+          "ref": "FT-020"
+        },
+        {
+          "liq": 8,
+          "perda": 0,
+          "ref": "MAT-031"
+        },
+        {
+          "liq": 8,
+          "perda": 0,
+          "ref": "MAT-001"
+        },
+        {
+          "liq": 4,
+          "perda": 0,
+          "ref": "MAT-017"
+        },
+        {
+          "liq": 4,
+          "perda": 0,
+          "ref": "MAT-032"
+        },
+        {
+          "liq": 4,
+          "perda": 0,
+          "ref": "MAT-002"
+        }
+      ]
+    }
+  ],
+  "produtos": [
+    {
+      "um": "m²",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0001",
+      "nome": "PLACA SV - TIPO I (GTP) + TIPO I (GTP) - ACM - SOLO",
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-003"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-012"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-001"
+        },
+        {
+          "liq": 2,
+          "perda": 0,
+          "ref": "FT-018"
+        },
+        {
+          "liq": 4,
+          "perda": 0,
+          "ref": "FT-020"
+        },
+        {
+          "liq": 8,
+          "perda": 0,
+          "ref": "MAT-001"
+        },
+        {
+          "liq": 8,
+          "perda": 0,
+          "ref": "MAT-031"
+        }
+      ],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0002",
+      "nome": "PLACA SV - TIPO I (GTP) + TIPO I (GTP) - ACO - SOLO",
+      "comp": [],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0003",
+      "nome": "PLACA SV - TIPO I (GTP) + TIPO III (AIP) - ALUM - AEREA",
+      "comp": [],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0004",
+      "nome": "PLACA SV - TIPO III (AIP) + (SI) - ACM - AEREA",
+      "comp": [],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0005",
+      "nome": "PLACA SV - TIPO III (AIP) + (SI) - ACM - SOLO",
+      "comp": [],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0006",
+      "nome": "PLACA SV - TIPO III (AIP) + TIPO X (GD) - ALUM - AEREA",
+      "comp": [],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0007",
+      "nome": "PLACA SV - TIPO X (GD) + (SI) - ACM - AEREA",
+      "comp": [],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0008",
+      "nome": "PLACA SV - TIPO X (GD) + (SI) - ACM - SOLO - (MA-MP)",
+      "comp": [],
+      "saldos": {}
+    },
+    {
+      "um": "m²",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0009",
+      "nome": "PLACA SV - TIPO X (GD) + (SI) - ACM - SOLO - (R-1)",
+      "comp": [],
+      "saldos": {}
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0010",
+      "nome": "CIRCULAR - 1,00 X 1,00 - TIPO III (AIP) + (SI) - ACM ",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-026"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-050"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-023"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-015"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0011",
+      "nome": "CIRCULAR - 1,20 X 1,20 - TIPO III (AIP) + (SI) - ACM ",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-025"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-051"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-024"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-015"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0012",
+      "nome": "CIRCULAR - 0,80 X 0,80 - TIPO III (AIP) + (SI) - ACM ",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-027"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-049"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-022"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-015"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0013",
+      "nome": "LOSANGULAR - 0,80 X 0,80 - TIPO III (AIP) + (SI)  - ACM ",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0014",
+      "nome": "LOSANGULAR - 1,00 X 1,00 - TIPO III (AIP) + (SI) - ACM",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0015",
+      "nome": "LOSANGULAR - 1,20 X 1,20 - TIPO III (AIP) + (SI) - ACM",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0016",
+      "nome": "CIRCULAR - 0,80 X 0.80 - TIPO III (AIP) + (SI) - AÇO",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0017",
+      "nome": "CIRCULAR - 1,00 X 1,00 - TIPO III (AIP) + (SI) - AÇO",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0018",
+      "nome": "CIRCULAR - 1,20 X 1,20 - TIPO III (AIP) + (SI) - AÇO",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0019",
+      "nome": "LOSANGULAR - 0,80 X 0,80 - TIPO III (AIP) + (SI) - AÇO",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0020",
+      "nome": "LOSANGULAR - 1,00 X 1,00 - TIPO III (AIP) + (SI) - AÇO",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0021",
+      "nome": "LOSANGULAR - 1,20 X 1,20 - TIPO III (AIP) + (SI) - AÇO",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0022",
+      "nome": "PARE - 0,80 X 0,80 - TIPO III (AIP) + (SI) - ACM ",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0023",
+      "nome": "PARE - 1,00 X 1,00 - TIPO III (AIP) + (SI) - ACM ",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0024",
+      "nome": "PARE - 1,00 X 1,00 - TIPO III (AIP) + (SI) - AÇO",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0025",
+      "nome": "TRIANGULAR - 0,80 X 0,80 - TIPO III (AIP) + (SI) - ACM ",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0026",
+      "nome": "TRIANGULAR - 1,00 X 1,00 - TIPO III (AIP) + (SI) - ACM ",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0027",
+      "nome": "MA - 0,50 X 0,60 - TIPO III (AIP) + (SI) - ACM ",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0028",
+      "nome": "MA - 0,50 X 0,60 - TIPO X (GD) + (SI) - ACM ",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-042"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-061"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-016"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0029",
+      "nome": "MA - 0,50 X 0,60 - TIPO III (AIP) + (SI) - AÇO",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0030",
+      "nome": "MP - 0,30 X 0,90 - TIPO X (GD) + (SI) - ACM ",
+      "saldos": {},
+      "comp": [
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-044"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-063"
+        },
+        {
+          "liq": 1,
+          "perda": 0,
+          "ref": "FT-016"
+        }
+      ]
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0031",
+      "nome": "MP - 0,30 X 0,90 - TIPO III + (SI) - AÇO",
+      "saldos": {},
+      "comp": []
+    },
+    {
+      "um": "und",
+      "setor": "ADESIVAGEM",
+      "maquina": "MONTAGEM",
+      "deposito": "DEP-01",
+      "estoque": 0,
+      "seg": 0,
+      "lead": 1,
+      "lote": 0,
+      "loteMin": 0,
+      "tempo": 0,
+      "sku": "PRD-0032",
+      "nome": "MQ - 0,60 X 1,00 - TIPO III (AIP) + (SI) - ACM ",
+      "saldos": {},
+      "comp": []
+    }
+  ],
+  "recProg": [
+    {
+      "ref": "PRD-0001",
+      "w": 0,
+      "qty": 0
+    }
+  ],
+  "currentComp": "FT-051",
+  "currentProd": "PRD-0013",
+  "horizonMode": "12",
+  "capacidadeDia": 100,
+  "clientes": [
+    {
+      "id": "C-001",
+      "nome": "969 - Eco Capixaba",
+      "contato": "mateus@eco.com.br",
+      "fone": "27000",
+      "obs": ""
+    },
+    {
+      "id": "C-002",
+      "nome": "970 - Motiva",
+      "contato": "carlos@motiva",
+      "fone": "18000",
+      "obs": ""
+    }
+  ],
+  "pedidos": [
+    {
+      "id": "P-001",
+      "numero": "NOV-1",
+      "clienteId": "C-001",
+      "entrega": "2026-08-06",
+      "ordem": 1,
+      "obs": "",
+      "itens": [
+        {
+          "ref": "PRD-0010",
+          "qtd": 201,
+          "apont": []
+        },
+        {
+          "ref": "PRD-0011",
+          "qtd": 50,
+          "apont": []
+        },
+        {
+          "ref": "PRD-0012",
+          "qtd": 36,
+          "apont": []
+        },
+        {
+          "ref": "PRD-0028",
+          "qtd": 1120,
+          "apont": []
+        }
+      ]
+    },
+    {
+      "id": "P-002",
+      "numero": "SET-4",
+      "clienteId": "C-002",
+      "entrega": "2026-08-13",
+      "ordem": 2,
+      "obs": "",
+      "itens": [
+        {
+          "ref": "PRD-0028",
+          "qtd": 250,
+          "apont": []
+        },
+        {
+          "ref": "PRD-0010",
+          "qtd": 698,
+          "apont": []
+        }
+      ]
+    },
+    {
+      "id": "P-003",
+      "numero": "IMP 29/07/2026",
+      "clienteId": "C-002",
+      "entrega": "2025-12-30",
+      "ordem": 3,
+      "obs": "",
+      "itens": [
+        {
+          "ref": "PRD-0010",
+          "qtd": 1,
+          "apont": []
+        }
+      ]
+    }
+  ],
+  "depositos": [
+    {
+      "id": "DEP-01",
+      "nome": "Expedição",
+      "local": "",
+      "resp": "",
+      "obs": ""
+    },
+    {
+      "id": "DEP-02",
+      "nome": "Acabados - MET",
+      "local": "",
+      "resp": "",
+      "obs": ""
+    },
+    {
+      "id": "DEP-03",
+      "nome": "Acabados - ADES",
+      "local": "",
+      "resp": "",
+      "obs": ""
+    },
+    {
+      "id": "DEP-04",
+      "nome": "Acabados - ALMOX",
+      "local": "",
+      "resp": "",
+      "obs": ""
+    }
+  ],
+  "unidades": [
+    {
+      "sigla": "und",
+      "nome": "",
+      "tipo": "",
+      "obs": "derivada do cadastro de itens"
+    },
+    {
+      "sigla": "m",
+      "nome": "",
+      "tipo": "",
+      "obs": "derivada do cadastro de itens"
+    },
+    {
+      "sigla": "m²",
+      "nome": "",
+      "tipo": "",
+      "obs": "derivada do cadastro de itens"
+    },
+    {
+      "sigla": "L",
+      "nome": "",
+      "tipo": "",
+      "obs": "derivada do cadastro de itens"
+    },
+    {
+      "sigla": "kg",
+      "nome": "",
+      "tipo": "",
+      "obs": "derivada do cadastro de itens"
+    }
+  ],
+  "setores": [
+    {
+      "nome": "Metalúrgica",
+      "resp": "",
+      "turno": "",
+      "obs": "derivado das fichas"
+    },
+    {
+      "nome": "Gráfico",
+      "resp": "",
+      "turno": "",
+      "obs": "derivado das fichas"
+    },
+    {
+      "nome": "Almox",
+      "resp": "",
+      "turno": "",
+      "obs": "derivado das fichas"
+    },
+    {
+      "nome": "ADESIVAGEM",
+      "resp": "",
+      "turno": "",
+      "obs": "derivado das fichas"
+    }
+  ],
+  "maquinas": [
+    {
+      "nome": "SOLDA",
+      "setor": "Metalúrgica",
+      "capac": 0,
+      "obs": "derivada das fichas"
+    },
+    {
+      "nome": "CORTE",
+      "setor": "Metalúrgica",
+      "capac": 0,
+      "obs": "derivada das fichas"
+    },
+    {
+      "nome": "IMPRESSORAS",
+      "setor": "Gráfico",
+      "capac": 0,
+      "obs": "derivada das fichas"
+    },
+    {
+      "nome": "PLOTTER",
+      "setor": "Gráfico",
+      "capac": 0,
+      "obs": "derivada das fichas"
+    },
+    {
+      "nome": "ALMOX",
+      "setor": "Almox",
+      "capac": 0,
+      "obs": "derivada das fichas"
+    },
+    {
+      "nome": "ROUTER",
+      "setor": "Metalúrgica",
+      "capac": 0,
+      "obs": "derivada das fichas"
+    },
+    {
+      "nome": "PLASMA",
+      "setor": "Metalúrgica",
+      "capac": 0,
+      "obs": "derivada das fichas"
+    },
+    {
+      "nome": "GUILHOTINA",
+      "setor": "Metalúrgica",
+      "capac": 0,
+      "obs": "derivada das fichas"
+    },
+    {
+      "nome": "MONTAGEM",
+      "setor": "ADESIVAGEM",
+      "capac": 0,
+      "obs": "derivada das fichas"
+    }
+  ],
+  "colaboradores": [],
+  "fornecedores": [],
+  "vendas": [
+    {
+      "id": "V-0001",
+      "data": "2026-07-29",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "clienteId": "C-002",
+      "ref": "PRD-0010",
+      "desc": "R-24a - Sentido de Circulação da Via ou Pista",
+      "qtd": 1,
+      "um": "und",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "pedidoId": "P-003"
+    }
+  ],
+  "conferencia": [
+    {
+      "id": "L-0001",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "A-21b - Estreitamento de Pista à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07461818181818182,
+      "sel": false,
+      "linha": 2,
+      "motivo": "mais parecida seria FT-017, mas só 7% — escolha à mão"
+    },
+    {
+      "id": "L-0002",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "A-21b - Estreitamento de Pista à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07461818181818182,
+      "sel": false,
+      "linha": 3,
+      "motivo": "mais parecida seria FT-017, mas só 7% — escolha à mão"
+    },
+    {
+      "id": "L-0003",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "A-21b - Estreitamento de Pista à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07461818181818182,
+      "sel": false,
+      "linha": 4,
+      "motivo": "mais parecida seria FT-017, mas só 7% — escolha à mão"
+    },
+    {
+      "id": "L-0004",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "A-21b - Estreitamento de Pista à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07461818181818182,
+      "sel": false,
+      "linha": 5,
+      "motivo": "mais parecida seria FT-017, mas só 7% — escolha à mão"
+    },
+    {
+      "id": "L-0005",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "A-30b - Passagem Sinalizada de Ciclistas",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.058628571428571426,
+      "sel": false,
+      "linha": 6,
+      "motivo": "mais parecida seria FT-004, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0006",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "A-30b - Passagem Sinalizada de Ciclistas",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.058628571428571426,
+      "sel": false,
+      "linha": 7,
+      "motivo": "mais parecida seria FT-004, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0007",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "A-30b - Passagem Sinalizada de Ciclistas",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.058628571428571426,
+      "sel": false,
+      "linha": 8,
+      "motivo": "mais parecida seria FT-004, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0008",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "A-30b - Passagem Sinalizada de Ciclistas",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.058628571428571426,
+      "sel": false,
+      "linha": 9,
+      "motivo": "mais parecida seria FT-004, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0009",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "A-30b - Passagem Sinalizada de Ciclistas",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.058628571428571426,
+      "sel": false,
+      "linha": 10,
+      "motivo": "mais parecida seria FT-004, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0010",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "MP-3 - Marcador de Perigo - Bifurcação",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.3,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.16140000000000002,
+      "sel": false,
+      "linha": 11,
+      "motivo": "mais parecida seria FT-045, mas só 16% — escolha à mão"
+    },
+    {
+      "id": "L-0011",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "MP-3 - Marcador de Perigo - Bifurcação",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.3,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.16140000000000002,
+      "sel": false,
+      "linha": 12,
+      "motivo": "mais parecida seria FT-045, mas só 16% — escolha à mão"
+    },
+    {
+      "id": "L-0012",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "MP-3 - Marcador de Perigo - Bifurcação",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.5,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.16140000000000002,
+      "sel": false,
+      "linha": 13,
+      "motivo": "mais parecida seria FT-045, mas só 16% — escolha à mão"
+    },
+    {
+      "id": "L-0013",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "C-04 - franca",
+      "qtd": 1,
+      "um": "",
+      "valor": 1.4,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.050666666666666665,
+      "sel": false,
+      "linha": 14,
+      "motivo": "mais parecida seria FT-015, mas só 5% — escolha à mão"
+    },
+    {
+      "id": "L-0014",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "C-01 - retorno - dr-14",
+      "qtd": 1,
+      "um": "",
+      "valor": 1.5,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.0912,
+      "sel": false,
+      "linha": 15,
+      "motivo": "mais parecida seria FT-005, mas só 9% — escolha à mão"
+    },
+    {
+      "id": "L-0015",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "c-02 - brasilia  - dist. industrial",
+      "qtd": 1,
+      "um": "",
+      "valor": 2.6,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.06955932203389831,
+      "sel": false,
+      "linha": 16,
+      "motivo": "mais parecida seria FT-009, mas só 7% — escolha à mão"
+    },
+    {
+      "id": "L-0016",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "C-03 - franca - colina - bebedouro",
+      "qtd": 1,
+      "um": "",
+      "valor": 2,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.06840000000000002,
+      "sel": false,
+      "linha": 17,
+      "motivo": "mais parecida seria FT-020, mas só 7% — escolha à mão"
+    },
+    {
+      "id": "L-0017",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "PROJETO DE PESQUISA DE MANEJO INTEGRADO",
+      "qtd": 1,
+      "um": "",
+      "valor": 2,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.06412500000000002,
+      "sel": false,
+      "linha": 18,
+      "motivo": "mais parecida seria FT-002, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0018",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "PROJETO DE PESQUISA DE MANEJO INTEGRADO",
+      "qtd": 1,
+      "um": "",
+      "valor": 2,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.06412500000000002,
+      "sel": false,
+      "linha": 19,
+      "motivo": "mais parecida seria FT-002, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0019",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "PROJETO DE PESQUISA DE MANEJO INTEGRADO",
+      "qtd": 1,
+      "um": "",
+      "valor": 2,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.06412500000000002,
+      "sel": false,
+      "linha": 20,
+      "motivo": "mais parecida seria FT-002, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0020",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "PROJETO DE PESQUISA DE MANEJO INTEGRADO",
+      "qtd": 1,
+      "um": "",
+      "valor": 2,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.06412500000000002,
+      "sel": false,
+      "linha": 21,
+      "motivo": "mais parecida seria FT-002, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0021",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "PROJETO DE PESQUISA DE MANEJO INTEGRADO",
+      "qtd": 1,
+      "um": "",
+      "valor": 2,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.06412500000000002,
+      "sel": false,
+      "linha": 22,
+      "motivo": "mais parecida seria FT-002, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0022",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-1 - Parada Obrigatória",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.5,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.2328181818181818,
+      "sel": false,
+      "linha": 23,
+      "motivo": "mais parecida seria FT-020, mas só 23% — escolha à mão"
+    },
+    {
+      "id": "L-0023",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-1 - Parada Obrigatória",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.5,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.2328181818181818,
+      "sel": false,
+      "linha": 24,
+      "motivo": "mais parecida seria FT-020, mas só 23% — escolha à mão"
+    },
+    {
+      "id": "L-0024",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-1 - Parada Obrigatória",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.5,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.2328181818181818,
+      "sel": false,
+      "linha": 25,
+      "motivo": "mais parecida seria FT-020, mas só 23% — escolha à mão"
+    },
+    {
+      "id": "L-0025",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-1 - Parada Obrigatória",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.5,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.2328181818181818,
+      "sel": false,
+      "linha": 26,
+      "motivo": "mais parecida seria FT-020, mas só 23% — escolha à mão"
+    },
+    {
+      "id": "L-0026",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-1 - Parada Obrigatória",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.5,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.2328181818181818,
+      "sel": false,
+      "linha": 27,
+      "motivo": "mais parecida seria FT-020, mas só 23% — escolha à mão"
+    },
+    {
+      "id": "L-0027",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-1 - Parada Obrigatória",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.5,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.2328181818181818,
+      "sel": false,
+      "linha": 28,
+      "motivo": "mais parecida seria FT-020, mas só 23% — escolha à mão"
+    },
+    {
+      "id": "L-0028",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-1 - Parada Obrigatória",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.2328181818181818,
+      "sel": false,
+      "linha": 29,
+      "motivo": "mais parecida seria FT-020, mas só 23% — escolha à mão"
+    },
+    {
+      "id": "L-0029",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-1 - Parada Obrigatória",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.2328181818181818,
+      "sel": false,
+      "linha": 30,
+      "motivo": "mais parecida seria FT-020, mas só 23% — escolha à mão"
+    },
+    {
+      "id": "L-0030",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-1 - Parada Obrigatória",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.2328181818181818,
+      "sel": false,
+      "linha": 31,
+      "motivo": "mais parecida seria FT-020, mas só 23% — escolha à mão"
+    },
+    {
+      "id": "L-0031",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-19.4",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.14168983957219253,
+      "sel": false,
+      "linha": 32,
+      "motivo": "mais parecida seria FT-018, mas só 14% — escolha à mão"
+    },
+    {
+      "id": "L-0032",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-19.4",
+      "qtd": 1,
+      "um": "",
+      "valor": 1.2,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.14168983957219253,
+      "sel": false,
+      "linha": 33,
+      "motivo": "mais parecida seria FT-018, mas só 14% — escolha à mão"
+    },
+    {
+      "id": "L-0033",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-2 - Dê a Preferência",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.17285714285714285,
+      "sel": false,
+      "linha": 34,
+      "motivo": "mais parecida seria FT-020, mas só 17% — escolha à mão"
+    },
+    {
+      "id": "L-0034",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-2 - Dê a Preferência",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.17285714285714285,
+      "sel": false,
+      "linha": 35,
+      "motivo": "mais parecida seria FT-020, mas só 17% — escolha à mão"
+    },
+    {
+      "id": "L-0036",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-24a - Sentido de Circulação da Via ou Pista",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.11259259259259259,
+      "sel": false,
+      "linha": 37,
+      "motivo": "mais parecida seria PRD-0011, mas só 11% — escolha à mão"
+    },
+    {
+      "id": "L-0037",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-24a - Sentido de Circulação da Via ou Pista",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.11259259259259259,
+      "sel": false,
+      "linha": 38,
+      "motivo": "mais parecida seria PRD-0011, mas só 11% — escolha à mão"
+    },
+    {
+      "id": "L-0038",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-24a - Sentido de Circulação da Via ou Pista",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.11259259259259259,
+      "sel": false,
+      "linha": 39,
+      "motivo": "mais parecida seria PRD-0011, mas só 11% — escolha à mão"
+    },
+    {
+      "id": "L-0039",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-24a - Sentido de Circulação da Via ou Pista",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.11259259259259259,
+      "sel": false,
+      "linha": 40,
+      "motivo": "mais parecida seria PRD-0011, mas só 11% — escolha à mão"
+    },
+    {
+      "id": "L-0040",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-24a - Sentido de Circulação da Via ou Pista",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.11259259259259259,
+      "sel": false,
+      "linha": 41,
+      "motivo": "mais parecida seria PRD-0011, mas só 11% — escolha à mão"
+    },
+    {
+      "id": "L-0041",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-24a - Sentido de Circulação da Via ou Pista",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.11259259259259259,
+      "sel": false,
+      "linha": 42,
+      "motivo": "mais parecida seria PRD-0011, mas só 11% — escolha à mão"
+    },
+    {
+      "id": "L-0042",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-28 - Duplo Sentido de Circulação",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.13382608695652176,
+      "sel": false,
+      "linha": 43,
+      "motivo": "mais parecida seria FT-016, mas só 13% — escolha à mão"
+    },
+    {
+      "id": "L-0043",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-28 - Duplo Sentido de Circulação",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.13382608695652176,
+      "sel": false,
+      "linha": 44,
+      "motivo": "mais parecida seria FT-016, mas só 13% — escolha à mão"
+    },
+    {
+      "id": "L-0044",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-28 - Duplo Sentido de Circulação",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.13382608695652176,
+      "sel": false,
+      "linha": 45,
+      "motivo": "mais parecida seria FT-016, mas só 13% — escolha à mão"
+    },
+    {
+      "id": "L-0045",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-3 - Sentido Proibido",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.06204081632653061,
+      "sel": false,
+      "linha": 46,
+      "motivo": "mais parecida seria PRD-0030, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0046",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-3 - Sentido Proibido",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.06204081632653061,
+      "sel": false,
+      "linha": 47,
+      "motivo": "mais parecida seria PRD-0030, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0047",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-3 - Sentido Proibido",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.06204081632653061,
+      "sel": false,
+      "linha": 48,
+      "motivo": "mais parecida seria PRD-0030, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0048",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-3 - Sentido Proibido",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.06204081632653061,
+      "sel": false,
+      "linha": 49,
+      "motivo": "mais parecida seria PRD-0030, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0049",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-3 - Sentido Proibido",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.06204081632653061,
+      "sel": false,
+      "linha": 50,
+      "motivo": "mais parecida seria PRD-0030, mas só 6% — escolha à mão"
+    },
+    {
+      "id": "L-0050",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-34 - Circulação Exclusiva de Bicicletas",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.5,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.10091803278688524,
+      "sel": false,
+      "linha": 51,
+      "motivo": "mais parecida seria FT-028, mas só 10% — escolha à mão"
+    },
+    {
+      "id": "L-0051",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-34 - Circulação Exclusiva de Bicicletas",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.5,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.10091803278688524,
+      "sel": false,
+      "linha": 52,
+      "motivo": "mais parecida seria FT-028, mas só 10% — escolha à mão"
+    },
+    {
+      "id": "L-0052",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-34 - Circulação Exclusiva de Bicicletas",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.5,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.10091803278688524,
+      "sel": false,
+      "linha": 53,
+      "motivo": "mais parecida seria FT-028, mas só 10% — escolha à mão"
+    },
+    {
+      "id": "L-0053",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-34 - Circulação Exclusiva de Bicicletas",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.5,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.10091803278688524,
+      "sel": false,
+      "linha": 54,
+      "motivo": "mais parecida seria FT-028, mas só 10% — escolha à mão"
+    },
+    {
+      "id": "L-0054",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-34 - Circulação Exclusiva de Bicicletas",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.10091803278688524,
+      "sel": false,
+      "linha": 55,
+      "motivo": "mais parecida seria FT-028, mas só 10% — escolha à mão"
+    },
+    {
+      "id": "L-0055",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-34 - Circulação Exclusiva de Bicicletas",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.10091803278688524,
+      "sel": false,
+      "linha": 56,
+      "motivo": "mais parecida seria FT-028, mas só 10% — escolha à mão"
+    },
+    {
+      "id": "L-0056",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-34 - Circulação Exclusiva de Bicicletas",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.10091803278688524,
+      "sel": false,
+      "linha": 57,
+      "motivo": "mais parecida seria FT-028, mas só 10% — escolha à mão"
+    },
+    {
+      "id": "L-0057",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-4a - Proibido Virar à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07892307692307693,
+      "sel": false,
+      "linha": 58,
+      "motivo": "mais parecida seria FT-020, mas só 8% — escolha à mão"
+    },
+    {
+      "id": "L-0058",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-4a - Proibido Virar à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07892307692307693,
+      "sel": false,
+      "linha": 59,
+      "motivo": "mais parecida seria FT-020, mas só 8% — escolha à mão"
+    },
+    {
+      "id": "L-0059",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-4a - Proibido Virar à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07892307692307693,
+      "sel": false,
+      "linha": 60,
+      "motivo": "mais parecida seria FT-020, mas só 8% — escolha à mão"
+    },
+    {
+      "id": "L-0060",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-4a - Proibido Virar à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07892307692307693,
+      "sel": false,
+      "linha": 61,
+      "motivo": "mais parecida seria FT-020, mas só 8% — escolha à mão"
+    },
+    {
+      "id": "L-0061",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-4a - Proibido Virar à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07892307692307693,
+      "sel": false,
+      "linha": 62,
+      "motivo": "mais parecida seria FT-020, mas só 8% — escolha à mão"
+    },
+    {
+      "id": "L-0062",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-4a - Proibido Virar à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07892307692307693,
+      "sel": false,
+      "linha": 63,
+      "motivo": "mais parecida seria FT-020, mas só 8% — escolha à mão"
+    },
+    {
+      "id": "L-0063",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-4a - Proibido Virar à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07892307692307693,
+      "sel": false,
+      "linha": 64,
+      "motivo": "mais parecida seria FT-020, mas só 8% — escolha à mão"
+    },
+    {
+      "id": "L-0064",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-4a - Proibido Virar à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07892307692307693,
+      "sel": false,
+      "linha": 65,
+      "motivo": "mais parecida seria FT-020, mas só 8% — escolha à mão"
+    },
+    {
+      "id": "L-0065",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-4a - Proibido Virar à Esquerda",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07892307692307693,
+      "sel": false,
+      "linha": 66,
+      "motivo": "mais parecida seria FT-020, mas só 8% — escolha à mão"
+    },
+    {
+      "id": "L-0066",
+      "origem": "planilha",
+      "arquivo": "OBRA-828-BARRETOS.xlsx",
+      "numero": "IMP 29/07/2026",
+      "cliente": "",
+      "clienteId": "",
+      "codigo": "",
+      "desc": "R-6a - Proibido Estacionar",
+      "qtd": 1,
+      "um": "",
+      "valor": 0.8,
+      "entrega": "2025-12-30",
+      "obs": "",
+      "ref": "",
+      "score": 0.07434782608695652,
+      "sel": false,
+      "linha": 67,
+      "motivo": "mais parecida seria FT-028, mas só 7% — escolha à mão"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#
+# Hook de pre-commit (WP-0.6): commit que toca supabase/migrations/ so passa
+# com a auditoria de RLS limpa.
+#
+# Ativacao: git config core.hooksPath .githooks
+
+set -uo pipefail
+
+if git diff --cached --name-only --diff-filter=ACM | grep -q '^supabase/migrations/'; then
+  echo "pre-commit: migrations alteradas, rodando scripts/audit-rls.sh"
+  if ! bash scripts/audit-rls.sh; then
+    echo
+    echo "pre-commit: BLOQUEADO — corrija as violacoes de RLS antes de commitar." >&2
+    exit 1
+  fi
+fi
+
+exit 0

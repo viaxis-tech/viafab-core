@@ -1,0 +1,111 @@
+{
+  "runId": "20260825_085318-4ff9ed",
+  "recommendedCandidateId": "C4",
+  "selectedCandidateId": null,
+  "candidates": [
+    {
+      "id": "C1",
+      "title": "Seam de acesso a dados entre o dominio e o DB global",
+      "files": [
+        "prototype/index.html:15641-15711",
+        "prototype/index.html:15726",
+        "prototype/index.html:15734-15757",
+        "prototype/index.html:16472-16526",
+        "prototype/index.html:21550-21594",
+        "prototype/index.html:15759-15764"
+      ],
+      "problem": "Nao existe interface de acesso a dado. Ha 42 sitios de mutacao direta em arrays de DB (DB.<lista>.push/unshift/splice) e 75 funcoes render*/init* que leem os mesmos globais. Mutacao de dominio e efeito de UI vivem na mesma funcao: reservarMaterial(id) (L16495) calcula necessidade, altera saldo, grava DB.reservas e no meio escreve em $('#res-alert'), chama audit, evento, renderEstoque, preencherSelects e toast. O saldo por unidade e invisivel: i.fis/i.res parecem campos mas sao getters/setters sobre SALDO[S.tenant] (L15746-15755), entao leitura aparentemente pura depende de estado de sessao global. Depth zero e Locality zero: a interface de qualquer parte e o arquivo inteiro, e nao ha superficie de teste porque toda regra exige DOM e globais montados.",
+      "proposedDirection": "Introduzir um seam unico de leitura/escrita de dominio pelo qual todo o codigo de regra passa, em vez de tocar DB/SALDO/ITENS diretamente, separando decidir-e-mutar-o-dominio de redesenhar-a-tela. O DB em memoria vira o primeiro adapter; o Supabase vira o segundo na fase 4. A variacao e real e datada, entao o seam se justifica.",
+      "benefits": {
+        "locality": "Tenant, unidade fabril, erro de rede, ordenacao e retry passam a ter um lugar em vez de 42.",
+        "leverage": "Cada render* deixa de saber de onde o dado vem; ligar o backend vira escrever um adapter em vez de reescrever chamadores.",
+        "testing": "A regra de reserva/baixa fica exercitavel sem DOM, hoje impossivel: a unica coisa executavel no frontend e tools/contraste.mjs, que le o HTML como texto."
+      },
+      "payoff": "high",
+      "risk": "high",
+      "whyNow": "E a pre-condicao dos candidatos C2, C3 e C5. Ligar o Supabase sem esse seam significa espalhar await e tratamento de erro por dezenas de funcoes hoje sincronas que ja misturam UI; o custo cresce a cada tela nova."
+    },
+    {
+      "id": "C2",
+      "title": "Custo aberto com duas implementacoes divergentes (JS vs SQL)",
+      "files": [
+        "prototype/index.html:19333",
+        "prototype/index.html:19472-19529",
+        "supabase/migrations/20260824140400_fn_custo_aberto.sql:34-103"
+      ],
+      "problem": "O mesmo conceito esta implementado duas vezes com formulas verificadamente diferentes. (1) Perda: o JS aplica qPerda = qtd * (1 + perda/100) em todos os niveis da BOM (L19477, L19485, L19493, L19521); o SQL acumula lf.quantidade * quantidade_acumulada (L60) sem nenhum fator de perda, entao o custo material do banco e sistematicamente menor. (2) 'Processo' significa coisas diferentes: no JS e hora-maquina da operacao ((f.tempo/60) * horaMaquina(f.maq), L19492); no SQL e custo_unitario dos componentes tipo componente/produto (L70-75) - duas grandezas distintas com o mesmo nome de coluna. (3) Profundidade: o JS corta em prof > 6 (L19474); o SQL e with recursive sem limite, entao ciclo na BOM derruba a funcao. A propria migration admite a origem no comentario L11-13: a SPEC define as colunas de saida mas nao a formula interna. Interface especificada, invariante nao.",
+      "proposedDirection": "Eleger um lado como definicao autoritativa de custo aberto e tornar o outro um adapter que a satisfaz, com teste de conformidade que roda a mesma BOM nos dois caminhos e falha na divergencia. Decidir qual lado e a interface e exatamente o que a fase 4 precisa cravar.",
+      "benefits": {
+        "locality": "A regra de perda e de composicao de custo passa a ter um dono unico.",
+        "leverage": "Orcamento, BI de custo, ficha, OS impressa e GET /itens/{itemId}/custo passam a concordar por construcao.",
+        "testing": "supabase/tests/engenharia_custo_aberto_test.sql ja existe e cobre so o lado SQL; um teste de conformidade cruzado fecha a lacuna real."
+      },
+      "payoff": "high",
+      "risk": "low",
+      "whyNow": "fn_custo_aberto ja tem grant execute para authenticated prevendo o endpoint. Quando a tela passar a consumi-lo, os valores exibidos mudam sem que ninguem tenha mexido em regra de negocio."
+    },
+    {
+      "id": "C3",
+      "title": "Transacionalidade do apontamento emulada por indice de array",
+      "files": [
+        "prototype/index.html:16982-17020",
+        "prototype/index.html:17021-17058",
+        "prototype/index.html:21550-21594",
+        "prototype/index.html:16109-16146",
+        "prototype/index.html:19262"
+      ],
+      "problem": "Maior risco de corrupcao de dado do sistema, com reversao baseada em contador de posicoes de array. finalizarOperacao guarda ev0, se0, au0 (L16987) e baixaAutomatica guarda r0, c0, m0 (L21553); corrigirApontamento desfaz via splice cego (L17039-17047). (1) Direcao presumida: DB.movimentos.splice(0, u.rev.movimentos) (L17044) remove do inicio do array, so funcionando porque baixaAutomatica usa unshift; qualquer reordenacao apaga o movimento errado. (2) Colisao com invariante do banco: DB.auditoria.splice(0, DB.auditoria.length - u.au0) (L17047) apaga linhas de auditoria para desfazer, mas no Supabase auditoria e append-only em duas camadas (ausencia de policy + REVOKE UPDATE/DELETE inclusive para service_role), tornando essa correcao impossivel de executar contra o backend. (3) Estado critico volatil: ESTORNO_APONTAMENTO e declarado no comentario L16111-16112 como estrutura volatil nunca gravada, e a janela de 10 min usa Date.now() do cliente.",
+      "proposedDirection": "Trocar desfazer-removendo-o-que-foi-escrito por compensar-escrevendo-o-inverso: a correcao vira novo registro que anula o efeito, nunca remocao, alinhando o prototipo a semantica append-only que o banco ja impoe. O agrupamento das escritas de um apontamento (consumo, lote, movimento, serie, evento, auditoria) passa a ser explicito em vez de implicito na ordem das linhas.",
+      "benefits": {
+        "locality": "A invariante 'zero duplicacao de baixa de estoque', nomeada na SPEC, passa a ter um unico guardiao; hoje esta espalhada por tres regioes distantes do arquivo.",
+        "leverage": "A correcao funciona igual em memoria e contra o banco.",
+        "testing": "A invariante vira asseguravel; hoje nao ha nenhum teste sobre a cadeia mais perigosa do produto."
+      },
+      "payoff": "high",
+      "risk": "high",
+      "whyNow": "Se o seam de C1 for desenhado sem acomodar compensacao, ele nasce incompativel com a unica tabela que o backend ja tem blindada."
+    },
+    {
+      "id": "C4",
+      "title": "Preview e execucao do plano: regra duplicada e decisao de dominio lida do DOM",
+      "files": [
+        "prototype/index.html:22953-22991",
+        "prototype/index.html:23032-23062",
+        "prototype/index.html:22922",
+        "prototype/index.html:21795",
+        "prototype/index.html:20922",
+        "prototype/index.html:22768"
+      ],
+      "problem": "Preview e execucao sao duas implementacoes da mesma regra, nao uma regra com duas apresentacoes. A deteccao de lote consolidado esta escrita por inteiro nas duas funcoes (L22963-22967 e L23048-23054), com o mesmo cont/fila.filter copiado. Ambas leem a decisao de negocio direto da UI em momentos diferentes: a linha $('#pn-consol button[data-c=\"1\"]').getAttribute('aria-pressed') === 'true' aparece identica em L22960 e L23042. O usuario ve o preview, o botao muda, e confirmarEfeito executa com outra leitura, entao o que foi confirmado nao e necessariamente o que sera gerado. Como consequencia, o maior concentrado de regra de negocio do repositorio (prioridade, consolidacao, alocacao de prontos, capacidade) e intestavel sem DOM montado. A nocao de capacidade ainda aparece em tres lugares: CAP_DIA (L21795), capSetorDia (L20922), cargaPorSetor (L22768).",
+      "proposedDirection": "Fazer as opcoes de planejamento (consolidar, criterio de prioridade) serem estado de dominio explicito, lido uma unica vez e repassado, de modo que preview e execucao passem a ser o mesmo calculo e o preview vire leitura do resultado em vez de recalculo paralelo. A UI escreve a opcao; o motor nunca consulta a UI.",
+      "benefits": {
+        "locality": "A regra de consolidacao passa a existir uma vez so.",
+        "leverage": "'O que foi confirmado e o que sera gerado' vira garantia estrutural em vez de coincidencia.",
+        "testing": "O motor de PCP fica exercitavel em Node puro, sem DOM."
+      },
+      "payoff": "high",
+      "risk": "medium",
+      "whyNow": "E o candidato mais contido da lista (duas funcoes vizinhas) e entrega a maior area testavel por unidade de esforco; serve de piloto para o seam de C1."
+    },
+    {
+      "id": "C5",
+      "title": "Matriz de permissao em duas codificacoes incompativeis",
+      "files": [
+        "prototype/index.html:15299-15310",
+        "prototype/index.html:15312-15330",
+        "prototype/index.html:15884-15890",
+        "supabase/migrations/20260824130346_core_multiempresa_tables.sql:47-62"
+      ],
+      "problem": "Autorizacao esta modelada duas vezes com formatos que nao se convertem sem traducao explicita. No cliente e matriz posicional por string: P('r r r r w w ...'), validada apenas por contagem (if(v.length !== MODULOS.length) throw, L15307), onde a ordem das 22 colunas de MODULOS e a unica coisa que da significado a cada caractere. No banco e {\"<modulo>\": {\"leitura\": bool, \"escrita\": bool}} (comentario da coluna, L61-62). Alem do formato, a fonte diverge: PERFIS e constante hardcoded no bundle, com usuario e home embutidos, enquanto o banco tem perfis por tenant. Inserir um modulo novo exige reeditar a string de cada perfil na posicao certa, erro que so aparece em runtime e apenas se a contagem mudar.",
+      "proposedDirection": "Estabelecer uma representacao unica de permissao e um ponto de traducao entre ela e o formato do banco, com a matriz deixando de ser constante compilada para virar dado carregado da sessao. Manter perm() como unico portao de leitura, ja que ele e o seam certo: o problema e a fonte que ele consulta, nao a funcao.",
+      "benefits": {
+        "locality": "O significado de 'escrita em expedicao' para de existir em dois vocabularios.",
+        "leverage": "renderNav, paleta Ctrl+K, aplicarSomenteLeitura e as policies RLS passam a concordar por construcao.",
+        "testing": "supabase/tests/rls_isolation_test.sql ja cobre o lado do banco; a matriz do cliente hoje nao tem teste nenhum."
+      },
+      "payoff": "medium",
+      "risk": "medium",
+      "whyNow": "Autorizacao e a primeira coisa que o backend real assume. Enquanto o cliente decidir acesso por string posicional hardcoded, UI e RLS podem discordar, e a UI ficara permissiva onde o banco nega, gerando erro em vez de tela bloqueada."
+    }
+  ]
+}

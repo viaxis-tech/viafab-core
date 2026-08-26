@@ -1,0 +1,20 @@
+# Dependencias
+node_modules/
+
+# Segredos e ambiente
+.env
+.env.*
+!.env.example
+
+# Supabase (estado local, nunca versionado)
+supabase/.temp/
+supabase/.branches/
+
+# Artefatos gerados
+prototype/*.preview-*.png
+*.log
+
+# Sistema operacional
+Thumbs.db
+Desktop.ini
+.DS_Store

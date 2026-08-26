@@ -1,0 +1,163 @@
+{
+  "runId": "20260825_085318-4ff9ed",
+  "candidateId": "C1",
+  "rootCause": "O sistema tem um seam de leitura parcial (ordem(), item(), reservasAtivas(), ordensUn()) e nenhum seam de escrita: os acessores devolvem a referencia viva do store, entao toda mutacao acontece in-place no call site, em 42 sitios de push/unshift/splice e 21 atribuicoes diretas de status. Como nao existe fronteira entre decidir/mutar o dominio e redesenhar a tela, a mesma funcao que aplica a regra tambem escreve no DOM e chama render*/toast, tornando a interface de qualquer regra o arquivo inteiro (26.081 linhas, escopo global unico, zero import/export). A consequencia mensuravel: a invariante de saldo esta replicada em 6 call sites que ja divergem entre si, e 100% das funcoes de dominio sao sincronas.",
+  "evidence": [
+    {
+      "path": "prototype/index.html",
+      "lines": "15641-15711",
+      "finding": "DB e um objeto literal unico com 17 colecoes de dominio mais os contadores de identidade seqCfg/seqSnap/seqOrd (L15710) no mesmo objeto. Nao ha construtor, tipo nem funcao de acesso: a declaracao e a interface.",
+      "impact": "Geracao de id, dado de demonstracao e estado transacional compartilham o mesmo grau de acesso. Qualquer codigo pode incrementar seqOrd ou reescrever ordens sem validacao. No Supabase a identidade e do banco, entao esses tres campos nao tem para onde migrar sem tocar todos os geradores."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "15713-15716",
+      "finding": "O campo res de cada item e derivado por efeito colateral no carregamento: DB.reservas.forEach muta ITENS logo apos a declaracao do DB.",
+      "impact": "Acopla ordem de inicializacao (ITENS antes de DB, DB antes de SALDO). Nao ha como instanciar estado de teste sem reexecutar o arquivo inteiro na ordem certa — razao estrutural pela qual nao existe teste de dominio."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "15734-15757",
+      "finding": "fis e res deixam de ser campos e viram Object.defineProperty cujo getter le SALDO[S.tenant]/RESERV[S.tenant] (L15746-15755). Expressoes com aparencia de leitura pura (it.fis - it.res em L16503 e L21620) dependem de estado de sessao global. S.tenant aparece 53 vezes no arquivo.",
+      "impact": "Nao existe leitura de saldo sem sessao montada; trocar de tenant muda silenciosamente qualquer calculo em curso. O acessor explicito saldoUn(cod, t) (L15757) seria o seam correto mas quase nao e usado."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "15759-15764",
+      "finding": "audit() faz tres coisas em cinco linhas: muta o dominio (DB.auditoria.unshift), persiste (gravarLocal) e renderiza (renderAuditoria() sob checagem de DOM). E chamada por todos os modules de dominio.",
+      "impact": "A funcao mais transversal do sistema nao roda sem DOM, entao qualquer teste de regra que audite exige document. No backend auditoria e append-only com REVOKE UPDATE/DELETE, logo esta funcao precisa virar escrita remota — hoje e sincrona e desenha tela."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "16472-16491",
+      "finding": "liberarReserva(id, avisar) usa o parametro avisar para decidir se executa efeitos de UI: muta status (L16483), audita, escreve $('#res-alert').hidden (L16486) e chama renderEstoque()/preencherSelects()/toast() (L16487-16488).",
+      "impact": "O booleano avisar e uma fronteira de UI improvisada dentro da funcao de dominio — prova de que a separacao ja foi sentida e resolvida com flag em vez de seam. reservarMaterial chama liberarReserva(id, false) (L16497) so para suprimir a UI."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "16495-16531",
+      "finding": "reservarMaterial(id) concentra regra e apresentacao: calcula reserva parcial (L16503-16505), muta saldo (L16506), grava DB.reservas.push (L16509), muta status (L16515, L16521), escreve $('#res-alert') e $('#res-msg').innerHTML (L16516-16520), emite evento/audit (L16523-16526) e termina em renderEstoque(); preencherSelects(); toast() (L16527-16530).",
+      "impact": "A regra mais sensivel do almoxarifado (reserva parcial, saldo negativo proibido) e inexercitavel sem DOM montado. Mudar a mensagem e mudar a regra tocam o mesmo bloco."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "16416-16423",
+      "finding": "necessidadeDe(id) tem tres caminhos e o ultimo e um fallback hardcoded: retorna MAT-011/MAT-023/MAT-016 com fatores literais 1.1, 1.15 e 4 (L16422).",
+      "impact": "Dado de demonstracao esta dentro do caminho de decisao, nao numa seed separada. Ligado ao backend, esse ramo produz necessidade fabricada para qualquer ordem sem snapshot e sem reserva, sem teste que o detecte."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "21550-21594",
+      "finding": "baixaAutomatica implementa transacao por aritmetica de indice: captura r0/c0/m0 (L21553) e devolve rev com as diferencas de length (L21592-21593). Escreve com convencoes opostas no mesmo bloco: DB.consumos.push (L21562) e DB.movimentos.unshift (L21563).",
+      "impact": "O contrato de reversao e 'quantos itens entraram', nao 'quais', e depende da direcao de insercao de cada colecao permanecer como esta. O agrupamento das escritas (consumo + lote + movimento + evento + auditoria) e implicito na ordem das linhas."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "17035-17047",
+      "finding": "A reversao do apontamento executa dentro do callback do modal abrirModal(...): DB.rastreio.splice (L17039), DB.consumos.splice (L17043), DB.movimentos.splice(0, n) (L17044, remove do inicio), DB.serie.splice (L17045) e DB.auditoria.splice (L17047).",
+      "impact": "A escrita mais critica do produto e efeito colateral de um handler de apresentacao — nao ha como invoca-la sem abrir modal. E DB.auditoria.splice apaga trilha, operacao impossivel contra o backend, onde auditoria tem REVOKE UPDATE/DELETE inclusive para service_role."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "17037 (vs 16477, 16506, 16953, 21558, 21559)",
+      "finding": "Seis call sites mutam saldo e ja divergem na regra. Cinco aplicam clamp e/ou arredondamento (L16477, L16506, L16953, L21558, L21559). O sexto, na devolucao da correcao, faz 'it.fis += x.q; it.res += x.q;' sem clamp e sem arredondamento.",
+      "impact": "Prova direta de locality zero: a invariante 'saldo arredondado a 2 casas, nao negativo' nao tem dono e um dos seis sitios ja a viola. O caminho divergente e justamente o de correcao, acumulando residuo de ponto flutuante no estoque a cada estorno. Divergencia presente no codigo, nao deterioracao hipotetica."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "16020, 16410, 16415, 19324-19326, 21713",
+      "finding": "Os acessores de leitura existem e sao de uma linha: ordem (L16020), item (L16410), reservasAtivas (L16415), comp/prod/ficha (L19324-19326), ordensUn com escopo de tenant embutido (L21713).",
+      "impact": "Existe meio seam: resolve 'onde encontrar' e nao 'como alterar'. Devolve referencia viva, entao o chamador muta in-place (o.status = 'bloqueada' em L16965; 21 atribuicoes literais de status). E o ponto de enxerto natural do seam de escrita — a metade que falta ja tem nome e call sites estabelecidos."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "17065-17070, 24374 (vs 15715, 16506)",
+      "finding": "O identificador .res carrega dois significados incompativeis: em ITENS e o saldo reservado, numero (L16506); em DB.inspecoes e o resultado da inspecao, string (L17069, L24374).",
+      "impact": "Busca textual por .res — unica ferramenta de navegacao num arquivo sem modulos — retorna dois dominios misturados, encarecendo manutencao e tornando refatoracao automatizada insegura."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "18923-18962, 21830",
+      "finding": "Varredura do arquivo por fetch(, createClient, import , export , async function e await retorna 9 ocorrencias, todas do adapter VFB (lerZip, extrairZip, lerPacoteVfb, abrirPacoteVfb) — leitura de arquivo local, nao rede. Zero fetch, zero createClient, zero import/export.",
+      "impact": "100% do dominio e sincrono. Introduzir o adapter Supabase sem seam significa converter em async cada funcao de regra e, por contagio, cada uma das 75 funcoes render*/init* que a chamam. E a medida exata do custo de nao ter o seam."
+    },
+    {
+      "path": "prototype/index.html",
+      "lines": "15618-15638, 15717-15723",
+      "finding": "Existe um seam de persistencia real e bem definido (chaveLocal/lerLocal/gravarLocal, com politica explicita de descarte de versao divergente em L15629), mas usado por apenas 5 chaves; localStorage aparece 15 vezes e de DB so auditoria persiste (L15720-15723).",
+      "impact": "O padrao correto ja foi inventado no proprio codigo e nao foi generalizado. O seam de dados pode seguir esse formato em vez de introduzir vocabulario novo, reduzindo risco de adocao."
+    },
+    {
+      "path": "tools/contraste.mjs (e ausencia de package.json/.github)",
+      "lines": "1-218",
+      "finding": "Glob por {package.json,tools/**,*.config.*,.github/**} retorna um unico resultado: tools/contraste.mjs. Nao ha package.json, test runner nem CI.",
+      "impact": "Nao existe rede de protecao para uma mudanca de 42 sitios. Qualquer trabalho em C1 precisa primeiro criar a capacidade de executar codigo do dominio em Node — hoje impossivel porque o dominio esta num <script> sem export."
+    }
+  ],
+  "dependencyCategories": [
+    {
+      "dependency": "DB, ITENS, SALDO/RESERV, PARAM (estado em memoria)",
+      "category": "in-process",
+      "testStrategy": "Nenhum adapter. Vira o estado do module aprofundado; o teste constroi o estado direto e assere sobre ele."
+    },
+    {
+      "dependency": "Regras puras ja isoladas (matDaOperacao L21527, qPerda, explodir, custoAberto)",
+      "category": "in-process",
+      "testStrategy": "Chamada direta em Node. Sao as primeiras funcoes que ficam testaveis assim que houver export."
+    },
+    {
+      "dependency": "localStorage",
+      "category": "local-substitutable",
+      "testStrategy": "Ja existe o seam lerLocal/gravarLocal (L15618-15638). Teste usa um mapa em memoria com a mesma assinatura — sem introduzir port novo."
+    },
+    {
+      "dependency": "DOM / document / $ / render* / toast",
+      "category": "local-substitutable",
+      "testStrategy": "Nao substituir: remover. O objetivo do candidato e que o dominio nao dependa disso. Substituto (jsdom) so se sobrar codigo de apresentacao a testar."
+    },
+    {
+      "dependency": "Relogio (now(), Date.now()) — sustenta a janela de estorno de 10 min",
+      "category": "in-process",
+      "testStrategy": "Injetar como funcao no construtor do module. Um parametro, nao um port."
+    },
+    {
+      "dependency": "DecompressionStream / File API (adapter VFB, L18923-18962)",
+      "category": "in-process",
+      "testStrategy": "API de plataforma pura, entrada por <input type=file>. Fora do escopo de C1."
+    },
+    {
+      "dependency": "Postgres/Supabase (fase 4)",
+      "category": "local-substitutable",
+      "testStrategy": "Supabase CLI local ou PGLite. As invariantes ja tem testes SQL em supabase/tests/. Nao precisa de mock."
+    },
+    {
+      "dependency": "Edge Functions / PostgREST proprios (fase 4)",
+      "category": "remote-owned",
+      "testStrategy": "Porta de dados + adapter HTTP + adapter em memoria. Dois adapters reais (o DB de hoje e o remoto de amanha), entao a porta se justifica pela regra 'dois adapters = seam real'."
+    },
+    {
+      "dependency": "Supabase Auth (claims app_metadata.tenant_id)",
+      "category": "external",
+      "testStrategy": "Porta injetada que devolve {tenant_id, unidade, perfil}. Teste fornece claims fixos; nao sobe Auth."
+    }
+  ],
+  "currentSeams": [
+    "Acessores de leitura por id (ordem L16020, item L16410, reservasAtivas L16415, comp/prod/ficha L19324-19326, ordensUn L21713) — separam 'onde o dado mora' de 'quem le', mas devolvem referencia mutavel e nao interceptam escrita; ordensUn ainda mistura busca com escopo de tenant.",
+    "lerLocal/gravarLocal (L15618-15638) — seam de persistencia legitimo com politica de versao explicita, porem cobre apenas 5 chaves, nao o dominio.",
+    "PARAM (L15339-15368) — seam saudavel de variacao de comportamento por flag (baixaAutomatica, estoqueNegativo, reservaObrigatoria, transfDepAuto), ja provado em uso em L21551, L21558 e L21569.",
+    "saldoUn(cod, t) (L15757) — unico acesso a saldo com unidade explicita; seam correto e praticamente nao adotado.",
+    "Object.defineProperty em fis/res (L15746-15755) — seam de interceptacao acidental que ja prova ser viavel indireta o saldo sem tocar chamadores, mas aponta para um global em vez de para uma porta.",
+    "abrirModal/confirmarEfeito — seam de confirmacao do usuario que virou hospedeiro de logica de escrita (L17035-17047), invertendo a direcao: a UI passou a conter o dominio."
+  ],
+  "missingSeams": [
+    "Porta de escrita de dominio — nao ha ponto unico por onde passem push/unshift/splice; os 42 sitios sao 42 lugares para adicionar await, tratamento de erro e retry.",
+    "Fronteira decisao-de-dominio vs efeito-de-UI — ausencia provada pelo parametro 'avisar' (L16481) e pelo $('#res-msg').innerHTML dentro da regra de reserva (L16518).",
+    "Unidade de trabalho (agrupamento explicito de escritas) — hoje o agrupamento e implicito na ordem das linhas e a reversao e aritmetica de indice (L21553, L21592-21593, L17039-17047).",
+    "Porta de escopo tenant/unidade — S.tenant e lido implicitamente pelos getters; nenhuma assinatura declara de qual unidade e a leitura. saldoUn e o embriao correto.",
+    "Relogio injetavel — now()/Date.now() do cliente sustentam a janela de estorno de 10 min e todo ts gravado; sem porta, nenhum teste exercita limite de janela.",
+    "Gerador de identidade — seqCfg/seqSnap/seqOrd vivem dentro do DB (L15710); no backend a identidade e do banco, e sem seam a troca atinge todos os pontos de criacao.",
+    "Fronteira sincrono/assincrono — nenhuma funcao de dominio e async (verificado); nao existe lugar onde a latencia de rede possa ser absorvida."
+  ],
+  "testingImpact": "A superficie de teste do frontend e zero: o unico executavel e tools/contraste.mjs, que le o HTML como texto, e nao existe package.json nem CI. A causa e estrutural, nao de disciplina — sem export nada do dominio e importavel, e mesmo importavel audit() (L15763) e reservarMaterial() (L16516) tocam DOM. Regras de alto valor ja escritas em forma quase pura, como matDaOperacao (L21527-21549), permanecem intestaveis por vizinhanca. Na manutencao, a divergencia de arredondamento entre L17037 e os outros cinco sitios de saldo e o custo ja materializado, somada a 268 referencias a DB.* a inspecionar em qualquer mudanca de forma de dado, ao identificador .res com dois significados quebrando busca textual e a dado de demonstracao dentro do caminho de decisao (L16422). Em performance o efeito hoje e modesto mas tem mecanismo identificado: audit() chama renderAuditoria() a cada registro (L15763) e gravarLocal serializa a lista inteira com JSON.stringify a cada chamada (L15637), o que em sequencias como baixaAutomatica seguida de finalizarOperacao vira re-render e re-serializacao repetidos — e, com adapter remoto no lugar, viraria N requisicoes em vez de um lote.",
+  "riskOfNoChange": "Ligar o Supabase vira mudanca de contagem conhecida: 42 sitios de escrita e 268 leituras, com async contaminando as 75 funcoes render*/init* por transitividade, e o custo cresce a cada tela nova adicionada antes do seam. A correcao de apontamento ja nasce incompativel — DB.auditoria.splice (L17047) nao tem equivalente possivel contra uma tabela com REVOKE UPDATE/DELETE para service_role, entao sem um seam que acomode compensacao (escrever o inverso) em vez de remocao, esse caminho sera reescrito de qualquer forma. A corrupcao silenciosa de saldo continua acumulando: cada estorno passa por L17037 sem clamp nem arredondamento, somando residuo de ponto flutuante ao estoque, e sem locality o proximo call site de saldo tem chance real de divergir tambem. Com S.tenant lido implicitamente em getters (L15746-15755), o escopo de tenant nao aparece em nenhuma assinatura, entao discordancias entre a UI e o RLS nao terao lugar unico de investigacao. O onboarding permanece dependente de busca textual num escopo global de 26.081 linhas, degradada por identificadores sobrecarregados. Por fim, o proprio candidato carrega risco de execucao: sem package.json, test runner ou CI, uma mudanca de 42 sitios ocorre sem rede de protecao — o argumento que sustentou C4 como piloto na fase 2 nao desaparece por C1 ter sido escolhido, apenas exige sequenciamento explicito (criar capacidade de executar o dominio em Node antes de mover call sites)."
+}

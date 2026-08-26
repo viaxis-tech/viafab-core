@@ -1,0 +1,906 @@
+{
+  "project": {
+    "id": "5b1da7b5ef2867aeeb3fd022fd4ae27c",
+    "name": "ViaFab — Fase 0+1: decisões de produto e correção P0 (auditoria 23/08)",
+    "description": "Objetivo: corrigir o prototipo ViaFab (prototype/index.html, ~25k linhas) conforme docs/auditoria-design-20260823.md — Fase 0 (registrar decisoes de produto D-01..D-13) + Fase 1 (22 bloqueios P0 do prototipo).\n\nREGRA DE PRECEDENCIA DAS FONTES (obrigatoria, nao inferir divergencia):\n1. Fontes tecnicas autoritativas: docs/Docs20260820_134109/design/design-contract.json (design lock APROVADO/travado) + docs/Docs20260820_134109/SPEC20260820_134109.md (SPEC validada).\n2. Lista de decisoes pendentes: docs/Docs20260820_134109/sprint-validation20260820_134109.md (pendencias S6 Playwright/E2E, S7 buckets de Storage, S8 geracao de series_item, S9/S11 ajustes menores).\n3. Riscos e conflitos a resolver: docs/auditoria-design-20260823.md (22 P0 bloqueantes, 14 grupos P1, 13 decisoes de produto D-01..D-13, veredicto OPTIMIZE).\nEm qualquer divergencia entre essas fontes, PAUSE e ESCALE para o humano — nunca infira que uma decisao foi tomada.\n\nGATE OBRIGATORIO: a Sprint 1 (S1) desta feature so pode iniciar depois de registrar, para cada uma das 13 decisoes D-01..D-13 (auditoria, secao \"Decisoes de produto em aberto\") e das 4 pendencias do sprint-validation (S6/S7/S8/S9-S11), se foi ACEITA, ADIADA ou REJEITADA. Sem esse registro completo, nao avancar para implementacao.\n\nEscopo desta feature: Fase 0 (decisoes, 1 rodada) + Fase 1 do plano da auditoria (22 P0 no prototipo prototype/index.html — tokens/a11y, integridade de fluxo, handoffs, home/teclado, numeros/relatorios). Fase 2 (P1) e Fase 3 (validacao com usuarios) ficam fora deste pipeline. Criterios de aceite: ver docs/auditoria-design-20260823.md secao \"Criterios de aceite da etapa de design\" (itens aplicaveis a P0).",
+    "path": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core",
+    "stack": [],
+    "config": {
+      "max_rounds_per_sprint": 3,
+      "use_playwright": false,
+      "evaluator_agent_id": "harness-evaluator",
+      "planner_agent_id": "harness-planner"
+    }
+  },
+  "sprints": [
+    {
+      "id": "sprint-001",
+      "index": 0,
+      "name": "Fase 0 — Registro formal das decisoes de produto (gate obrigatorio)",
+      "description": "Criar o documento de registro que fecha a Fase 0: status (ACEITA/ADIADA/REJEITADA) de cada decisao D-01..D-13 da auditoria e das 4 pendencias do sprint-validation (S6/S7/S8/S9-S11). Este registro e o gate que libera as sprints de implementacao. Nenhum codigo do prototipo e alterado nesta sprint.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "markdown",
+        "documentacao"
+      ],
+      "features": [
+        {
+          "id": "feat-001",
+          "name": "Registro das decisoes D-01 a D-13",
+          "description": "Criar docs/decisoes-fase0-20260824.md com uma linha/secao por decisao D-01..D-13, cada uma com status, fonte da evidencia e resumo do que foi decidido, extraindo os status exclusivamente das fontes do repositorio (auditoria 23/08 e SPEC do LionClaw que ja consolida 13 aceitas com 4 adiadas).",
+          "acceptance_criteria": [
+            "Arquivo docs/decisoes-fase0-20260824.md existe e contem exatamente 13 entradas D-01 a D-13, sem lacunas de numeracao",
+            "Cada entrada tem status explicito ACEITA, ADIADA ou REJEITADA e cita o documento-fonte de onde o status foi extraido (path do arquivo em docs/)",
+            "As 4 decisoes adiadas estao identificadas como ADIADA com destino declarado (ex.: Fase 4)",
+            "Nenhum status foi inventado: entradas cujo status nao consta em nenhuma fonte aparecem como PENDENTE-ESCALADO em secao propria 'Divergencias escaladas ao humano', nunca com status inferido"
+          ]
+        },
+        {
+          "id": "feat-002",
+          "name": "Registro das 4 pendencias do sprint-validation",
+          "description": "No mesmo documento, registrar o status das pendencias S6 (Playwright/E2E), S7 (buckets de Storage), S8 (geracao de series_item) e S9/S11 (ajustes menores) listadas em docs/Docs20260820_134109/sprint-validation20260820_134109.md.",
+          "acceptance_criteria": [
+            "As 4 pendencias (S6, S7, S8, S9/S11) aparecem em secao propria com status ACEITA, ADIADA ou REJEITADA cada",
+            "Cada pendencia cita o trecho/secao do sprint-validation de origem",
+            "Pendencias sem status determinavel pelas fontes aparecem como PENDENTE-ESCALADO, nunca com status inferido"
+          ]
+        },
+        {
+          "id": "feat-003",
+          "name": "Declaracao de gate e precedencia de fontes",
+          "description": "O documento abre com a declaracao do gate (Fase 1 so inicia com este registro completo) e a regra de precedencia das 3 fontes, e fecha com um veredicto: GATE LIBERADO (zero itens PENDENTE-ESCALADO) ou GATE BLOQUEADO (lista dos itens escalados).",
+          "acceptance_criteria": [
+            "Documento contem secao inicial declarando a regra de precedencia das fontes (design-contract.json + SPEC > sprint-validation > auditoria)",
+            "Documento termina com veredicto explicito GATE LIBERADO ou GATE BLOQUEADO",
+            "Se GATE BLOQUEADO, cada item escalado lista qual informacao falta e em qual fonte foi procurada"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "docs/auditoria-design-20260823.md",
+          "docs/Docs20260820_134109/sprint-validation20260820_134109.md",
+          "docs/Docs20260820_134109/SPEC20260820_134109.md",
+          "docs/Docs20260820_134109/design/design-contract.json"
+        ],
+        "key_interfaces": [],
+        "architecture_notes": "Sprint somente de documentacao — NAO alterar prototype/index.html. A SPEC consolidada do projeto ja afirma que as 13 decisoes foram aceitas (4 adiadas); o trabalho aqui e materializar esse registro item a item com rastreio de fonte. Em divergencia entre fontes, registrar PENDENTE-ESCALADO em vez de decidir."
+      },
+      "dependencies": [],
+      "complexity": "low",
+      "estimated_rounds": 1
+    },
+    {
+      "id": "sprint-002",
+      "index": 1,
+      "name": "Fundacao client-side: confirmarEfeito, localStorage versionado e constantes",
+      "description": "Criar em prototype/index.html a infraestrutura compartilhada pelas demais sprints: helper confirmarEfeito() (Decisao F-2) com copy normativa, convencao de persistencia localStorage com namespace versionado, constantes de vocabulario fechado (MOTIVOS_REPROVACAO, MOTIVOS_BLOQUEIO, EXCECOES_RANGE_PAINEL) e o padrao transversal de estado vazio de lista filtrada.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "html",
+        "css",
+        "javascript"
+      ],
+      "features": [
+        {
+          "id": "feat-004",
+          "name": "Helper confirmarEfeito()",
+          "description": "Funcao unica de confirmacao de acao irreversivel, delegando aos helpers abrirModal()/fecharModal()/trapModal() existentes, com estrutura fixa .mo-lead (consequencia) + .tbl (efeito calculado) + .mo-nota.danger (irreversibilidade) e textos interpolaveis conforme a copy normativa da SPEC (secao 4.7).",
+          "acceptance_criteria": [
+            "Existe funcao nomeada confirmarEfeito() que recebe titulo/lead/tabela de efeito/nota/rotulo do botao e callback de confirmacao, e so executa o callback apos clique no botao de confirmacao",
+            "O modal renderiza as tres partes na ordem: .mo-lead, .tbl com o efeito calculado, .mo-nota.danger — usando exclusivamente classes CSS ja existentes (nenhuma classe nova)",
+            "Cancelar/fechar o modal nao executa o callback e nao grava nada",
+            "Foco preso no modal via trapModal() existente e navegavel por teclado (Tab/Enter/Esc)"
+          ]
+        },
+        {
+          "id": "feat-005",
+          "name": "Persistencia localStorage com namespace versionado",
+          "description": "Helpers de leitura/gravacao no padrao viafab.<estrutura>.v<N>. Na leitura, valor gravado sob versao diferente da vigente e descartado silenciosamente (estrutura reinicia vazia) com console.warn, sem erro visivel ao usuario.",
+          "acceptance_criteria": [
+            "Existem helpers de leitura/gravacao que recebem nome da estrutura e versao e montam a chave no formato viafab.<estrutura>.v<N>",
+            "Leitura de chave gravada com versao divergente retorna estrutura vazia, emite console.warn e nao lanca excecao nem exibe erro na UI",
+            "usuario_atalhos e DB.auditoria passam a ler/gravar pelas chaves viafab.usuario_atalhos.v1 e viafab.auditoria.v1 sem perda de funcionalidade existente"
+          ]
+        },
+        {
+          "id": "feat-006",
+          "name": "Constantes de vocabulario fechado",
+          "description": "Declarar MOTIVOS_REPROVACAO (dimensional, acabamento, pelicula, impressao, material_divergente, outro), MOTIVOS_BLOQUEIO (falta_material, reprovacao_qualidade, aguardando_ficha, parada_maquina, outro) com rotulos de exibicao em pt-BR, e EXCECOES_RANGE_PAINEL como array constante vazio.",
+          "acceptance_criteria": [
+            "MOTIVOS_REPROVACAO contem exatamente os 6 codigos da SPEC, cada um com rotulo de exibicao em portugues",
+            "MOTIVOS_BLOQUEIO contem exatamente os 5 codigos da SPEC, cada um com rotulo de exibicao em portugues",
+            "EXCECOES_RANGE_PAINEL existe como array vazio ([]) declarado como constante"
+          ]
+        },
+        {
+          "id": "feat-007",
+          "name": "Padrao de estado vazio de lista filtrada",
+          "description": "Helper/padrao reutilizavel que distingue lista vazia por ausencia de dado (mensagem neutra do dominio, sem alerta nem contagem) de lista vazia por filtro ativo (mensagem 'Nenhum resultado para os filtros aplicados.' + acao 'Limpar filtros' que restaura o estado sem filtro).",
+          "acceptance_criteria": [
+            "Existe helper reutilizavel que recebe a flag 'ha filtro ativo' e a mensagem neutra do dominio e retorna o markup do estado vazio correto",
+            "No caso de filtro ativo, o markup contem o texto exato 'Nenhum resultado para os filtros aplicados.' e um controle 'Limpar filtros' funcional",
+            "No caso sem filtro, nao ha alerta, contagem nem botao de limpar"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "prototype/index.html"
+        ],
+        "key_interfaces": [
+          "abrirModal()",
+          "fecharModal()",
+          "trapModal()",
+          "toast()",
+          "audit(mod, acao, alvo, dado)",
+          "objeto DB (declarado por volta da linha ~15544)",
+          "classes CSS: .mo-lead, .mo-nota.danger, .tbl, .btn"
+        ],
+        "architecture_notes": "Tudo dentro de prototype/index.html (arquivo unico, design lock — Decisao F-1): sem build, sem dependencia externa, sem classe CSS nova. confirmarEfeito() sera consumido pelas sprints 4, 5 e 6 com os textos normativos da secao 4.7 da SPEC — projete a assinatura para aceitar lead/nota/rotulo interpolados. Nao persista DB.ordens, DB.reservas nem estornos (decisao consciente da SPEC 2.1.3)."
+      },
+      "dependencies": [
+        "sprint-001"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2
+    },
+    {
+      "id": "sprint-003",
+      "index": 2,
+      "name": "Acessibilidade e temas: tokens AA, foco visivel, tabelas por teclado e verificador de contraste",
+      "description": "Corrigir os P0 de acessibilidade visual e de teclado (US-17 a US-20, P0-14/15/16/17): recalibrar tokens com os valores normativos da SPEC, indicador :focus-visible nos dois temas, tabelas clicaveis operaveis por teclado via a11yTabelas(), e criar o verificador automatizado tools/contraste.mjs.",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "css",
+        "javascript",
+        "node"
+      ],
+      "features": [
+        {
+          "id": "feat-008",
+          "name": "Recalibracao normativa dos tokens de texto",
+          "description": "Aplicar exatamente os valores da tabela normativa da SPEC (4.5): tema claro --text-dim:#5b5b55, --text-faint:#6e6e66, --accent-text:#9b5239; tema escuro --text-dim:#a8a89e, --text-faint:#8e8e84; --text-on-accent:#1c1c1a nos dois temas. Nenhum token novo — apenas recalibracao de valor.",
+          "acceptance_criteria": [
+            "Os 6 pares token/tema em :root e [data-theme=\"light\"] contem exatamente os valores hex da tabela da SPEC",
+            "Nenhum token CSS novo foi criado e apenas --accent muda identidade visual entre temas (RNF-10)",
+            ".btn-primary usa --text-on-accent como cor de texto, mantendo a cor de marca no fundo do botao (P0-16)"
+          ]
+        },
+        {
+          "id": "feat-009",
+          "name": "Indicador de foco :focus-visible global",
+          "description": "Regra global :focus-visible com outline: 2px solid var(--accent-text) + outline-offset, valida nos dois temas, aplicada a todos os elementos interativos e a tr.clickable (US-17, RF-30, P0-14).",
+          "acceptance_criteria": [
+            "Regra CSS :focus-visible com outline 2px solid var(--accent-text) e outline-offset existe e alcanca botoes, links, inputs, .seg, .tab e tr.clickable",
+            "Navegando por Tab em qualquer tela, todo elemento interativo exibe foco visivel nos temas claro e escuro",
+            "Nao ha outline:none sem substituto visivel em nenhum seletor do arquivo"
+          ]
+        },
+        {
+          "id": "feat-010",
+          "name": "a11yTabelas(): linhas clicaveis operaveis por teclado",
+          "description": "Funcao a11yTabelas() que aplica tabindex, role e aria-label a toda tr.clickable e dispara a mesma acao do clique via Enter e Espaco, cobrindo as 7 tabelas afetadas, inclusive linhas re-renderizadas apos filtro (US-20, P0-17).",
+          "acceptance_criteria": [
+            "Toda tr.clickable possui tabindex=\"0\", role apropriado e aria-label descritivo apos qualquer renderizacao",
+            "Enter e Espaco sobre uma tr.clickable focada disparam exatamente a mesma acao do clique",
+            "Linhas renderizadas apos aplicacao de filtro tambem recebem os atributos e handlers (a11yTabelas e reaplicada ou usa delegacao)"
+          ]
+        },
+        {
+          "id": "feat-011",
+          "name": "Verificador automatizado tools/contraste.mjs",
+          "description": "Script Node standalone (fora do prototipo, sem dependencia externa) que le os tokens de :root e [data-theme=\"light\"] do CSS de prototype/index.html sem executar a pagina, calcula luminancia relativa WCAG e valida os pares da tabela normativa nos 2 temas, cobrindo texto, .pill, .btn-primary e indicador de foco (RNF-01).",
+          "acceptance_criteria": [
+            "Arquivo tools/contraste.mjs existe, roda com `node tools/contraste.mjs` sem nenhuma dependencia instalada (sem package.json/npm install)",
+            "Saida lista cada par token/tema verificado com a razao calculada e o criterio aplicado (>=4,5:1 texto normal; >=3:1 UI/foco)",
+            "Exit code 0 quando todos os pares passam; exit code diferente de 0 com listagem das violacoes quando qualquer par falha",
+            "Com os tokens da feat-008 aplicados, a execucao retorna exit code 0 nos dois temas"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "prototype/index.html",
+          "docs/decisoes-fase0-20260824.md"
+        ],
+        "key_interfaces": [
+          "tokens CSS em :root e [data-theme=\"light\"]",
+          "classes: .btn-primary, .pill, .tbl, tr.clickable, .seg, .tab",
+          "tabela normativa de valores/razoes na SPEC secao 4.5 (valores sao obrigatorios, nao sugeridos)"
+        ],
+        "architecture_notes": "Os valores hex da SPEC sao normativos: se o verificador acusar violacao, corrige-se o valor para o da tabela, nunca o criterio. tools/contraste.mjs fica FORA de prototype/index.html (Decisao F-1) e deve parsear o CSS por texto/regex, sem headless browser. Nenhuma classe CSS nova no prototipo."
+      },
+      "dependencies": [
+        "sprint-001"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2
+    },
+    {
+      "id": "sprint-004",
+      "index": 3,
+      "name": "Dominio A — Ficha tecnica: rascunho, publicacao versionada e roteiro editavel",
+      "description": "Corrigir P0-06/P0-07/P0-08 (US-01 a US-03): separar rascunho de versao publicada (com rot[] DENTRO de cada versao), implementar fn_publicar_ficha com segmentacao de ordens abertas e fallback global, interceptacao de navegacao com rascunho aberto, e aba Roteiro editavel com validacoes e pill de roteiro herdado.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "html",
+        "css",
+        "javascript"
+      ],
+      "features": [
+        {
+          "id": "feat-012",
+          "name": "Estrutura rascunho/versao_publicada e lista real de nao publicadas",
+          "description": "ficha ganha rascunho e versao_publicada como objetos distintos, ambos contendo rot[] internamente (RNF-09). Editar a ficha grava em rascunho, nunca sobrescreve versao_publicada. renderFichaLista passa a listar 'fichas nao publicadas' pelo status real (P0-06).",
+          "acceptance_criteria": [
+            "Editar qualquer campo de uma ficha publicada grava em ficha.rascunho e ficha.versao_publicada permanece byte-a-byte inalterada",
+            "rot[] vive dentro de rascunho e de versao_publicada (ficha.rascunho.rot / ficha.versao_publicada.rot), nunca solto no objeto ficha",
+            "A lista de fichas nao publicadas exibe exatamente as fichas com status 'rascunho' ou com rascunho pendente, refletindo o estado real (P0-06)",
+            "O snap de uma ordem criada a partir de uma versao da ficha carrega o rot[] daquela versao"
+          ]
+        },
+        {
+          "id": "feat-013",
+          "name": "fn_publicar_ficha com segmentacao e fallback",
+          "description": "Publicacao via confirmarEfeito(): identifica ordens abertas (ordem.fim == null) que referenciam a ficha, segmenta afetadas/nao afetadas, escolha de fallback unica e global (manter snapshot ou herdar nova versao), ordens com qualquer operacao baixado=true sao forcadas a manter snapshot em bloco proprio com motivo 'material ja baixado — snapshot preservado', bloqueio de publicacao se rascunho.rot[] tiver operacao invalida, e sempre grava nova versao (nunca UPDATE in-place), incrementando ficha.versao.",
+          "acceptance_criteria": [
+            "Publicar sem ordens abertas segue direto (com confirmarEfeito) e incrementa a versao; publicar com ordens abertas exibe segmentacao afetadas/nao afetadas e exige escolha global de fallback (manter snapshot | herdar nova versao)",
+            "Ordem com qualquer operacao baixado=true nunca herda a nova versao mesmo com fallback 'herdar', aparece em bloco proprio do modal com o motivo exato 'material ja baixado — snapshot preservado'",
+            "Publicacao com operacao invalida em rascunho.rot[] e recusada com o erro apontado na linha da operacao invalida",
+            "Modal usa a copy normativa: lead 'Publicar a versão {v} desta ficha afeta {n} ordens abertas.', nota 'A versão publicada não pode ser alterada depois; correções exigem nova versão.', botao 'Publicar versão {v}'; toast de sucesso 'Ficha {codigo} publicada na versão {v}.'"
+          ]
+        },
+        {
+          "id": "feat-014",
+          "name": "Descartar alteracoes e interceptacao de navegacao",
+          "description": "descartarFicha() reverte rascunho para o conteudo de versao_publicada INCLUINDO rot[]. Navegar para outra ficha ou sair do modulo Engenharia com rascunho pendente abre modal com 3 acoes: 'Descartar alterações', 'Manter rascunho e sair', 'Continuar editando'. Sem beforeunload.",
+          "acceptance_criteria": [
+            "Apos descartarFicha(), rascunho e identico a versao_publicada, incluindo rot[], e toast exibe 'Alterações descartadas. Ficha restaurada para a versão {v}.'",
+            "Trocar de ficha ou sair do modulo Engenharia com rascunho pendente abre modal com exatamente as 3 acoes nomeadas; 'Manter rascunho e sair' preserva ficha.rascunho e prossegue; 'Continuar editando' cancela a navegacao",
+            "Nenhum handler beforeunload e registrado; recarregar a aba nao dispara interceptacao"
+          ]
+        },
+        {
+          "id": "feat-015",
+          "name": "Aba Roteiro editavel com validacoes e heranca sinalizada",
+          "description": "renderFichaRoteiro permite adicionar/remover/reordenar operacoes (minimo 1); campos setor (obrigatorio), maquina (seletor filtrado pelas maquinas do setor; trocar setor limpa a maquina) e tempo_padrao (min/unidade, decimal ate 2 casas, >0 e <= PARAM_DEF.tempoPadraoMaxMin). Ordem sem ficha.rot propria recebe roteiro_herdado=true e exibe pill .pill.warn 'roteiro base herdado' + CTA 'Definir roteiro próprio' (Decisao F-3, P0-08).",
+          "acceptance_criteria": [
+            "E possivel adicionar, remover e reordenar operacoes do roteiro no rascunho; tentar deixar o roteiro com 0 operacoes e bloqueado com mensagem na tela",
+            "Trocar o setor de uma operacao limpa a maquina selecionada e o seletor de maquina lista apenas maquinas do setor escolhido",
+            "tempo_padrao aceita decimal com ate 2 casas, rejeita valores <=0 e acima de PARAM_DEF.tempoPadraoMaxMin com erro na propria linha",
+            "roteiroDe(ordem) marca roteiro_herdado=true quando cai em ROT_BASE, e a UI exibe pill 'roteiro base herdado' com CTA 'Definir roteiro próprio'"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "prototype/index.html",
+          "docs/decisoes-fase0-20260824.md"
+        ],
+        "key_interfaces": [
+          "confirmarEfeito() (criado na sprint-002)",
+          "descartarFicha() (existente, estender)",
+          "roteiroDe(ordem)",
+          "renderFichaLista",
+          "renderFichaRoteiro(f)",
+          "ROT_BASE",
+          "PARAM_DEF",
+          "audit()",
+          "toast()",
+          "campos: ficha.status ('rascunho'|'publicada'), ficha.versao, ordem.snap, ordem.cfg, ordem.fim, roteiro[].baixado",
+          "classes: .aviso-filtro (faixa de ordens afetadas P0-07), .pill.warn, #fi-desc"
+        ],
+        "architecture_notes": "fn_publicar_ficha espelha client-side o trigger fn_versao_ficha do Supabase (Decisao B-2): nova versao e sempre um novo objeto, nunca mutacao de versao_publicada. 'Ordem aberta' = ordem.fim == null, independente do estagio do roteiro. A escolha de fallback e unica/global — nao criar triagem por ordem. Reaproveitar .aviso-filtro para a faixa de ordens afetadas (P0-07); nenhuma classe CSS nova."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3
+    },
+    {
+      "id": "sprint-005",
+      "index": 4,
+      "name": "Dominio B1 — Geracao de ordens com preview e reserva de materiais",
+      "description": "Corrigir P0-01 e P0-10 (US-04, US-06): fn_gerar_ordens com preview limitado a 20 ordens e bloqueio_motivo automatico por falta de material, e fn_reservar_material com estorno-antes-de-gravar, reserva parcial e as tres acoes (Reservar/Recalcular/Liberar) com tratamento de confirmacao diferenciado (RNF-03).",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "html",
+        "css",
+        "javascript"
+      ],
+      "features": [
+        {
+          "id": "feat-016",
+          "name": "fn_gerar_ordens com preview e faltas nao bloqueantes",
+          "description": "Geracao a partir de gerarOrdensDoPlano() passa por confirmarEfeito() com preview das primeiras 20 ordens (produto, quantidade, faltas, componentes) + linha '+ N outras ordens' com totais agregados quando houver mais. Falta de material nao bloqueia: a ordem afetada nasce com bloqueio_motivo {codigo:'falta_material', origem:'sistema', criado_em}. audit() registra quantidade criada e plano de origem.",
+          "acceptance_criteria": [
+            "Clicar gerar abre confirmarEfeito() com lead 'Serão criadas {n} ordens a partir do plano vigente. A fila de planejamento será consumida.', nota 'Esta ação não pode ser desfeita.' e botao 'Gerar {n} ordens'; nada e criado antes da confirmacao",
+            "Com mais de 20 ordens, o preview detalha exatamente as 20 primeiras e exibe linha '+ N outras ordens' com totais consolidados; o rotulo do botao sempre mostra o total geral, nunca truncado",
+            "Ordem gerada com falta de material e criada mesmo assim e recebe bloqueio_motivo com codigo 'falta_material', origem 'sistema' e criado_em preenchido",
+            "Apos confirmar, audit() registra a quantidade de ordens criadas e o plano de origem, e a fila DB.plano e consumida"
+          ]
+        },
+        {
+          "id": "feat-017",
+          "name": "fn_reservar_material: estorno antes de gravar e reserva parcial",
+          "description": "Reservar sempre estorna a reserva vigente antes de gravar a nova (nunca soma). Saldo insuficiente gera reserva parcial: qtd_reservada = disponivel, qtd_faltante = qtd_necessaria - qtd_reservada, com rotulo explicito na tela. Saldo negativo proibido. DB.reservas ganha qtd_necessaria, qtd_faltante, criada_em, liberada_em.",
+          "acceptance_criteria": [
+            "Reservar duas vezes seguidas para a mesma ordem resulta em saldo reservado igual a necessidade calculada, nunca a soma das duas (verificacao RF-12)",
+            "Com disponivel < necessidade, a reserva grava exatamente o disponivel em qtd_reservada, registra a diferenca em qtd_faltante e exibe toast 'Reserva parcial: {qtd} de {necessario} reservados. Falta {faltante}.'",
+            "qtd_reservada nunca excede o disponivel em nenhum cenario (saldo negativo impossivel)",
+            "Registros em DB.reservas contem qtd_necessaria, qtd_faltante, criada_em e liberada_em (null enquanto ativa)"
+          ]
+        },
+        {
+          "id": "feat-018",
+          "name": "Acoes Reservar/Recalcular/Liberar com confirmacao diferenciada",
+          "description": "'Reservar materiais' exige confirmarEfeito() (lead/nota/botao da copy normativa); 'Recalcular' e preview puro do delta entre reserva vigente e nova necessidade, sem gravar e sem confirmacao; 'Liberar' devolve saldo ao disponivel, executa direto com toast() + audit(), sem confirmacao (RNF-03).",
+          "acceptance_criteria": [
+            "'Reservar materiais' abre confirmarEfeito() com lead 'A reserva vigente desta ordem será estornada e substituída pela nova necessidade calculada.' e botao 'Reservar materiais'; toast de sucesso 'Materiais reservados para a ordem {id}.'",
+            "'Recalcular' nao altera nenhum dado (DB.reservas identico antes/depois) e exibe o delta entre reserva vigente e nova necessidade",
+            "'Liberar' executa sem modal de confirmacao, preenche liberada_em, devolve o saldo ao disponivel, exibe toast 'Reserva da ordem {id} liberada. Saldo devolvido ao disponível.' e gera audit()"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "prototype/index.html",
+          "docs/decisoes-fase0-20260824.md"
+        ],
+        "key_interfaces": [
+          "confirmarEfeito() e MOTIVOS_BLOQUEIO (criados na sprint-002)",
+          "gerarOrdensDoPlano() (existente)",
+          "DB.plano",
+          "DB.ordens[]",
+          "DB.reservas[]",
+          "audit()",
+          "toast()",
+          "evento()",
+          "estrutura bloqueio_motivo: {codigo, detalhe, origem, autor, criado_em} — SPEC 2.1.2"
+        ],
+        "architecture_notes": "As faltas apuradas na reserva alimentam o preview de fn_gerar_ordens — mantenha a apuracao de falta numa funcao reutilizavel. Nao confirmar tudo: RNF-03 e explicito que Recalcular (preview) e Liberar (reversivel) NAO abrem modal. DB.ordens e DB.reservas sao volateis (memoria), nao persistir em localStorage."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3
+    },
+    {
+      "id": "sprint-006",
+      "index": 5,
+      "name": "Dominio B2 — Finalizacao de operacao, estorno e desbloqueio",
+      "description": "Corrigir P0-04/P0-05 (US-05): fn_finalizar_operacao com baixa unica de material, trilha append-only estorno_apontamento, janela de correcao de 10 minutos com contador, e desbloqueio explicito com escolha registrada de retrabalho com/sem novo material, restrito aos perfis pcp(w) e qualidade(w).",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "html",
+        "css",
+        "javascript"
+      ],
+      "features": [
+        {
+          "id": "feat-019",
+          "name": "fn_finalizar_operacao com baixa unica",
+          "description": "Finalizar operacao passa por confirmarEfeito() com o efeito calculado por matDaOperacao(o, setor); grava a baixa, marca a operacao baixado=true e bloqueia reapontamento ate evento explicito de desbloqueio. O mesmo guard-rail cobre a reabertura por reprovacao de qualidade.",
+          "acceptance_criteria": [
+            "Finalizar abre confirmarEfeito() com lead 'Finalizar {operacao} da ordem {id} vai baixar o material listado abaixo do estoque.', tabela com o material de matDaOperacao(), nota 'A baixa de material não pode ser desfeita após 10 minutos.' e botao 'Finalizar e baixar material'",
+            "Apos confirmar, a operacao fica baixado=true e qualquer tentativa de refinalizar sem desbloqueio explicito e impossivel (acao bloqueada na UI)",
+            "Refinalizar apos desbloqueio nunca produz baixa duplicada: o consumo segue exatamente a escolha registrada (feat-021)"
+          ]
+        },
+        {
+          "id": "feat-020",
+          "name": "estorno_apontamento append-only e janela de 10 minutos",
+          "description": "Estrutura local append-only estorno_apontamento {id, operacao_ordem_id, tipo, delta, criado_em, janela_expira_em, autor}. Correcoes dentro de criado_em+10min geram NOVA linha (nunca sobrescrita). Enquanto aberta, acao 'Corrigir apontamento' visivel com contador regressivo 'corrigível por mais N min'; expirada, botao permanece visivel e desabilitado com 'Janela de correção expirada — solicite desbloqueio ao PCP.'",
+          "acceptance_criteria": [
+            "Toda correcao/desbloqueio gera nova linha em estorno_apontamento; nenhuma linha existente e alterada ou removida (append-only)",
+            "janela_expira_em = criado_em + 10 minutos, contados do instante da gravacao da finalizacao",
+            "Dentro da janela, o botao 'Corrigir apontamento' exibe contador regressivo com os minutos restantes",
+            "Apos expirar, o botao permanece visivel porem desabilitado, com o texto exato 'Janela de correção expirada — solicite desbloqueio ao PCP.' — nunca desaparece"
+          ]
+        },
+        {
+          "id": "feat-021",
+          "name": "Desbloqueio explicito com escolha de retrabalho",
+          "description": "Evento de desbloqueio emitivel apenas por pcp com 'w' (destrave operacional) e qualidade com 'w' (exclusivamente retrabalho por reprovacao); operador nunca desbloqueia. Ao reabrir operacao baixado=true, modal exige escolha: 'Retrabalho sem novo material' (padrao, mantem baixa, refinalizar nao baixa de novo) ou 'Retrabalho com novo material' (linha tipo='desbloqueio' revertendo a baixa; refinalizar baixa normalmente). Escolha registrada em estorno_apontamento e audit().",
+          "acceptance_criteria": [
+            "Com perfil operador, nenhuma acao de desbloqueio esta disponivel (apenas visualizacao); com pcp(w) e qualidade(w) a acao existe nos caminhos definidos",
+            "O modal de desbloqueio de operacao baixada exige escolha explicita entre as duas opcoes, com 'Retrabalho sem novo material' pre-selecionada como padrao",
+            "Escolhendo 'com novo material', e gerada linha em estorno_apontamento com tipo='desbloqueio' e delta revertendo a baixa original; a refinalizacao subsequente baixa material normalmente",
+            "Escolhendo 'sem novo material', a refinalizacao nao gera nova baixa; em ambos os casos a escolha aparece em estorno_apontamento e em audit()"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "prototype/index.html",
+          "docs/decisoes-fase0-20260824.md"
+        ],
+        "key_interfaces": [
+          "confirmarEfeito() (sprint-002)",
+          "matDaOperacao(o, setor) (existente)",
+          "renderOrdem (existente)",
+          "perm(screen)",
+          "S.perfil",
+          "audit()",
+          "evento()",
+          "bloqueio_motivo (estrutura da sprint-005)",
+          "ordem.roteiro[].status / .baixado"
+        ],
+        "architecture_notes": "Base de tempo da janela e o relogio do cliente (limitacao aceita nesta fase). estorno_apontamento e volatil (memoria, nao persistir). O caminho de desbloqueio da qualidade sera consumido pela sprint-007 (retrabalho por reprovacao) — exponha uma funcao reutilizavel de desbloqueio que recebe origem/perfil. Guard-rail unico cobre P0-04 e P0-05: nunca duas baixas para a mesma operacao sem estorno registrado."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-005"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3
+    },
+    {
+      "id": "sprint-007",
+      "index": 6,
+      "name": "Dominio C — Handoffs Qualidade e Expedicao",
+      "description": "Corrigir os handoffs entre papeis (US-07 a US-09, P0-03 como regressao): estrutura completa de ordem.qa com motivo obrigatorio de lista fechada, fila 'Aguardando inspeção' na Qualidade e no Inicio, #qa-op alimentado por roteiroDe(ordem) (gap F-6 item 3), unidades retidas na Expedicao e caminho de retrabalho por reprovacao no posto do operador.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "html",
+        "css",
+        "javascript"
+      ],
+      "features": [
+        {
+          "id": "feat-022",
+          "name": "Parecer de qualidade com motivo obrigatorio",
+          "description": "ordem.qa = {aprovado, motivo, motivo_detalhe, autor, criado_em}. Reprovar exige motivo da lista fechada MOTIVOS_REPROVACAO; motivo_detalhe obrigatorio quando motivo='outro'. aprovado=false sem motivo e estado invalido bloqueado na UI. Ausencia de qa = aguardando inspecao.",
+          "acceptance_criteria": [
+            "Reprovar sem selecionar motivo e impossivel (acao bloqueada com erro visivel); motivo so aceita valores de MOTIVOS_REPROVACAO",
+            "Com motivo='outro', o campo motivo_detalhe e obrigatorio e a reprovacao nao conclui sem ele",
+            "Todo parecer grava autor e criado_em; aprovacao grava motivo=null",
+            "Ordem sem objeto qa aparece na fila 'Aguardando inspeção'"
+          ]
+        },
+        {
+          "id": "feat-023",
+          "name": "Fila de inspecao e roteiro efetivo na Qualidade",
+          "description": "renderQualidade() exibe contagem em #qa-fila-n via DB.ordens.filter(o => !o.qa); o resumo critico do Inicio (renderInicio) mostra o sinal de handoff. Correcao do gap F-6 item 3: #qa-op passa a ser populado por roteiroDe(ordem) da ordem selecionada, nunca lendo ROT_BASE direto quando ha ordem selecionada.",
+          "acceptance_criteria": [
+            "#qa-fila-n exibe a contagem exata de ordens sem qa; fila vazia sem filtro mostra mensagem neutra 'nenhuma ordem aguardando inspeção', sem contagem nem alerta",
+            "Com uma ordem selecionada, #qa-op lista o roteiro retornado por roteiroDe(ordem) — inclusive quando a ficha tem rot proprio diferente de ROT_BASE",
+            "O resumo critico do Inicio exibe a contagem de ordens aguardando inspecao coerente com #qa-fila-n"
+          ]
+        },
+        {
+          "id": "feat-024",
+          "name": "Expedicao: retidas pela qualidade (regressao P0-03)",
+          "description": "renderExpedicao() exibe stat 'Retidas pela qualidade' (ordens concluidas sem qa ou com qa.aprovado=false) e blocos .ped-blk.retido desabilitados com o motivo do rotulo da lista fechada + CTA 'Acompanhar na Qualidade'.",
+          "acceptance_criteria": [
+            "Stat 'Retidas pela qualidade' conta ordens concluidas com qa ausente ou qa.aprovado=false",
+            "Bloco .ped-blk.retido esta desabilitado (nao expede) e exibe 'Retido pela qualidade: {motivo}.' usando o rotulo de MOTIVOS_REPROVACAO, nunca texto livre solto",
+            "CTA 'Acompanhar na Qualidade' presente e navegando para a tela de Qualidade respeitando perm()"
+          ]
+        },
+        {
+          "id": "feat-025",
+          "name": "Card de reprovacao e retrabalho no posto do operador",
+          "description": "Reprovacao gera card no posto do operador com motivo (rotulo da lista) e detalhe; a ordem reprovada recebe bloqueio_motivo {codigo:'reprovacao_qualidade', origem:'sistema'} e a reabertura da operacao usa o caminho de desbloqueio da qualidade (sprint-006), seguindo o guard-rail anti-duplicacao de baixa.",
+          "acceptance_criteria": [
+            "Ao reprovar, o posto do operador exibe card com o rotulo do motivo e o motivo_detalhe quando existir",
+            "Ordem reprovada recebe bloqueio_motivo com codigo 'reprovacao_qualidade' e origem 'sistema'",
+            "O desbloqueio para retrabalho e acionavel pelo perfil qualidade(w) sem depender do PCP, exigindo a escolha retrabalho com/sem novo material registrada em estorno_apontamento (integracao com sprint-006)"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "prototype/index.html",
+          "docs/decisoes-fase0-20260824.md"
+        ],
+        "key_interfaces": [
+          "MOTIVOS_REPROVACAO e MOTIVOS_BLOQUEIO (sprint-002)",
+          "roteiroDe(ordem) com roteiro_herdado (sprint-004)",
+          "funcao de desbloqueio com escolha de retrabalho (sprint-006)",
+          "renderQualidade(), renderExpedicao(), renderInicio() (existentes)",
+          "#qa-fila-n",
+          "#qa-op",
+          ".ped-blk.retido",
+          ".stat"
+        ],
+        "architecture_notes": "P0-03 ja esta parcialmente aplicado no codigo — trate como regressao: verifique e complete, nao reconstrua do zero. As leituras de fila sao filtros sincronos sobre DB.ordens (SPEC 4.3). O rotulo exibido SEMPRE vem do rotulo pt-BR de MOTIVOS_REPROVACAO; texto livre entra apenas como complemento (motivo_detalhe)."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-004",
+        "sprint-005",
+        "sprint-006"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2
+    },
+    {
+      "id": "sprint-008",
+      "index": 7,
+      "name": "Dominio D — Importacao ViaSign (.vfb): pelicula IV, colisao dimensional e LGPD",
+      "description": "Corrigir US-10 a US-13 + RF-48/D-04 (sem US dedicada): guarda de confirmacao de importacao recusada, mapeamento da pelicula tipo IV em VFB_PEL, aviso de colisao de chave dimensional com conferencia por linha, supressao de origem.usuario em toda superficie de saida, variante sem_quadro e segmented control real/demo com confirmacao.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "html",
+        "css",
+        "javascript"
+      ],
+      "features": [
+        {
+          "id": "feat-026",
+          "name": "Pelicula tipo IV e variante sem_quadro",
+          "description": "Adicionar entrada 'IV' -> 'IV' em VFB_PEL (chave igual ao codigo, decisao consciente do dono do produto — nao 'corrigir' para sigla de 3 letras). mapearPlacaVfb() resolve pelicula tipo IV pelo mesmo caminho das demais entradas, sem tratamento especial. Adicionar valor 'sem_quadro' ao enum de produto.formato_variante dentro da estrutura de 5 partes existente.",
+          "acceptance_criteria": [
+            "VFB_PEL contem a entrada com chave 'IV' e valor 'IV', mantendo I->GTP, III->AIP, X->GD inalteradas",
+            "Importar manifesto com pelicula tipo IV nao gera erro e cria/resolve o produto normalmente via mapearPlacaVfb()",
+            "produto.formato_variante aceita 'sem_quadro' sem criar sexta parte na estrutura de nomenclatura"
+          ]
+        },
+        {
+          "id": "feat-027",
+          "name": "Aviso de colisao de chave dimensional (RF-48)",
+          "description": "importarVfb() detecta quando duas dimensoes distintas mapeiam para a mesma chave_dimensao (1 casa decimal) e marca colisao_dimensao_aviso na linha, com aviso 'Dimensões distintas com a mesma chave — confira antes de importar.' e checkbox 'conferido' POR LINHA. O botao de confirmacao da importacao so habilita quando todas as linhas em colisao estiverem conferidas. audit() registra quantas colisoes foram confirmadas e por quem.",
+          "acceptance_criteria": [
+            "Duas linhas com dimensoes distintas e mesma chave_dimensao (1 casa decimal) exibem o aviso com o texto exato da SPEC na propria linha",
+            "Cada linha em colisao tem checkbox 'conferido' individual; o botao de confirmar importacao permanece desabilitado enquanto qualquer linha em colisao nao estiver conferida",
+            "Ao concluir, audit() registra a quantidade de colisoes confirmadas e o autor, e o toast exibe '{n} placas importadas. {c} colisões dimensionais confirmadas.'"
+          ]
+        },
+        {
+          "id": "feat-028",
+          "name": "Supressao de origem.usuario em toda superficie de saida (RF-24, LGPD)",
+          "description": "origem.usuario permanece no objeto em memoria (nao e removido na importacao), mas nunca e renderizado em tela, nem exportado em CSV/PDF/folhaA4, nem incluido em QR/etiqueta. Telas de importacao identificam procedencia apenas por sistema e tenant de origem.",
+          "acceptance_criteria": [
+            "Busca por origem.usuario em todas as funcoes de render, export CSV, folhaA4 e geracao de QR nao encontra nenhuma renderizacao/serializacao do valor para saida",
+            "O objeto importado em memoria mantem origem.usuario intacto (preserva rastreabilidade futura)",
+            "Telas de origem de pacote exibem sistema e tenant de origem, sem e-mail nem identificador de usuario"
+          ]
+        },
+        {
+          "id": "feat-029",
+          "name": "Guarda de importacao recusada e troca de modo real/demo",
+          "description": "Botao de confirmacao de importacao com pacote recusado (val.erros) fica desabilitado com motivo explicito (US-10). Segmented control pacote real vs demonstracao: com pacote carregado, alternar abre confirmacao 'isso descarta o pacote carregado' antes de limpar o estado — nunca troca silenciosamente (RF-22).",
+          "acceptance_criteria": [
+            "Com pacote recusado (val.erros nao vazio), o botao de confirmar importacao esta desabilitado e exibe o motivo; apenas as linhas validas (bons[]) sao elegiveis quando aplicavel",
+            "Alternar o segmented real/demo com pacote carregado abre confirmacao mencionando o descarte do pacote; cancelar mantem o estado; confirmar limpa e troca o modo",
+            "Alternar sem pacote carregado troca direto, sem confirmacao"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "prototype/index.html",
+          "docs/decisoes-fase0-20260824.md"
+        ],
+        "key_interfaces": [
+          "importarVfb() e mapearPlacaVfb() (existentes, estender)",
+          "VFB_PEL (constante existente)",
+          "val.erros / bons[] (validacao existente)",
+          "folhaA4()",
+          "audit()",
+          "toast()",
+          "helper de estado vazio filtrado (sprint-002) para as linhas do importador",
+          ".seg (segmented control existente)"
+        ],
+        "architecture_notes": "A conferencia de colisao e POR LINHA, nunca um checkbox global (decisao explicita da SPEC: confirmacao unica seria clicada sem leitura). A entrada IV->IV de VFB_PEL e um desvio de padrao consciente — documente com comentario no codigo para que revisao futura nao 'corrija'. A supressao de origem.usuario tambem se aplica ao export de Auditoria (sprint-011) e ao QR de OS (sprint-011): garanta que o valor nao entra nesses caminhos de dados."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2
+    },
+    {
+      "id": "sprint-009",
+      "index": 8,
+      "name": "Dominio E — Inicio, atalhos e navegacao por teclado",
+      "description": "Corrigir/verificar P0-11, P0-12 e P0-13 (US-14 a US-16): atalhos padrao validos nos 8 perfis, 'Adicionar atalho' disponivel para todos com seletor filtrado por permissao e revalidacao no clique, e atalhos globais de teclado (Ctrl+K, g+letra, ?, /) com comportamento correto em telas com e sem filtro.",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "html",
+        "css",
+        "javascript"
+      ],
+      "features": [
+        {
+          "id": "feat-030",
+          "name": "Atalhos padrao do Inicio validos nos 8 perfis (P0-11)",
+          "description": "Nenhum atalho de ATALHO_PADRAO aponta para screen fora de MODULOS; tooltip 'Sem permissão' aparece apenas quando perm(screen)==='-'; destino abre na aba correta via rotaDe()/go().",
+          "acceptance_criteria": [
+            "Percorrendo os 8 perfis, todo atalho padrao referencia screen existente em MODULOS (validado por atalhoValido())",
+            "Tooltip 'Sem permissão' aparece exatamente quando perm(screen)==='-' e em nenhum outro caso",
+            "Clicar um atalho permitido abre o modulo e a aba corretos via rotaDe()/go()"
+          ]
+        },
+        {
+          "id": "feat-031",
+          "name": "Adicionar atalho para todos os perfis com seletor filtrado (P0-12)",
+          "description": "#in-add disponivel em 100% dos 8 perfis; modalAtalho() lista apenas telas com perm(screen) !== '-' para o perfil corrente (Decisao S-5); atalhos persistem via viafab.usuario_atalhos.v1.",
+          "acceptance_criteria": [
+            "Com cada um dos 8 perfis, o botao #in-add esta visivel e funcional no Inicio",
+            "O seletor de destino do modalAtalho() lista somente telas com perm(screen) !== '-' para o perfil corrente",
+            "Atalho criado persiste apos reload da pagina (chave viafab.usuario_atalhos.v1)"
+          ]
+        },
+        {
+          "id": "feat-032",
+          "name": "Revalidacao de atalho no clique (Decisao S-5)",
+          "description": "irAtalho() revalida perm(screen) no momento do clique, nao apenas na criacao, cobrindo o caso de perfil trocado apos o atalho ter sido salvo; negacao exibe toast e nao navega.",
+          "acceptance_criteria": [
+            "Criar atalho com perfil A, trocar para perfil B sem permissao no destino e clicar: navegacao bloqueada com toast 'Você não tem permissão para esta ação.' e audit() da tentativa via route() fail-closed",
+            "Com perfil que tem permissao, o mesmo atalho navega normalmente"
+          ]
+        },
+        {
+          "id": "feat-033",
+          "name": "Atalhos globais de teclado (P0-13)",
+          "description": "Ctrl+K abre a paleta respeitando permissoes; g+letra salta apenas para modulos permitidos; ? abre a ajuda de teclado (abrirAjudaTeclado); / foca o filtro onde existe e e inerte (sem erro, sem acao) onde nao existe; dentro de input/textarea, / digita a barra normalmente. Paleta usa o padrao de estado vazio filtrado.",
+          "acceptance_criteria": [
+            "Ctrl+K abre a paleta e ela lista apenas destinos com perm !== '-' para o perfil corrente",
+            "g+letra navega somente para modulos permitidos; para modulo negado nao navega",
+            "/ em tela com campo de filtro move o foco para o filtro; em tela sem filtro nao faz nada silenciosamente; dentro de input/textarea insere o caractere '/'",
+            "Busca sem resultado na paleta exibe 'Nenhum resultado para os filtros aplicados.' + 'Limpar filtros' (helper da sprint-002)"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "prototype/index.html",
+          "docs/decisoes-fase0-20260824.md"
+        ],
+        "key_interfaces": [
+          "ATALHO_PADRAO, ATALHO_TECLA, NAV, MODULOS, PERFIS (constantes existentes)",
+          "perm(screen)",
+          "route()/rotaDe()/go()",
+          "atalhoValido()",
+          "abrirPaleta()",
+          "abrirAjudaTeclado()",
+          "modalAtalho()",
+          "irAtalho()",
+          "#in-add",
+          "#perfil-switch",
+          "helpers localStorage versionado e estado vazio filtrado (sprint-002)"
+        ],
+        "architecture_notes": "P0-11/12/13 constam na SPEC como regressao de correcoes ja aplicadas: primeiro verifique o que ja existe no codigo e complete os gaps (o gap confirmado e o foco de filtro via '/'), sem reescrever o que funciona. Roteador e fail-closed: chave desconhecida em perm() e defeito de codigo (console.warn), nunca negacao silenciosa."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2
+    },
+    {
+      "id": "sprint-010",
+      "index": 9,
+      "name": "Dominio G — Painel com periodo real e Relatorios com janela de datas",
+      "description": "Corrigir US-21 a US-23 (P0 de numeros/relatorios): seletor de periodo 7/30/90 que recalcula todos os cards simultaneamente com persistencia da escolha, calculo real de aderencia (fim<=prazo) com rotulos de exclusao e estado sem base, e janela retrospectiva de Relatorios com as duas datas concretas no cabecalho impresso.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "html",
+        "css",
+        "javascript"
+      ],
+      "features": [
+        {
+          "id": "feat-034",
+          "name": "Seletor de periodo do Painel com recalculo simultaneo",
+          "description": "renderDashboard() com .seg de periodo 7/30/90 dias, padrao 30, persistido por usuario em viafab.painel_periodo.v1. KPIs, carga, donut e aderencia recalculam simultaneamente ao alternar. EXCECOES_RANGE_PAINEL permanece vazia; qualquer card nela exigiria rotulo 'Este card não responde ao período selecionado: {motivo}.'",
+          "acceptance_criteria": [
+            "Alternar 7/30/90 recalcula KPIs, carga, donut e aderencia na mesma acao, sem card ignorando o periodo",
+            "Periodo padrao e 30 dias; a escolha persiste em viafab.painel_periodo.v1 e e restaurada no proximo carregamento",
+            "EXCECOES_RANGE_PAINEL esta vazia e o mecanismo de rotulo de excecao existe e e coberto por codigo (testavel adicionando item temporario)"
+          ]
+        },
+        {
+          "id": "feat-035",
+          "name": "Aderencia real com rotulos de exclusao (RF-37)",
+          "description": "Aderencia = ordens com fim<=prazo sobre ordens com fim no periodo. Ordens sem fim saem do denominador com rotulo '{n} ordens sem data de conclusão foram excluídas do cálculo.'. Denominador zero exibe '—' com rotulo 'sem ordens concluídas no período' — nunca 0% e nunca card oculto sem explicacao.",
+          "acceptance_criteria": [
+            "Ordem com fim > prazo conta como atrasada; ordem com fim <= prazo conta como aderente",
+            "Quando ha ordens sem fim no periodo, o rotulo de exclusao com a contagem exata aparece no card",
+            "Sem nenhuma ordem com fim no periodo, o card exibe '—' e o texto 'sem ordens concluídas no período', nunca '0%'"
+          ]
+        },
+        {
+          "id": "feat-036",
+          "name": "Relatorios com janela retrospectiva e datas concretas",
+          "description": "renderRelatorios()/RPV usa janela [hoje − N dias, hoje], inclusiva nas duas pontas, incluindo o dia corrente. O cabecalho impresso via folhaA4() exibe as duas datas concretas no formato dd/MM/yyyy (ex.: '25/07/2026 a 24/08/2026'), nunca apenas 'Últimos 30 dias'.",
+          "acceptance_criteria": [
+            "A janela de dados inclui registros do dia corrente e do dia [hoje − N] (inclusiva nas duas pontas)",
+            "O cabecalho impresso exibe as duas datas concretas calculadas, no formato dd/MM/yyyy, e nao apenas o rotulo relativo",
+            "Registros fora da janela nao entram no relatorio"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "prototype/index.html",
+          "docs/decisoes-fase0-20260824.md"
+        ],
+        "key_interfaces": [
+          "renderDashboard(), renderRelatorios(), folhaA4() (existentes)",
+          ".seg (segmented existente)",
+          ".aviso-filtro (rotulos de exclusao)",
+          "EXCECOES_RANGE_PAINEL e helpers de localStorage versionado (sprint-002)",
+          "campos ordem.fim e ordem.prazo (existentes)"
+        ],
+        "architecture_notes": "Regras normativas na SPEC 4.8: periodo padrao 30 dias, chave viafab.painel_periodo.v1, janela retrospectiva real (alternativa ±N dias foi explicitamente descartada). RNF-07 governa tudo aqui: todo dado excluido de calculo precisa de rotulo explicito; 0% quando nao ha base afirmaria atraso inexistente."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2
+    },
+    {
+      "id": "sprint-011",
+      "index": 10,
+      "name": "Dominios H e I — OS/QR estavel e Auditoria com export completo",
+      "description": "Corrigir P0-20 e P0-21 (US-24, US-25): identificador de OS estavel por grupo nao posicional persistido em localStorage (sobrevive a reload), QR carregando o os_id, e Auditoria com paginacao de 50 linhas e export CSV/PDF do conjunto filtrado completo no formato pt-BR definido.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "html",
+        "css",
+        "javascript"
+      ],
+      "features": [
+        {
+          "id": "feat-037",
+          "name": "Sequencial estavel de OS (os_ids[], P0-20)",
+          "description": "grupo_chave = ids das ordens do grupo ordenados alfabeticamente e unidos por '|'. os_id no formato 'OS-' + 6 digitos com zeros a esquerda, gerado uma unica vez por grupo_chave via contador seq. Toda emissao consulta os_ids[] antes de gerar: chave existente reusa o os_id; grupo alterado gera os_id novo preservando o anterior. Persistencia em viafab.os_ids.v1. O QR carrega o os_id, nunca posicao nem chave composta.",
+          "acceptance_criteria": [
+            "Emitir OS para o mesmo conjunto de ordens em ordens de selecao diferentes produz a mesma grupo_chave e o mesmo os_id",
+            "Reemitir apos recarregar a pagina reusa o mesmo os_id e o mesmo QR (persistencia via viafab.os_ids.v1)",
+            "Adicionar ou remover uma ordem do grupo gera os_id novo; o os_id anterior permanece em os_ids[] apontando para o grupo antigo",
+            "os_id segue o formato OS-NNNNNN (6 digitos com zeros a esquerda) e o conteudo do QR e o os_id, sem posicao de emissao, sem chave composta e sem origem.usuario"
+          ]
+        },
+        {
+          "id": "feat-038",
+          "name": "Auditoria: filtros, paginacao e estados (P0-21)",
+          "description": "renderAuditoria() com filtros de unidade (#f-aud-de/#f-aud-ate/#f-aud-q existentes), periodo e busca textual funcionando em conjunto, paginacao de 50 linhas, todo registro carregando un:S.tenant, e estados vazios distinguindo sem-dado de filtro-ativo.",
+          "acceptance_criteria": [
+            "Filtros de unidade, periodo e busca aplicam-se em conjunto e a lista responde a todos",
+            "Paginacao exibe 50 linhas por pagina com navegacao entre paginas",
+            "Todo registro gravado por audit() carrega un igual a S.tenant",
+            "Lista vazia por filtro exibe 'Nenhum resultado para os filtros aplicados.' + 'Limpar filtros'; vazia sem filtro exibe mensagem neutra"
+          ]
+        },
+        {
+          "id": "feat-039",
+          "name": "Export CSV/PDF do conjunto filtrado completo (RF-44, S-7)",
+          "description": "Export via #aud-csv/#aud-pdf abrange TODO o conjunto filtrado por unidade/periodo/busca — a paginacao nao recorta a exportacao. CSV com separador ';', UTF-8 com BOM, datas dd/MM/yyyy HH:mm, mesmas colunas e ordem da tabela em tela. Cabecalho (CSV e folhaA4) declara os filtros aplicados e o total de linhas exportadas.",
+          "acceptance_criteria": [
+            "Com 120 registros filtrados e paginacao em 50, o CSV e o PDF contem as 120 linhas, nao apenas a pagina visivel",
+            "CSV usa ';' como separador, inicia com BOM UTF-8 e formata datas como dd/MM/yyyy HH:mm",
+            "Cabecalho do CSV e do folhaA4 declara os filtros aplicados (unidade, periodo, busca) e o total de linhas exportadas",
+            "Nenhuma coluna/valor de origem.usuario aparece no CSV nem no PDF"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "prototype/index.html",
+          "docs/decisoes-fase0-20260824.md"
+        ],
+        "key_interfaces": [
+          "helpers de localStorage versionado (sprint-002)",
+          "renderAuditoria(), audit(), folhaA4() (existentes)",
+          "#f-aud-de, #f-aud-ate, #f-aud-q, #aud-csv, #aud-pdf",
+          "S.tenant",
+          "estrutura os_ids[]: {grupo_chave, os_id, criado_em, seq} — SPEC 2.1.2",
+          "supressao de origem.usuario (regra da sprint-008)"
+        ],
+        "architecture_notes": "A estabilidade do os_id depende da persistencia: sem localStorage o P0-20 falha mesmo com logica correta (SPEC 2.1.3). A paginacao e apresentacao, nunca recorte de dado — o isolamento multi-tenant vem do filtro de unidade, que permanece sempre aplicado. Formato CSV pensado para Excel pt-BR (';' + BOM); nao usar padrao internacional."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-008"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2
+    },
+    {
+      "id": "sprint-012",
+      "index": 11,
+      "name": "Dominio J — Comercial, lote e fila do operador + verificacao transversal final",
+      "description": "Corrigir US-26 a US-28 (decisoes D-03/D-05/D-06): area nominal vs geometrica no item de contrato, exclusao de ordens de lote do avanco por pedido com rotulo, fila do operador exibindo bloqueio_motivo em modo somente leitura; e executar a verificacao transversal final dos criterios da SPEC (secao 6) sobre o conjunto entregue.",
+      "coder_agent_id": "javascript-pro",
+      "stack": [
+        "html",
+        "css",
+        "javascript",
+        "node"
+      ],
+      "features": [
+        {
+          "id": "feat-040",
+          "name": "Area nominal vs geometrica no item de contrato (US-26)",
+          "description": "item_contrato ganha area_geometrica_m2 (derivada da geometria quando conhecida, com override manual; null sem geometria nem valor) e faturamento_criterio ('nominal'|'geometrica'). Exibicao dos dois numeros lado a lado apenas quando a geometrica existe e difere da nominal, cada um com rotulo do proposito; consumo de material sempre usa a nominal; faturamento usa a area do criterio.",
+          "acceptance_criteria": [
+            "Quando area_geometrica_m2 existe e difere de area_nominal_m2, a tela exibe os dois valores com os rotulos 'área nominal (retângulo) — consumo de chapa/corte' e 'área geométrica — faturamento por m² de face'",
+            "Quando iguais ou sem geometrica, apenas a area nominal e exibida",
+            "O calculo de consumo usa sempre a nominal; o faturamento usa a area indicada por faturamento_criterio; o override manual da geometrica e editavel no item de contrato"
+          ]
+        },
+        {
+          "id": "feat-041",
+          "name": "Exclusao de ordem de lote do avanco por pedido (US-27)",
+          "description": "Ordens com eh_lote=true nao entram no calculo de avanco por pedido na tela de clientes/entregas, com rotulo explicito 'Ordens de lote não entram no rateio de avanço deste pedido.' sempre que a exclusao ocorre (RNF-07).",
+          "acceptance_criteria": [
+            "Pedido contendo ordem eh_lote=true calcula o avanco apenas sobre as ordens nao-lote",
+            "O rotulo exato de exclusao aparece na tela sempre que ao menos uma ordem de lote foi excluida do calculo",
+            "Pedido sem ordem de lote nao exibe o rotulo"
+          ]
+        },
+        {
+          "id": "feat-042",
+          "name": "Fila do operador: bloqueio somente leitura (US-28)",
+          "description": "Ordens bloqueadas exibem na fila do operador o bloqueio_motivo (rotulo de MOTIVOS_BLOQUEIO + detalhe quando houver, origem sistema/manual e autor quando manual) em modo somente leitura — o operador nunca desbloqueia. Bloqueio manual pelo PCP exige codigo da lista e detalhe obrigatorio quando codigo='outro'. Fila sem ordens bloqueadas exibe estado vazio neutro, sem contagem nem alerta. Ordem nunca fica bloqueada com bloqueio_motivo em branco.",
+          "acceptance_criteria": [
+            "Toda ordem bloqueada na fila do operador exibe o rotulo do codigo de MOTIVOS_BLOQUEIO, o detalhe quando existir e a origem (sistema/manual, com autor quando manual), sem nenhum controle de desbloqueio para o perfil operador",
+            "Bloqueio manual pelo PCP exige codigo da lista fechada e detalhe obrigatorio quando codigo='outro'; origem='manual' e autor sao gravados",
+            "Nenhuma ordem bloqueada existe sem bloqueio_motivo preenchido (bloqueios de falta_material e reprovacao_qualidade vem preenchidos pelo sistema)",
+            "Fila sem ordens bloqueadas exibe mensagem neutra, sem contagem nem alerta"
+          ]
+        },
+        {
+          "id": "feat-043",
+          "name": "Verificacao transversal final (SPEC secao 6)",
+          "description": "Executar e corrigir regressoes do roteiro de verificacao da SPEC (6.1 e 6.2) sobre o conjunto entregue pelas sprints anteriores, registrando o resultado em docs/verificacao-p0-20260824.md com acao/resultado por item.",
+          "acceptance_criteria": [
+            "node tools/contraste.mjs retorna exit code 0 nos dois temas",
+            "Busca por origem.usuario em telas, CSV, PDF e QR nao encontra o valor em nenhuma superficie de saida",
+            "Reservar duas vezes para a mesma ordem resulta em saldo igual a necessidade (nunca soma); refinalizar operacao sem desbloqueio explicito e impossivel",
+            "Emitir OS, recarregar a pagina e reemitir o mesmo grupo produz o mesmo os_id; docs/verificacao-p0-20260824.md existe listando cada item de 6.1/6.2 com resultado PASSOU/FALHOU e as correcoes aplicadas"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "prototype/index.html",
+          "tools/contraste.mjs",
+          "docs/decisoes-fase0-20260824.md",
+          "docs/auditoria-design-20260823.md"
+        ],
+        "key_interfaces": [
+          "MOTIVOS_BLOQUEIO e helper de estado vazio filtrado (sprint-002)",
+          "bloqueio_motivo {codigo, detalhe, origem, autor, criado_em} (populado nas sprints 005 e 007)",
+          "fn_reservar_material e fn_finalizar_operacao (sprints 005/006)",
+          "os_ids[] e export de Auditoria (sprint-011)",
+          "campos: item_contrato.area_nominal_m2, item_contrato.area_geometrica_m2, item_contrato.faturamento_criterio, ordem.eh_lote"
+        ],
+        "architecture_notes": "Ultima sprint do plano: alem das 3 features de UI (Dominio J), ela fecha a fase com o roteiro de verificacao da SPEC secao 6 — os criterios de 6.1 (regressao) e 6.2 (construcao nova) sao a definicao de pronto da Fase 1 ('zero P0 remanescentes verificados'). Regressoes encontradas devem ser corrigidas nesta propria sprint quando pontuais; se estruturais, registrar como FALHOU no documento de verificacao com o motivo. Rotulos de exclusao seguem a copy normativa da SPEC 4.7 palavra a palavra (RNF-07)."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003",
+        "sprint-005",
+        "sprint-006",
+        "sprint-007",
+        "sprint-011"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 3
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "created_at": "2026-08-24T22:01:20.047Z",
+    "total_sprints": 12,
+    "total_features": 43
+  }
+}

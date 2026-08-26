@@ -1,0 +1,2127 @@
+{
+  "project": {
+    "id": "abebf225b97a3152b9af340b230455e5",
+    "name": "ViaFab ERP - Discovery e Arquitetura",
+    "description": "ERP verticalizado para fabricas de sinalizacao viaria cobrindo configuracao tecnica, BOM, roteiro, PCP, estoque, chao de fabrica, qualidade, expedicao, rastreabilidade e seguranca multi-tenant, conforme SPEC e design lock aprovados.",
+    "path": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core",
+    "stack": [
+      "TypeScript",
+      "PostgreSQL",
+      "Supabase",
+      "Deno Edge Functions",
+      "Vitest"
+    ],
+    "config": {
+      "max_rounds_per_sprint": 3,
+      "use_playwright": false,
+      "evaluator_agent_id": "harness-evaluator",
+      "planner_agent_id": "harness-planner"
+    }
+  },
+  "sprints": [
+    {
+      "id": "sprint-001",
+      "index": 0,
+      "name": "Banco: fundacao multiempresa, auditoria e RLS fail-closed",
+      "description": "Cria a estrutura do projeto Supabase com migrations versionadas, tabelas do nucleo multiempresa/seguranca, tabela de auditoria append-only, padrao de RLS fail-closed com testes de isolamento cross-tenant e seeds do nucleo (tenant demo, perfis, admin).",
+      "coder_agent_id": "postgres-pro",
+      "stack": [
+        "PostgreSQL",
+        "Supabase",
+        "SQL",
+        "pgTAP"
+      ],
+      "features": [
+        {
+          "id": "feat-001",
+          "name": "Estrutura do projeto Supabase e migrations",
+          "description": "Criar layout supabase/migrations com SQL versionado, config do Supabase local e convencao de nomeacao de migrations conforme SPEC 3.1.",
+          "acceptance_criteria": [
+            "Pasta supabase/migrations existe com migrations numeradas em ordem de aplicacao",
+            "supabase db reset aplica todas as migrations sem erro",
+            "Extensoes necessarias (uuid/pgcrypto) habilitadas via migration"
+          ]
+        },
+        {
+          "id": "feat-002",
+          "name": "Tabelas do nucleo multiempresa",
+          "description": "Criar tabelas tenants, unidades_fabrica, perfis, usuarios_perfil, usuarios_unidades_concedidas e usuario_atalhos com todas as colunas, tipos e FKs definidos na SPEC secao 2.1.",
+          "acceptance_criteria": [
+            "Todas as 6 tabelas existem com colunas exatamente conforme SPEC 2.1 (nucleo multiempresa e seguranca)",
+            "Toda tabela exceto tenants possui tenant_id ou vinculo direto a tenant via FK",
+            "usuarios_perfil referencia auth.users e perfis por FK",
+            "perfis.permissoes e jsonb com estrutura leitura/escrita por modulo"
+          ]
+        },
+        {
+          "id": "feat-003",
+          "name": "Auditoria append-only",
+          "description": "Criar tabela auditoria com policies apenas de INSERT/SELECT e REVOKE de UPDATE/DELETE inclusive para service_role (RF-36/RNF-15).",
+          "acceptance_criteria": [
+            "Tabela auditoria criada com colunas da SPEC 2.1 (id, tenant_id, usuario_id, acao, entidade, entidade_id, dado_alterado jsonb, criado_em)",
+            "Tentativa de UPDATE ou DELETE em auditoria falha mesmo com service_role (teste SQL comprova)",
+            "Policy de INSERT e SELECT restrita ao tenant_id do JWT"
+          ]
+        },
+        {
+          "id": "feat-004",
+          "name": "Padrao RLS fail-closed e testes de isolamento",
+          "description": "Habilitar RLS em todas as tabelas criadas com policies tenant_isolation (select/insert/update) baseadas em auth.jwt() app_metadata, sem nenhuma policy using(true). Criar suite pgTAP com dois tenants ficticios tentando cross-read (RF-37/US-26).",
+          "acceptance_criteria": [
+            "Todas as tabelas de negocio criadas tem RLS habilitada e nenhuma policy using(true)",
+            "Policies seguem exatamente o padrao SQL da SPEC 2.2 (claims em app_metadata, nunca user_metadata)",
+            "Suite pgTAP com 2 tenants comprova que SELECT cross-tenant retorna 0 linhas e INSERT com tenant_id alheio falha",
+            "Tabela sem policy correspondente nega acesso (fail-closed comprovado em teste)"
+          ]
+        },
+        {
+          "id": "feat-005",
+          "name": "Seeds do nucleo",
+          "description": "Seed com tenant ViaFab Demo, uma unidade fabril, 9 perfis padrao (PCP, Engenharia, Almoxarifado, Operador, Qualidade, Expedicao, Compras, Direcao, Admin) com matriz de permissoes por modulo, e usuario admin com claims tenant_id/perfil_id/unidades_autorizadas em raw_app_meta_data.",
+          "acceptance_criteria": [
+            "Seed cria 1 tenant, 1 unidade e 9 perfis com permissoes jsonb preenchidas",
+            "Usuario admin criado via Supabase Auth com claims em raw_app_meta_data (nunca user_metadata)",
+            "Seed e idempotente (rodar duas vezes nao duplica dados)"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\design-contract.json"
+        ],
+        "key_interfaces": [
+          "auth.jwt() -> 'app_metadata' ->> 'tenant_id'",
+          "perfis.permissoes (jsonb)",
+          "auditoria (append-only)"
+        ],
+        "architecture_notes": "Seguir literalmente a SPEC secoes 2.1, 2.2 e 2.4. Padrao fail-closed: ausencia de policy = acesso negado. Claims sempre em raw_app_meta_data. Este e o alicerce de todo o projeto: nomes de tabelas e colunas devem bater exatamente com a SPEC pois todas as sprints seguintes referenciam esses nomes."
+      },
+      "dependencies": [],
+      "complexity": "high",
+      "estimated_rounds": 2,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-002",
+      "index": 1,
+      "name": "Banco: catalogo de engenharia e recursos",
+      "description": "Cria as tabelas do catalogo de engenharia (familias construtivas e normas versionadas, itens, produtos padrao, componentes gerados, fichas tecnicas com BOM multinivel, roteiros base), tabelas de recursos (setores, maquinas, cargos), a funcao fn_custo_aberto e seeds de engenharia.",
+      "coder_agent_id": "postgres-pro",
+      "stack": [
+        "PostgreSQL",
+        "Supabase",
+        "SQL"
+      ],
+      "features": [
+        {
+          "id": "feat-006",
+          "name": "Catalogo versionado: familias e normas",
+          "description": "Tabelas familias_construtivas e normas_tecnicas com versionamento imutavel: nova versao sempre via INSERT, triggers trg_versao_familia/trg_versao_norma calculam versao e impedem UPDATE/DELETE de versoes existentes (RNF-14).",
+          "acceptance_criteria": [
+            "familias_construtivas tem colunas parametros_schema, regras, formula_bom, template_roteiro (jsonb), versao, vigencia_inicio conforme SPEC 2.1",
+            "INSERT de nova linha para o mesmo codigo incrementa versao automaticamente via trigger",
+            "UPDATE/DELETE de linha existente falha por trigger (teste SQL comprova)",
+            "RLS fail-closed por tenant aplicada nas duas tabelas"
+          ]
+        },
+        {
+          "id": "feat-007",
+          "name": "Itens, produtos padrao e componentes gerados",
+          "description": "Tabelas itens (tipo enum materia_prima|componente|produto), produtos_padrao (formato, dimensoes, peliculas, area como coluna gerada em m2, dimensao_variavel) e componentes_gerados (papel enum corte|quadro|sinal|recorte|fix).",
+          "acceptance_criteria": [
+            "itens criada com codigo unico por tenant e enum de tipo conforme SPEC",
+            "produtos_padrao.area e coluna gerada a partir de largura x altura",
+            "componentes_gerados criada com FK para itens e enum papel",
+            "RLS por tenant aplicada"
+          ]
+        },
+        {
+          "id": "feat-008",
+          "name": "Fichas tecnicas com BOM multinivel e roteiros base",
+          "description": "Tabelas fichas_tecnicas (status rascunho|publicada, versao), linhas_ficha (arvore multinivel via componente_pai_id self-fk e nivel) e roteiros_base (sequencia, operacao, setor, maquina_padrao, tempo_padrao_min).",
+          "acceptance_criteria": [
+            "linhas_ficha suporta arvore multinivel via self-fk componente_pai_id nullable e coluna nivel",
+            "fichas_tecnicas tem enum status rascunho|publicada e versao int",
+            "UPDATE em fichas publicadas restrito a metadados; nova versao via INSERT (policy/trigger comprovada em teste)",
+            "roteiros_base criada conforme SPEC com FK para itens"
+          ]
+        },
+        {
+          "id": "feat-009",
+          "name": "Recursos e custo aberto",
+          "description": "Tabelas setores, maquinas (com unidade_id e capacidade_horas_dia) e cargos (custo_hora, efetivo). Funcao fn_custo_aberto(item_id) que soma a arvore da ficha retornando material, processo, mao_de_obra, total e tempo_minutos (entidade derivada, nao persistida).",
+          "acceptance_criteria": [
+            "setores e maquinas tem tenant_id e unidade_id; cargos tem FK para setores",
+            "fn_custo_aberto(item_id) retorna material, processo, mao_de_obra, total e tempo_minutos calculados recursivamente pela arvore de linhas_ficha e roteiros_base",
+            "Teste SQL com ficha de 2 niveis comprova o calculo",
+            "RLS por tenant (e unidade onde aplicavel) aplicada"
+          ]
+        },
+        {
+          "id": "feat-010",
+          "name": "Seeds de engenharia",
+          "description": "Seed com 2-3 familias construtivas de exemplo (placa circular regulamentacao, placa retangular indicativa) incluindo regras, formula de BOM e template de roteiro; setores e maquinas basicos (corte, impressao, laminacao, montagem); itens de exemplo.",
+          "acceptance_criteria": [
+            "Ao menos 2 familias construtivas seedadas com parametros_schema, formula_bom e template_roteiro preenchidos",
+            "4 setores com pelo menos 1 maquina cada, vinculados a unidade do tenant demo",
+            "Seed idempotente"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/migrations/ (migrations da sprint-001)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\design-contract.json"
+        ],
+        "key_interfaces": [
+          "tenants, unidades_fabrica, perfis (sprint-001)",
+          "fn_custo_aberto(item_id)",
+          "linhas_ficha.componente_pai_id (self-fk arvore BOM)"
+        ],
+        "architecture_notes": "Reaproveitar o padrao de RLS fail-closed criado na sprint-001 (mesmas policies por tenant_id). Catalogo versionado nunca sofre UPDATE de conteudo: sempre nova linha com versao incrementada. Nomes de tabelas/colunas devem seguir literalmente a SPEC 2.1 pois os dominios de Edge Functions das proximas sprints dependem deles."
+      },
+      "dependencies": [
+        "sprint-001"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 2,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-003",
+      "index": 2,
+      "name": "Banco: clientes, pedidos, snapshots e ordens de producao",
+      "description": "Cria as tabelas comerciais (clientes, contratos, pedidos, linhas, orcamento, manifestos VFB), snapshots tecnicos imutaveis e todo o bloco de ordens de producao com eventos append-only e programacao.",
+      "coder_agent_id": "postgres-pro",
+      "stack": [
+        "PostgreSQL",
+        "Supabase",
+        "SQL"
+      ],
+      "features": [
+        {
+          "id": "feat-011",
+          "name": "Comercial: clientes, contratos, pedidos e orcamento",
+          "description": "Tabelas clientes, pedidos (status enum orcamento|aprovado|em_producao|concluido|cancelado), linhas_pedido (com ordem_id nullable), linhas_orcamento. Criar tambem tabelas contratos e itens_contrato (derivadas dos endpoints api-contratos/api-itens-contrato/api-medicao-contrato do design-contract, ausentes da secao 2.1 mas necessarias ao dominio clientes).",
+          "acceptance_criteria": [
+            "pedidos tem tenant_id, unidade_id, cliente_id, status enum e prazo_contratado conforme SPEC",
+            "linhas_pedido tem ordem_id FK nullable (vinculo pedido->ordem, delta-021)",
+            "contratos e itens_contrato criadas com FK para clientes/contratos, suportando os requestShapes de api-contratos e api-itens-contrato do design-contract.json",
+            "RLS por tenant (e unidade em pedidos) aplicada"
+          ]
+        },
+        {
+          "id": "feat-012",
+          "name": "Manifestos e importacoes VFB",
+          "description": "Tabelas vfb_manifestos (schema const viaxis.vfb/1, campos de placa, arquivos jsonb, referencia_viasign nullable) e vfb_importacoes (projeto_id, revisao, hash, placas_lancadas) para suportar aviso de reimportacao sem bloqueio (delta-105).",
+          "acceptance_criteria": [
+            "vfb_manifestos criada com todas as colunas da SPEC 2.1 incluindo enums de forma, pelicula_tipo (I|III|IV|X), substrato e implantacao",
+            "vfb_importacoes registra projeto_id+revisao+hash permitindo detectar reimportacao por consulta",
+            "RLS por tenant aplicada"
+          ]
+        },
+        {
+          "id": "feat-013",
+          "name": "Snapshots tecnicos imutaveis",
+          "description": "Tabela snapshots com bom_snapshot, roteiro_base_snapshot e configuracao (jsonb), norma_versao_id e snapshot_revisao_de_id (self-fk). Imutavel: apenas policies de INSERT/SELECT, sem UPDATE/DELETE (RNF-13).",
+          "acceptance_criteria": [
+            "snapshots criada conforme SPEC 2.1 com self-fk snapshot_revisao_de_id nullable",
+            "UPDATE/DELETE em snapshots falha mesmo com service_role (teste SQL comprova)",
+            "Correcao modelada como nova linha referenciando a original via snapshot_revisao_de_id"
+          ]
+        },
+        {
+          "id": "feat-014",
+          "name": "Bloco de ordens de producao",
+          "description": "Tabelas ordens_producao (status enum planejada|aguardando_material|em_producao|bloqueada|concluida|expedida), itens_ordem, linhas_os, operacoes_ordem, programacao_operacao, programacao_ancora, eventos_ordem (append-only) e conclusao_ordem.",
+          "acceptance_criteria": [
+            "As 8 tabelas existem com colunas e enums exatamente conforme SPEC 2.1",
+            "itens_ordem vincula ordem->snapshot->item com quantidade (cardinalidade 1:N ordem->item, delta-013)",
+            "eventos_ordem aceita apenas INSERT/SELECT; UPDATE/DELETE bloqueados (teste comprova)",
+            "RLS por tenant e por unidade (unidades_autorizadas do JWT) aplicada em ordens_producao conforme SPEC 2.2"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/migrations/ (sprints 001-002)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\design-contract.json"
+        ],
+        "key_interfaces": [
+          "itens, fichas_tecnicas, familias_construtivas, normas_tecnicas (sprint-002)",
+          "snapshots.snapshot_revisao_de_id",
+          "ordens_producao.status (enum)",
+          "eventos_ordem (append-only, timeline US-24)"
+        ],
+        "architecture_notes": "Snapshots congelam ficha+roteiro+configuracao em jsonb no momento da liberacao (US-04): nao usar FKs vivas para conteudo, apenas para rastreio de origem. eventos_ordem segue o mesmo padrao append-only da tabela auditoria (sprint-001). Policy de unidade usa unidades_autorizadas do JWT como na SPEC 2.2."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 2,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-004",
+      "index": 3,
+      "name": "Banco: estoque, execucao de fabrica, expedicao, GED, plano e triggers transacionais",
+      "description": "Completa o schema com as tabelas de apontamento/consumo/perdas/qualidade, estoque transacional com concorrencia segura, rastreabilidade unitaria/expedicao, GED, plano e parametros. Implementa todas as triggers transacionais da SPEC 2.3, as views/funcoes derivadas e os seeds finais.",
+      "coder_agent_id": "postgres-pro",
+      "stack": [
+        "PostgreSQL",
+        "Supabase",
+        "SQL",
+        "pgTAP"
+      ],
+      "features": [
+        {
+          "id": "feat-015",
+          "name": "Tabelas de execucao e qualidade",
+          "description": "Tabelas apontamentos (com sync_status e client_generated_id), estornos_apontamento (com expira_em), consumos, perdas, bloqueios (duracao_min gerada), retrabalhos e inspecoes (resultado aprovado|reprovado, critica bool).",
+          "acceptance_criteria": [
+            "As 7 tabelas existem com colunas e enums conforme SPEC 2.1",
+            "apontamentos e consumos tem client_generated_id e sync_status (pendente|conflito|confirmado)",
+            "Constraint de unicidade (tenant via ordem + client_generated_id) garante idempotencia no banco",
+            "RLS por tenant aplicada"
+          ]
+        },
+        {
+          "id": "feat-016",
+          "name": "Tabelas de estoque transacional",
+          "description": "Tabelas depositos, lotes_material, saldo_estoque (disponivel = fisico - reservado como coluna gerada), reservas, separacoes, movimentos_estoque (kardex append-only), rastreio_consumo e transferencias_unidade.",
+          "acceptance_criteria": [
+            "saldo_estoque e tabela transacional (nao view) com disponivel gerado",
+            "movimentos_estoque aceita apenas INSERT/SELECT (kardex append-only, teste comprova)",
+            "transferencias_unidade tem enum situacao transito|recebida|cancelada e campo recebida_em nullable",
+            "RLS por tenant e unidade aplicada"
+          ]
+        },
+        {
+          "id": "feat-017",
+          "name": "Rastreabilidade unitaria, expedicao, GED, plano e parametros",
+          "description": "Tabelas series_item, series_deposito, remessas, romaneios, documentos_ged (com campos OCR), planos_producao e parametros_sistema com todos os flags da SPEC.",
+          "acceptance_criteria": [
+            "series_item tem enum status produzido|expedido, seq, topo e componentes uuid[]",
+            "parametros_sistema contem todos os 16 flags/campos listados na SPEC 2.1",
+            "documentos_ged tem ocr_status, ocr_confianca e conteudo_reconhecido para busca textual",
+            "RLS por tenant aplicada em todas"
+          ]
+        },
+        {
+          "id": "feat-018",
+          "name": "Triggers transacionais",
+          "description": "Implementar as triggers da SPEC 2.3: trg_saldo_estoque_movimento (SELECT FOR UPDATE), trg_reserva_saldo, trg_apontamento_tempo, trg_estorno_expira, trg_baixa_automatica_consumo (respeitando parametros_sistema.baixa_automatica), trg_ordem_status_material, trg_bloqueio_qualidade e trg_auditoria_generica nas tabelas criticas.",
+          "acceptance_criteria": [
+            "INSERT em movimentos_estoque atualiza saldo_estoque.fisico com lock FOR UPDATE (teste de concorrencia com 2 transacoes comprova consistencia)",
+            "INSERT em reservas incrementa saldo_estoque.reservado; liberacao decrementa",
+            "INSERT em consumos gera movimento tipo baixa somente quando parametros_sistema.baixa_automatica = true",
+            "UPDATE de status de ordem para elegivel a expedicao falha quando existe inspecao reprovada critica nao revertida (RF-27)",
+            "INSERT/UPDATE/DELETE nas tabelas criticas listadas na SPEC 2.3 gera linha em auditoria via trg_auditoria_generica"
+          ]
+        },
+        {
+          "id": "feat-019",
+          "name": "Views/funcoes derivadas e seeds finais",
+          "description": "Criar funcoes fn_*/views para as entidades derivadas listadas na SPEC (plano-item, capacidade-plano, consolidacao-componentes, projecao-consumo, indicador-painel, resumo-critico, viabilidade-prazo, saldo-por-unidade, indicador-m2, etc.). Seeds: 4 depositos padrao (materia-prima, componentes, produto acabado, expedicao) e parametros_sistema com valores conservadores.",
+          "acceptance_criteria": [
+            "Cada entidade derivada da lista da SPEC 2.1 tem uma view ou funcao fn_* correspondente sem estado duplicado",
+            "Seed cria os 4 depositos padrao vinculados a unidade demo",
+            "parametros_sistema seedado com reserva_obrigatoria=true, estoque_negativo=false, consumo_acima_separado='bloquear', qualidade_para_expedir=true, certificado_obrigatorio=true",
+            "supabase db reset completo (todas as sprints de banco) roda sem erro"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/migrations/ (sprints 001-003)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\design-contract.json"
+        ],
+        "key_interfaces": [
+          "ordens_producao, operacoes_ordem, eventos_ordem (sprint-003)",
+          "itens, setores, maquinas (sprint-002)",
+          "auditoria (sprint-001)",
+          "parametros_sistema (flags que condicionam triggers)"
+        ],
+        "architecture_notes": "saldo_estoque e transacional e so muda via trigger sobre movimentos/reservas com FOR UPDATE — nunca update direto pela aplicacao. Estorno de apontamento e contrapartida (nunca DELETE), com expiracao em 10 minutos. Triggers devem consultar parametros_sistema do tenant/unidade antes de agir (baixa_automatica, qualidade_para_expedir)."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-005",
+      "index": 4,
+      "name": "Backend: infraestrutura compartilhada de Edge Functions, dominio auth e CI",
+      "description": "Implementa a camada shared das Edge Functions (guards de auth/tenant/unidade/rbac, idempotencia, audit-writer, validacao zod, error-handler), o dominio de autenticacao (login, tenants, perfis, tenant-guard) e o pipeline de CI no GitHub Actions.",
+      "coder_agent_id": "typescript-pro",
+      "stack": [
+        "TypeScript",
+        "Deno",
+        "Supabase Edge Functions",
+        "Zod",
+        "Vitest",
+        "GitHub Actions"
+      ],
+      "features": [
+        {
+          "id": "feat-020",
+          "name": "Guards compartilhados (auth, tenant, unidade, rbac)",
+          "description": "Implementar em supabase/shared os middlewares auth-guard (valida JWT e claims em raw_app_meta_data), tenant-guard (injeta tenant_id do JWT, nunca aceita do payload), unidade-guard (valida unidade_id contra unidades_autorizadas) e rbac-guard (matriz perfil->permissao por modulo/acao, nega com 403).",
+          "acceptance_criteria": [
+            "Requisicao sem JWT ou sem claims tenant_id/perfil_id retorna 401",
+            "tenant_id enviado no payload do cliente e ignorado; queries usam apenas o do JWT (teste unitario comprova)",
+            "unidade_id fora de unidades_autorizadas retorna 403",
+            "Perfil sem permissao para modulo/acao retorna 403 antes de qualquer acesso a dado",
+            "Testes Vitest cobrem os 4 guards"
+          ]
+        },
+        {
+          "id": "feat-021",
+          "name": "Idempotencia, audit-writer, validacao zod e error-handler",
+          "description": "Middlewares shared: idempotency (chave tenant_id+client_generated_id, requisicao repetida retorna resultado ja processado sem duplicar), audit-writer (escrita explicita em auditoria para eventos sem trigger), validation zod (espelha requestShape do design-contract) e error-handler (formato padrao; login nunca revela qual campo errou — RNF-04; validacoes de negocio especificas — RNF-09).",
+          "acceptance_criteria": [
+            "Duas chamadas com mesmo client_generated_id produzem exatamente um registro e a segunda retorna o resultado original",
+            "Helper de auditoria grava acao, entidade, usuario_id e dado_alterado em auditoria",
+            "Erro de validacao zod retorna mensagem objetiva indicando campo/regra violada",
+            "Erro de autenticacao retorna mensagem generica sem indicar qual campo esta incorreto"
+          ]
+        },
+        {
+          "id": "feat-022",
+          "name": "Dominio auth",
+          "description": "Endpoints do bloco auth: POST /auth/login (api-login), GET /tenants (api-tenants), GET /perfis (api-perfis) e GET /tenants/{id}/ordens (api-tenant-guard, prova de isolamento). Schemas request/response espelhados literalmente de apiExpectations do design-contract.json.",
+          "acceptance_criteria": [
+            "POST /auth/login autentica via Supabase Auth e retorna sessao com claims de app_metadata",
+            "Falha de login retorna mensagem generica 'credenciais invalidas' (RNF-04)",
+            "GET /tenants/{id}/ordens com id de outro tenant retorna 403/negado (nunca dados)",
+            "Schemas zod dos 4 endpoints identicos aos requestShape/responseShape do design-contract.json"
+          ]
+        },
+        {
+          "id": "feat-023",
+          "name": "Pipeline de CI",
+          "description": "GitHub Actions executando lint, testes Vitest da camada de dominio e dry-run das migrations em Supabase local, conforme SPEC 3.5 (sem Playwright nesta fase, config use_playwright=false).",
+          "acceptance_criteria": [
+            "Workflow .github/workflows/ci.yml roda lint + vitest + aplicacao das migrations em banco efemero",
+            "Suite pgTAP de isolamento (sprint-001) incluida no job de banco",
+            "Pipeline falha se qualquer etapa falhar"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/migrations/ (schema completo, sprints 001-004)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\design-contract.json"
+        ],
+        "key_interfaces": [
+          "perfis.permissoes (jsonb, matriz RBAC)",
+          "usuarios_perfil.unidades_autorizadas",
+          "auditoria (append-only)",
+          "Estrutura supabase/functions/{dominio}/{index.ts,domain/,use-cases/,adapters/,schemas.ts} da SPEC 3.1"
+        ],
+        "architecture_notes": "Ordem obrigatoria dos middlewares em toda Edge Function: auth-guard -> tenant-guard -> unidade-guard -> rbac-guard -> validation -> use-case -> audit-writer. Toda sprint de backend seguinte reutiliza esses guards de supabase/shared. Env vars conforme .env.example da SPEC 5.3. Regras puras em domain/ sem import de supabase/zod."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-002",
+        "sprint-003",
+        "sprint-004"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-006",
+      "index": 5,
+      "name": "Frontend: fundacao, roteador hash, design system e autenticacao",
+      "description": "Cria o app web com tokens visuais ui-obs do design lock, roteador hash com suporte a entityId, shell autenticado (sidebar, paleta de comandos, relogio de sessao), tela de login com todos os estados e tela de acesso negado.",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "TypeScript",
+        "HTML",
+        "CSS",
+        "Supabase JS"
+      ],
+      "features": [
+        {
+          "id": "feat-024",
+          "name": "Setup do app web e tokens visuais",
+          "description": "Estrutura apps/web/src/{screens,components,lib/api} conforme SPEC 3.1. Tokens do kit ui-obs: accent #d97757, JetBrains Sans com numerais tabulares, tema escuro padrao com alternancia clara persistida em localStorage, densidade dense, sidebar 230px, raios s/m/l/pill, icones Lucide strokeWidth 1.9. Valores exatos lidos de design-contract.json > visual.",
+          "acceptance_criteria": [
+            "Variaveis CSS de cor/tipografia/espacamento/raios/alturas batem com design-contract.json > visual",
+            "Tema escuro e o padrao; toggle para claro persiste em localStorage e sobrevive a reload",
+            "Sidebar fixa de 230px presente no shell autenticado",
+            "Nenhuma lib externa de graficos incluida (dataviz sera SVG nativo)"
+          ]
+        },
+        {
+          "id": "feat-025",
+          "name": "Roteador hash com entityId e guarda de sessao",
+          "description": "Roteador para as 24 rotas hash do design lock com suporte a #{screenId}/{entityId} (delta-103): navegacao interna atualiza location.hash, reload/URL direta revalida sessao e restaura a tela com entityId, sessao invalida redireciona para #login preservando hash de destino para retorno pos-login, entityId inexistente/nao autorizado leva a acesso-negado ou estado empty/error.",
+          "acceptance_criteria": [
+            "Todas as 24 rotas do mapa 4.2 registradas (#login ... #parametros)",
+            "Navegar para detalhe gera hash #{screenId}/{entityId} e botoes voltar/avancar do navegador funcionam",
+            "F5 em rota de detalhe com sessao valida restaura a mesma tela; sem sessao redireciona a #login e retorna ao destino apos login",
+            "Rota protegida sem permissao de perfil renderiza #acesso-negado"
+          ]
+        },
+        {
+          "id": "feat-026",
+          "name": "Shell autenticado: sidebar, paleta de comandos e relogio de sessao",
+          "description": "Componentes cmp-sidebar-nav (itens ocultados conforme matriz de permissoes do perfil — ocultacao cosmetica, RF-39), cmp-paleta-comandos (navegacao global), cmp-session-clock (timeout de inatividade 1800s forcando reautenticacao) e infra de feedback cmp-toast/cmp-alert.",
+          "acceptance_criteria": [
+            "Sidebar renderiza apenas itens permitidos pelo perfil obtido via GET /perfis",
+            "Paleta de comandos abre por atalho de teclado e navega para qualquer tela permitida",
+            "Apos 1800s de inatividade a sessao expira e o usuario e levado a #login com estado expired",
+            "Visual dos componentes fiel ao artifact.html do design lock"
+          ]
+        },
+        {
+          "id": "feat-027",
+          "name": "Tela login",
+          "description": "Tela #login com cmp-form-login integrada a POST /auth/login e GET /tenants, implementando os estados idle, validation-error, loading, error, success e expired do contrato.",
+          "acceptance_criteria": [
+            "Todos os 6 estados do contrato implementados e alcancaveis",
+            "Mensagem de falha de login e generica, nunca indica qual campo errou (RNF-04)",
+            "Login com sucesso carrega claims e redireciona para o hash de destino preservado ou tela inicial",
+            "Layout fiel ao artifact.html"
+          ]
+        },
+        {
+          "id": "feat-028",
+          "name": "Tela acesso-negado e clients de API base",
+          "description": "Tela #acesso-negado conforme design lock e camada lib/api com client tipado base (fetch autenticado com JWT, tratamento padrao de erro, tipagem por dominio) que as proximas sprints estendem.",
+          "acceptance_criteria": [
+            "Tela acesso-negado renderizada em tentativa direta de rota sem permissao e em entityId nao autorizado",
+            "Client base anexa JWT automaticamente e propaga erros no formato do error-handler do backend",
+            "Estrutura lib/api/ preparada para um client por dominio de Edge Function"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\design-contract.json",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html",
+          "supabase/functions/unidades-parametros-viasign/ (dominio auth, sprint-005)"
+        ],
+        "key_interfaces": [
+          "POST /auth/login, GET /tenants, GET /perfis (sprint-005)",
+          "cmp-sidebar-nav, cmp-form-login, cmp-session-clock, cmp-paleta-comandos",
+          "design-contract.json > screens[].states e > visual (fontes literais)"
+        ],
+        "architecture_notes": "O design lock e imutavel: nenhuma tela/rota/componente/token fora do contrato. Ocultacao de acoes na UI e apenas cosmetica — a barreira real e o RBAC do backend. Uma pasta por tela em src/screens conforme SPEC 3.1. Todas as sprints de frontend seguintes reutilizam o roteador, o shell e o client base criados aqui."
+      },
+      "dependencies": [
+        "sprint-005"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": true,
+        "affectedScreenIds": [
+          "login",
+          "acesso-negado"
+        ],
+        "affectedComponentIds": [
+          "cmp-form-login",
+          "cmp-sidebar-nav",
+          "cmp-session-clock",
+          "cmp-paleta-comandos",
+          "cmp-toast",
+          "cmp-alert"
+        ],
+        "designArtifactPath": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+      }
+    },
+    {
+      "id": "sprint-007",
+      "index": 6,
+      "name": "Backend: dominio itens-fichas",
+      "description": "Implementa os 14 endpoints fisicos do dominio itens-fichas: CRUD e clonagem de itens, depositos, resolucao de produto padrao, geracao de componentes por dimensao, fichas tecnicas (linhas, clonagem, importacao, versoes/publicacao, roteiro proprio) e consulta de item por serie/ordem.",
+      "coder_agent_id": "backend-developer",
+      "stack": [
+        "TypeScript",
+        "Deno",
+        "Supabase Edge Functions",
+        "Zod",
+        "Vitest"
+      ],
+      "features": [
+        {
+          "id": "feat-029",
+          "name": "Itens e depositos",
+          "description": "GET /itens (api-itens), POST /itens (api-item-criar), PATCH /itens/{codigo} (api-item-atualizar), POST /itens/{codigo}/clonar (api-item-clonar) e POST /depositos (api-deposito-criar).",
+          "acceptance_criteria": [
+            "5 endpoints implementados com schemas zod espelhados de apiExpectations do design-contract.json",
+            "Clonagem cria item novo com codigo distinto preservando atributos do original",
+            "Guards de tenant/rbac aplicados; escrita gera auditoria (via trigger generica)",
+            "Testes Vitest da camada domain cobrem regras de criacao/clonagem"
+          ]
+        },
+        {
+          "id": "feat-030",
+          "name": "Produto padrao e componentes por dimensao",
+          "description": "POST /produtos/resolver-padrao (api-produto-padrao, compoe descricao/codigo a partir de formato, dimensoes, peliculas, substrato, instalacao) e POST /componentes/gerar-por-dimensao (api-componentes-dimensao, gera componentes_gerados com papel e fator_area).",
+          "acceptance_criteria": [
+            "resolver-padrao retorna produto com area calculada e codigo_da_placa composto conforme regras da familia",
+            "gerar-por-dimensao cria componentes com papel enum (corte|quadro|sinal|recorte|fix) e fator_area",
+            "Schemas identicos ao design-contract.json"
+          ]
+        },
+        {
+          "id": "feat-031",
+          "name": "Fichas tecnicas",
+          "description": "GET /fichas/{itemCodigo} (api-ficha), PUT /fichas/{fichaId}/linhas (api-ficha-linha), POST /fichas/{fichaId}/clonar (api-ficha-clonar), POST /fichas/{fichaId}/importar (api-ficha-importar), POST /fichas/{fichaId}/versoes (endpoint unico para api-ficha-versao e api-ficha-publicar) e PUT /fichas/{fichaId}/roteiro (api-ficha-roteiro).",
+          "acceptance_criteria": [
+            "GET retorna ficha com arvore multinivel de linhas (nivel/componente_pai_id)",
+            "Edicao de linhas so permitida em ficha status rascunho; publicar cria nova versao imutavel via INSERT",
+            "POST /fichas/{fichaId}/versoes satisfaz os dois contratos de UI (versionar e publicar)",
+            "Importacao valida linhas e retorna erros especificos por linha invalida (RNF-09)"
+          ]
+        },
+        {
+          "id": "feat-032",
+          "name": "Consulta de item por serie ou item de ordem",
+          "description": "GET /itens/{serieOuOrdemItem} (api-item): resolve serie unitaria ou item de ordem retornando composicao, arquivos e dados para a tela item.",
+          "acceptance_criteria": [
+            "Endpoint resolve tanto id de series_item quanto de itens_ordem",
+            "Id inexistente ou de outro tenant retorna 404/403 sem vazar dados",
+            "responseShape identico ao design-contract.json"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/shared/ (guards, validation, idempotency, audit — sprint-005)",
+          "supabase/functions/unidades-parametros-viasign/ (exemplo de dominio implementado)",
+          "supabase/migrations/ (tabelas itens, produtos_padrao, componentes_gerados, fichas_tecnicas, linhas_ficha, roteiros_base)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\design-contract.json"
+        ],
+        "key_interfaces": [
+          "Pipeline de guards da sprint-005 (auth->tenant->unidade->rbac->validation)",
+          "fn_custo_aberto(item_id) (sprint-002)",
+          "fichas_tecnicas.status (rascunho|publicada)"
+        ],
+        "architecture_notes": "Estrutura por dominio: supabase/functions/itens-fichas/{index.ts,domain/,use-cases/,adapters/,schemas.ts}. Schemas zod devem ser espelhados literalmente de design-contract.json > apiExpectations, nunca reescritos. Versionamento de ficha segue o padrao imutavel do banco (nova linha, nunca UPDATE de conteudo publicado)."
+      },
+      "dependencies": [
+        "sprint-002",
+        "sprint-004",
+        "sprint-005"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-008",
+      "index": 7,
+      "name": "Frontend: telas itens e fichas",
+      "description": "Implementa as telas #itens (cadastro de materiais/componentes/produtos/depositos com compositor de descricao) e #fichas (editor de BOM multinivel, rascunho/publicacao, clonagem, importacao, roteiro proprio e custo aberto), com todos os estados do contrato.",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "TypeScript",
+        "HTML",
+        "CSS"
+      ],
+      "features": [
+        {
+          "id": "feat-033",
+          "name": "Tela itens",
+          "description": "Tela #itens com abas materiais/componentes/produtos/depositos, formulario de novo/edicao, clonagem, compositor de descricao de produto padrao (resolver-padrao), geracao de componentes por dimensao e estados filtrado, form-novo, form-edicao, composicao-descricao, clonado, dimensao-fora-da-norma, dimensao-variavel, empty.",
+          "acceptance_criteria": [
+            "Todos os estados de itens listados no design-contract.json implementados e alcancaveis",
+            "Compositor chama POST /produtos/resolver-padrao e exibe codigo/area resultantes",
+            "Dimensao fora da norma exibe estado especifico sem bloquear quando dimensao_variavel",
+            "Layout fiel ao artifact.html; CRUD integrado aos endpoints da sprint-007"
+          ]
+        },
+        {
+          "id": "feat-034",
+          "name": "Tela fichas",
+          "description": "Tela #fichas com arvore BOM multinivel (cmp-bom-tree), editor de linhas (cmp-editor-ficha), rascunho vs versao publicada (cmp-rascunho-ficha), clonagem, importacao, roteiro proprio (cmp-roteiro-ficha), filtro por familia e custo aberto. Estados sem-selecao, edicao, linha-duplicada, linha-removida, alteracao-nao-publicada, versao-publicada, clonagem, importacao.",
+          "acceptance_criteria": [
+            "Arvore BOM renderiza niveis aninhados conforme linhas_ficha (nivel/pai)",
+            "Publicar versao chama POST /fichas/{fichaId}/versoes e alterna estado para versao-publicada (somente leitura)",
+            "Todos os 8 estados do contrato implementados",
+            "Custo aberto exibido via GET /itens/{itemId}/custo",
+            "Erros de importacao exibidos por linha com mensagem especifica (RNF-09)"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "apps/web/src/ (shell, roteador, client base — sprint-006)",
+          "supabase/functions/itens-fichas/schemas.ts (sprint-007)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\design-contract.json",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+        ],
+        "key_interfaces": [
+          "Client base lib/api (sprint-006)",
+          "cmp-bom-tree, cmp-tabela-cadastro, cmp-modal-cadastro, cmp-compositor-descricao, cmp-editor-ficha, cmp-roteiro-ficha, cmp-rascunho-ficha, cmp-filtro-familia-ficha",
+          "design-contract.json > components[].usedInScreenIds e > screens[].states"
+        ],
+        "architecture_notes": "Consultar o inventario completo de estados e componentes das telas itens/fichas no design-contract.json antes de implementar. Custo aberto e somente leitura (derivado). Reutilizar cmp-data-table e o padrao de loading/empty do shell."
+      },
+      "dependencies": [
+        "sprint-006",
+        "sprint-007"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": true,
+        "affectedScreenIds": [
+          "itens",
+          "fichas"
+        ],
+        "affectedComponentIds": [
+          "cmp-tabela-cadastro",
+          "cmp-modal-cadastro",
+          "cmp-compositor-descricao",
+          "cmp-bom-tree",
+          "cmp-editor-ficha",
+          "cmp-roteiro-ficha",
+          "cmp-rascunho-ficha",
+          "cmp-filtro-familia-ficha",
+          "cmp-data-table"
+        ],
+        "designArtifactPath": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+      }
+    },
+    {
+      "id": "sprint-009",
+      "index": 8,
+      "name": "Backend: dominios recursos e clientes",
+      "description": "Implementa os endpoints de recursos (setores, maquinas, cargos, roteiro base, custo aberto) e do dominio clientes (carteira via GET /pedidos, contratos, itens de contrato, medicao e importacao).",
+      "coder_agent_id": "backend-developer",
+      "stack": [
+        "TypeScript",
+        "Deno",
+        "Supabase Edge Functions",
+        "Zod",
+        "Vitest"
+      ],
+      "features": [
+        {
+          "id": "feat-035",
+          "name": "Recursos: setores e maquinas",
+          "description": "GET /recursos (api-recursos), POST/PUT/DELETE /setores (api-setores) e POST/PUT/DELETE /maquinas (api-maquinas).",
+          "acceptance_criteria": [
+            "GET /recursos retorna setores, maquinas e depositos da unidade autorizada",
+            "CRUD de setores/maquinas respeita tenant/unidade e gera auditoria",
+            "Exclusao de setor/maquina com vinculo ativo retorna erro especifico (estado vinculo-bloqueado da UI)",
+            "Schemas zod espelhados do design-contract.json"
+          ]
+        },
+        {
+          "id": "feat-036",
+          "name": "Cargos, roteiro base e custo aberto",
+          "description": "POST /cargos (api-cargo-criar), PUT /cargos/{cargoId} (api-cargo-atualizar), PUT /roteiro-base (api-roteiro-base) e GET /itens/{itemId}/custo (api-custo-aberto) expondo fn_custo_aberto.",
+          "acceptance_criteria": [
+            "Cargos gravam custo_hora, efetivo e setor conforme SPEC",
+            "PUT /roteiro-base substitui a sequencia de operacoes do item validando setor/maquina existentes",
+            "GET /itens/{itemId}/custo retorna material, processo, mao_de_obra, total e tempo_minutos de fn_custo_aberto"
+          ]
+        },
+        {
+          "id": "feat-037",
+          "name": "Clientes e contratos",
+          "description": "GET /pedidos (api-pedidos, carteira por cliente), GET|POST /clientes/{id}/contratos (api-contratos), POST|PATCH /contratos/{id}/itens (api-itens-contrato), GET /contratos/{id}/medicao (api-medicao-contrato) e POST /contratos/{id}/itens/importar (api-contrato-itens-import).",
+          "acceptance_criteria": [
+            "GET /pedidos lista pedidos filtrados por cliente/tenant com paginacao conforme responseShape do contrato",
+            "Contratos e itens de contrato persistidos nas tabelas da sprint-003",
+            "Medicao retorna consolidado por item de contrato (derivado, sem estado duplicado)",
+            "Importacao de itens retorna erros especificos por linha invalida (RNF-09)"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/shared/ (guards — sprint-005)",
+          "supabase/functions/itens-fichas/ (padrao de dominio — sprint-007)",
+          "supabase/migrations/ (setores, maquinas, cargos, clientes, contratos, itens_contrato, pedidos)"
+        ],
+        "key_interfaces": [
+          "fn_custo_aberto(item_id)",
+          "Pipeline de guards auth->tenant->unidade->rbac->validation",
+          "contratos, itens_contrato (sprint-003)"
+        ],
+        "architecture_notes": "Dois dominios de Edge Function separados: supabase/functions/recursos/ e supabase/functions/clientes/. GET /pedidos e implementado aqui (unico id api-pedidos do contrato) e reutilizado pela tela clientes; o dominio pedidos (sprint-011) adiciona os endpoints de escrita sobre a mesma tabela."
+      },
+      "dependencies": [
+        "sprint-002",
+        "sprint-003",
+        "sprint-005"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-010",
+      "index": 9,
+      "name": "Frontend: telas recursos e clientes",
+      "description": "Implementa a tela #recursos (setores, maquinas, processos/roteiro base, mao de obra, custo) e a tela #clientes (carteira, contratos, itens, medicao, entregas), com todos os estados do contrato.",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "TypeScript",
+        "HTML",
+        "CSS"
+      ],
+      "features": [
+        {
+          "id": "feat-038",
+          "name": "Tela recursos",
+          "description": "Tela #recursos com abas setores/maquinas/processos/depositos, cadastro/edicao (cmp-modal-cadastro), tabela de processos (cmp-tabela-processos), cargos e peso de mao de obra (cmp-tabela-cargos, cmp-peso-mao-de-obra). Estados: idle, setores, maquinas, processos, depositos, novo, edicao, gargalo-destacado, maquina-livre, vinculo-bloqueado, validacao-invalida, confirmacao-exclusao.",
+          "acceptance_criteria": [
+            "Todos os 12 estados do contrato implementados e alcancaveis",
+            "Exclusao com vinculo exibe estado vinculo-bloqueado com mensagem do backend",
+            "Edicao de roteiro base integrada a PUT /roteiro-base",
+            "Layout fiel ao artifact.html"
+          ]
+        },
+        {
+          "id": "feat-039",
+          "name": "Tela clientes",
+          "description": "Tela #clientes com carteira (GET /pedidos), vistas contratos/entregas, contrato selecionado com rota #clientes/{contratoId}, itens de contrato (cmp-contrato-itens), medicao e importacao. Estados: carteira, vista-contratos, vista-entregas, cliente-sem-contrato, contrato-selecionado, filtrado-por-cliente, importacao-itens, importacao-recusada, item-sem-medicao, no-prazo, previsao-em-atraso, entregue.",
+          "acceptance_criteria": [
+            "Todos os 12 estados do contrato implementados",
+            "Selecao de contrato atualiza hash com identificador da entidade (delta-103)",
+            "Importacao recusada exibe erros por linha retornados pelo backend",
+            "Layout fiel ao artifact.html"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "apps/web/src/ (shell/roteador — sprint-006; telas itens/fichas como referencia de padrao — sprint-008)",
+          "supabase/functions/recursos/schemas.ts e supabase/functions/clientes/schemas.ts (sprint-009)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+        ],
+        "key_interfaces": [
+          "cmp-tabela-cargos, cmp-peso-mao-de-obra, cmp-tabela-processos, cmp-contrato-itens, cmp-data-table",
+          "design-contract.json > screens[recursos|clientes].states"
+        ],
+        "architecture_notes": "Seguir o padrao de tela estabelecido na sprint-008 (pasta por tela, client por dominio). Consultar usedInScreenIds no contrato para o inventario completo de componentes das duas telas."
+      },
+      "dependencies": [
+        "sprint-006",
+        "sprint-009"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2,
+      "metadata": {
+        "touchesUI": true,
+        "affectedScreenIds": [
+          "recursos",
+          "clientes"
+        ],
+        "affectedComponentIds": [
+          "cmp-tabela-cargos",
+          "cmp-peso-mao-de-obra",
+          "cmp-tabela-processos",
+          "cmp-contrato-itens",
+          "cmp-data-table",
+          "cmp-modal-cadastro"
+        ],
+        "designArtifactPath": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+      }
+    },
+    {
+      "id": "sprint-011",
+      "index": 10,
+      "name": "Backend: dominio pedidos e integracao VFB/ViaSign",
+      "description": "Implementa os 11 endpoints do dominio pedidos mais o endpoint compartilhado de inclusao no plano: criacao/edicao/confirmacao de pedidos, importacao ViaSign avulsa e pacote .vfb (schema viaxis.vfb/1 com aviso de reimportacao), nomenclaturas CONTRAN, arquivos de linha via Storage, implantacao, template e importacao de planilha.",
+      "coder_agent_id": "backend-developer",
+      "stack": [
+        "TypeScript",
+        "Deno",
+        "Supabase Edge Functions",
+        "Zod",
+        "Supabase Storage",
+        "Vitest"
+      ],
+      "features": [
+        {
+          "id": "feat-040",
+          "name": "Pedido core",
+          "description": "POST /pedidos (api-pedido-criar, inclui clonagem), PUT /pedidos/{id}/linhas (api-pedido-linha), POST /pedidos/{id}/confirmar (api-pedido-confirmar), PATCH /pedidos/{id}/unidade-fabricacao (api-pedido-unidade) e POST /planos/atual/itens (api-plano-incluir, compartilhado com o dominio plano).",
+          "acceptance_criteria": [
+            "Confirmacao muda status seguindo o enum da SPEC e bloqueia edicao posterior de linhas (estado read-only)",
+            "Direcionamento de unidade valida unidade contra unidades_autorizadas",
+            "POST /planos/atual/itens inclui linha de pedido na fila do plano atual",
+            "Schemas zod espelhados do design-contract.json; escrita gera auditoria"
+          ]
+        },
+        {
+          "id": "feat-041",
+          "name": "Importacoes ViaSign e VFB",
+          "description": "POST /integracoes/viasign/importar (api-viasign-importar) e POST /integracoes/viasign/pacote (api-vfb-importar): validacao zod contra schema viaxis.vfb/1, persistencia em vfb_manifestos/vfb_importacoes e aviso de reimportacao sem bloqueio quando projeto_id+revisao+hash ja importado (delta-105). Integracao simulada conforme SPEC 3.5.",
+          "acceptance_criteria": [
+            "Pacote invalido contra viaxis.vfb/1 e recusado com erros especificos por campo",
+            "Reimportacao do mesmo projeto/revisao/hash retorna aviso (nao bloqueio) com referencia das placas ja lancadas",
+            "Manifesto valido cria linhas de pedido correspondentes as placas"
+          ]
+        },
+        {
+          "id": "feat-042",
+          "name": "Apoios do pedido: nomenclaturas, arquivos, implantacao e planilha",
+          "description": "GET /catalogos/nomenclaturas (api-nomenclaturas, pre-lista CONTRAN com 125 entradas), POST /pedidos/{id}/linhas/{n}/arquivos (api-arquivos-linha, Storage bucket arquivos-vfb com caminho {tenant_id}/{unidade_id}/...), PATCH /pedidos/{id}/linhas/{n}/implantacao (api-implantacao), GET /pedidos/template (api-template-pedido) e POST /pedidos/{id}/importar (api-importar-planilha).",
+          "acceptance_criteria": [
+            "Catalogo retorna as 125 nomenclaturas CONTRAN",
+            "Upload de arquivo grava no bucket arquivos-vfb sob caminho {tenant_id}/{unidade_id}/... sem acesso publico",
+            "Importacao de planilha valida o template e recusa linhas invalidas com mensagem por linha (estados planilha-importada/planilha-recusada)",
+            "Todos os schemas espelhados do design-contract.json"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/shared/ (guards — sprint-005)",
+          "supabase/functions/clientes/ (GET /pedidos ja implementado — sprint-009)",
+          "supabase/migrations/ (pedidos, linhas_pedido, vfb_manifestos, vfb_importacoes, planos_producao)"
+        ],
+        "key_interfaces": [
+          "vfb_importacoes (projeto_id, revisao, hash, placas_lancadas)",
+          "POST /produtos/resolver-padrao (sprint-007, usado na resolucao de placas)",
+          "Buckets STORAGE_BUCKET_VFB do .env.example"
+        ],
+        "architecture_notes": "Dominio supabase/functions/pedidos/. A validacao viaxis.vfb/1 fica em domain/ como funcao pura testavel. api-plano-incluir e implementado aqui pois a tela pedidos o consome; o dominio plano (sprint-017) reutiliza o mesmo use-case, nao duplica."
+      },
+      "dependencies": [
+        "sprint-003",
+        "sprint-005",
+        "sprint-007",
+        "sprint-009"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-012",
+      "index": 11,
+      "name": "Frontend: tela pedidos",
+      "description": "Implementa a tela #pedidos completa: editor de pedido com linhas, nomenclatura CONTRAN, produto padrao, arquivos e implantacao; importacoes VFB/planilha com conferencia; confirmacao, planejamento e direcionamento de unidade. Todos os 18 estados do contrato.",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "TypeScript",
+        "HTML",
+        "CSS"
+      ],
+      "features": [
+        {
+          "id": "feat-043",
+          "name": "Editor de pedido",
+          "description": "cmp-editor-pedido com criacao/clonagem, edicao/duplicacao de linhas, selecao de nomenclatura (cmp-prelista-nomenclatura), composicao de produto padrao, anexos por linha (cmp-arquivos-linha) e dados de implantacao. Estados: idle, rascunho, insercao-manual, nomenclatura-selecionada, com-item-de-contrato, com-arquivos, sem-arquivos, empty, loading, error.",
+          "acceptance_criteria": [
+            "Estados listados implementados e alcancaveis",
+            "Selecao de nomenclatura consome GET /catalogos/nomenclaturas com busca",
+            "Anexo de arquivo por linha integrado a api-arquivos-linha com feedback de upload",
+            "Layout fiel ao artifact.html"
+          ]
+        },
+        {
+          "id": "feat-044",
+          "name": "Importacoes VFB e planilha",
+          "description": "Conferencia de pacote .vfb (cmp-conferencia-vfb) e importacao de planilha (cmp-importador-planilha) com download de template. Estados: pacote-conferido, pacote-recusado, reimportacao-avisada, planilha-importada, planilha-recusada, placa-recusada.",
+          "acceptance_criteria": [
+            "Pacote recusado exibe erros por campo retornados pelo backend",
+            "Reimportacao exibe aviso nao bloqueante com placas ja lancadas (delta-105)",
+            "Planilha recusada lista erros por linha",
+            "Template baixado via GET /pedidos/template"
+          ]
+        },
+        {
+          "id": "feat-045",
+          "name": "Confirmacao, planejamento e unidade",
+          "description": "Confirmar pedido, incluir no plano (api-plano-incluir) e direcionar unidade de fabricacao. Estados: planejado, planejado-parcial, confirmado, read-only.",
+          "acceptance_criteria": [
+            "Pedido confirmado entra em estado read-only sem acoes de edicao renderizadas",
+            "Planejamento parcial (parte das linhas no plano) exibido como planejado-parcial",
+            "Direcionamento de unidade lista apenas unidades autorizadas do usuario"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "apps/web/src/ (shell/roteador e telas anteriores)",
+          "supabase/functions/pedidos/schemas.ts (sprint-011)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+        ],
+        "key_interfaces": [
+          "cmp-editor-pedido, cmp-conferencia-vfb, cmp-importador-planilha, cmp-prelista-nomenclatura, cmp-arquivos-linha, cmp-compositor-descricao",
+          "design-contract.json > screens[pedidos].states (18 estados)"
+        ],
+        "architecture_notes": "Tela mais rica em estados do sistema: mapear cada estado do contrato para uma condicao de dados explicita antes de codar. Acoes indisponiveis por perfil ficam ocultas (cosmetico), barreira real e o RBAC do backend."
+      },
+      "dependencies": [
+        "sprint-006",
+        "sprint-011"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": true,
+        "affectedScreenIds": [
+          "pedidos"
+        ],
+        "affectedComponentIds": [
+          "cmp-editor-pedido",
+          "cmp-conferencia-vfb",
+          "cmp-importador-planilha",
+          "cmp-prelista-nomenclatura",
+          "cmp-arquivos-linha",
+          "cmp-data-table"
+        ],
+        "designArtifactPath": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+      }
+    },
+    {
+      "id": "sprint-013",
+      "index": 12,
+      "name": "Backend: dominio ged-orcamento-os",
+      "description": "Implementa os 10 endpoints do dominio ged-orcamento-os: GED com upload/busca/OCR e databook, calculo de orcamento e propostas, emissao de OS consolidada com identificador estavel e etiquetas.",
+      "coder_agent_id": "backend-developer",
+      "stack": [
+        "TypeScript",
+        "Deno",
+        "Supabase Edge Functions",
+        "Zod",
+        "Supabase Storage",
+        "Vitest"
+      ],
+      "features": [
+        {
+          "id": "feat-046",
+          "name": "GED e databook",
+          "description": "POST /ged/documentos (api-ged-upload, bucket documentos-ged, campos OCR com status/confianca), GET /ged/documentos (api-ged-buscar, busca no conteudo reconhecido), GET /ged/documentos/{documentoId} (api-ged-documento) e GET /pedidos/{pedidoId}/databook (api-databook, consolidado derivado).",
+          "acceptance_criteria": [
+            "Upload grava no bucket documentos-ged sob {tenant_id}/{unidade_id}/... sem acesso publico",
+            "Busca filtra por conteudo_reconhecido, tipo, lote e nota fiscal",
+            "Databook consolida documentos/inspecoes/lotes do pedido sem estado duplicado",
+            "Schemas espelhados do design-contract.json"
+          ]
+        },
+        {
+          "id": "feat-047",
+          "name": "Orcamento e proposta",
+          "description": "POST /pedidos/{pedidoId}/orcamento (api-orcamento-calcular, usa fn_custo_aberto + margem + imposto gravando linhas_orcamento) e POST /propostas (api-proposta).",
+          "acceptance_criteria": [
+            "Calculo compoe custo_unitario a partir de fn_custo_aberto e aplica margem/imposto por linha",
+            "Resultado persistido em linhas_orcamento com total consistente (teste unitario do calculo)",
+            "Proposta gerada referencia o pedido e gera auditoria"
+          ]
+        },
+        {
+          "id": "feat-048",
+          "name": "OS e etiquetas",
+          "description": "POST /ordens-servico/emitir (api-os-emitir), GET /ordens-servico/consolidada (api-os-consolidada, visao por setor a partir de linhas_os), POST /ordens-servico/identificadores (api-os-id-estavel) e POST /etiquetas/emitir (api-etiquetas, com QR, bucket etiquetas).",
+          "acceptance_criteria": [
+            "Emissao de OS gera folhas por setor/maquina a partir de linhas_os",
+            "Identificador estavel e deterministico: mesma entrada retorna o mesmo id",
+            "Etiquetas emitidas com QR referenciando series_item/ordem",
+            "Schemas espelhados do design-contract.json"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/shared/ (guards — sprint-005)",
+          "supabase/migrations/ (documentos_ged, linhas_orcamento, linhas_os, series_item)",
+          "supabase/functions/pedidos/ (sprint-011)"
+        ],
+        "key_interfaces": [
+          "fn_custo_aberto(item_id)",
+          "linhas_os (pecas explodidas para impressao)",
+          "Buckets STORAGE_BUCKET_GED e STORAGE_BUCKET_ETIQUETAS"
+        ],
+        "architecture_notes": "Dominio supabase/functions/ged-orcamento-os/. OCR pode ser simulado (status/confianca preenchidos por stub deterministico) — a integracao real nao esta no escopo; o contrato exige apenas os campos e estados. Databook e derivado: nunca persistir consolidado."
+      },
+      "dependencies": [
+        "sprint-004",
+        "sprint-005",
+        "sprint-011"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-014",
+      "index": 13,
+      "name": "Frontend: telas ged e orcamento",
+      "description": "Implementa a tela #ged (dropzone com OCR, acervo pesquisavel, databook) e a tela #orcamento (tabela de orcamento, peso de mao de obra, painel BI de custo), com todos os estados do contrato.",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "TypeScript",
+        "HTML",
+        "CSS",
+        "SVG"
+      ],
+      "features": [
+        {
+          "id": "feat-049",
+          "name": "Tela ged",
+          "description": "Tela #ged com cmp-dropzone-ocr (upload com status/confianca de OCR), cmp-acervo-ged (busca no conteudo reconhecido) e cmp-databook (databook por pedido), incluindo estados de loading/empty do contrato.",
+          "acceptance_criteria": [
+            "Upload exibe progresso e resultado de OCR (status e confianca)",
+            "Busca no acervo consulta GET /ged/documentos e abre documento individual",
+            "Databook renderiza consolidado do pedido em modo somente leitura",
+            "Todos os estados da tela no contrato implementados; layout fiel ao artifact.html"
+          ]
+        },
+        {
+          "id": "feat-050",
+          "name": "Tela orcamento",
+          "description": "Tela #orcamento com cmp-tabela-orcamento (linhas com custo/margem/imposto/preco), cmp-peso-mao-de-obra e cmp-painel-bi-custo (dataviz SVG nativo com tooltip unico), integrada a api-orcamento-calcular, api-proposta e api-custo-aberto.",
+          "acceptance_criteria": [
+            "Calculo de orcamento atualiza tabela com totais consistentes por linha",
+            "Painel BI renderizado em SVG nativo sem lib externa, tokens de serie do contrato",
+            "Inclusao de proposta integrada a POST /propostas",
+            "Todos os estados da tela no contrato implementados"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "apps/web/src/ (shell e telas anteriores)",
+          "supabase/functions/ged-orcamento-os/schemas.ts (sprint-013)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+        ],
+        "key_interfaces": [
+          "cmp-dropzone-ocr, cmp-acervo-ged, cmp-databook, cmp-tabela-orcamento, cmp-painel-bi-custo, cmp-peso-mao-de-obra",
+          "design-contract.json > visual.dataviz (tokens de serie SVG)"
+        ],
+        "architecture_notes": "Dataviz obrigatoriamente em SVG nativo com tooltip unico compartilhado (norma do design lock). Databook e somente leitura."
+      },
+      "dependencies": [
+        "sprint-006",
+        "sprint-013"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2,
+      "metadata": {
+        "touchesUI": true,
+        "affectedScreenIds": [
+          "ged",
+          "orcamento"
+        ],
+        "affectedComponentIds": [
+          "cmp-dropzone-ocr",
+          "cmp-acervo-ged",
+          "cmp-databook",
+          "cmp-tabela-orcamento",
+          "cmp-painel-bi-custo",
+          "cmp-peso-mao-de-obra"
+        ],
+        "designArtifactPath": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+      }
+    },
+    {
+      "id": "sprint-015",
+      "index": 14,
+      "name": "Backend: dominio ordens",
+      "description": "Implementa os 8 endpoints do dominio ordens: listagem/detalhe/itens, atribuicao de operacoes, liberacao de bloqueio, comparativo planejado x realizado, historico consolidado e retrabalho.",
+      "coder_agent_id": "backend-developer",
+      "stack": [
+        "TypeScript",
+        "Deno",
+        "Supabase Edge Functions",
+        "Zod",
+        "Vitest"
+      ],
+      "features": [
+        {
+          "id": "feat-051",
+          "name": "Listagem, detalhe e itens da ordem",
+          "description": "GET /ordens (api-listar-ordens, filtros por status/prazo/unidade), GET /ordens/{id} (api-detalhe-ordem, inclui snapshot congelado) e GET /ordens/{ordemId}/itens (api-itens-ordem).",
+          "acceptance_criteria": [
+            "Listagem filtra por status e prazo respeitando tenant/unidade do JWT",
+            "Detalhe retorna snapshot (BOM/roteiro/configuracao congelados) em modo leitura",
+            "Ordem de outro tenant/unidade retorna 403/404 sem vazar dados",
+            "Schemas espelhados do design-contract.json"
+          ]
+        },
+        {
+          "id": "feat-052",
+          "name": "Operacoes e bloqueio",
+          "description": "PATCH /ordens/{id}/operacoes/{seq} (api-atribuir-operacao, distribui operacao entre setor/maquina — US-09) e PATCH /ordens/{id}/bloqueio (api-liberar-bloqueio, fecha bloqueio ativo — US-18).",
+          "acceptance_criteria": [
+            "Atribuicao valida setor/maquina existentes na unidade e grava em operacoes_ordem",
+            "Liberacao preenche fechado_em do bloqueio e recalcula status da ordem",
+            "Ambas as acoes geram eventos_ordem e auditoria"
+          ]
+        },
+        {
+          "id": "feat-053",
+          "name": "Comparativo, historico e retrabalho",
+          "description": "GET /ordens/{id}/planejado-realizado (api-comparativo, tempos padrao vs apontados e consumo previsto vs real — US-10), GET /ordens/{id}/eventos (api-historico-ordem, timeline de eventos_ordem — US-24) e POST /ordens/{id}/retrabalhos (api-registrar-retrabalho — US-21).",
+          "acceptance_criteria": [
+            "Comparativo cruza roteiro_base_snapshot/bom_snapshot com apontamentos/consumos reais",
+            "Historico retorna eventos ordenados cronologicamente com tipo e payload",
+            "Retrabalho registra motivo, tempo e materiais adicionais gerando evento na timeline"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/shared/ (guards — sprint-005)",
+          "supabase/migrations/ (ordens_producao, itens_ordem, operacoes_ordem, eventos_ordem, snapshots, apontamentos, consumos, retrabalhos, bloqueios)"
+        ],
+        "key_interfaces": [
+          "snapshots.bom_snapshot / roteiro_base_snapshot (jsonb congelado)",
+          "eventos_ordem (append-only, timeline US-24)",
+          "ordens_producao.status (enum de 6 estados)"
+        ],
+        "architecture_notes": "Dominio supabase/functions/ordens/. Snapshot e somente leitura: o detalhe nunca resolve a ficha viva, sempre o jsonb congelado. Toda mutacao de ordem gera linha em eventos_ordem alem da auditoria por trigger."
+      },
+      "dependencies": [
+        "sprint-003",
+        "sprint-004",
+        "sprint-005"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-016",
+      "index": 15,
+      "name": "Frontend: telas ordens e ordem-detalhe",
+      "description": "Implementa o painel de ordens (#ordens) com filtros e status, e a tela #ordem-detalhe/{id} com snapshot somente leitura, timeline, atribuicao de operacoes, comparativo planejado x realizado, retrabalho e bloqueio.",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "TypeScript",
+        "HTML",
+        "CSS"
+      ],
+      "features": [
+        {
+          "id": "feat-054",
+          "name": "Tela ordens",
+          "description": "Painel #ordens com cmp-data-table, cmp-status-pill (6 status), cmp-metric-filter e cmp-faixa-filtro, estados loading/empty/bloqueado do contrato e navegacao para #ordem-detalhe/{id}.",
+          "acceptance_criteria": [
+            "Filtros por status/prazo refletidos na chamada a GET /ordens",
+            "Ordem bloqueada exibe indicador visual com motivo (US-18)",
+            "Clique em ordem navega para #ordem-detalhe/{id} (hash com entityId)",
+            "Todos os estados da tela no contrato implementados; layout fiel ao artifact.html"
+          ]
+        },
+        {
+          "id": "feat-055",
+          "name": "Tela ordem-detalhe",
+          "description": "Tela #ordem-detalhe/{id} com BOM do snapshot em cmp-bom-tree (somente leitura, RNF-13), timeline de eventos, atribuicao de operacao a setor/maquina, comparativo planejado x realizado, registro de retrabalho e liberacao de bloqueio, alem dos itens da ordem.",
+          "acceptance_criteria": [
+            "Snapshot renderizado sem nenhuma acao de edicao (estado somente leitura)",
+            "Timeline consome GET /ordens/{id}/eventos em ordem cronologica",
+            "Atribuicao, retrabalho e liberacao de bloqueio integrados aos endpoints da sprint-015 com feedback via toast",
+            "entityId inexistente/nao autorizado leva a acesso-negado ou estado error da tela (delta-103)",
+            "F5 na rota de detalhe restaura a mesma ordem"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "apps/web/src/ (roteador com entityId — sprint-006)",
+          "supabase/functions/ordens/schemas.ts (sprint-015)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+        ],
+        "key_interfaces": [
+          "cmp-bom-tree (ja criado na sprint-008 — reutilizar)",
+          "cmp-status-pill, cmp-metric-filter, cmp-faixa-filtro, cmp-data-table",
+          "design-contract.json > screens[ordens|ordem-detalhe].states"
+        ],
+        "architecture_notes": "Reutilizar cmp-bom-tree da sprint-008 em modo somente leitura para o snapshot. O comparativo usa numerais tabulares da tipografia do kit. Estados bloqueado/somente-leitura sao obrigatorios."
+      },
+      "dependencies": [
+        "sprint-006",
+        "sprint-008",
+        "sprint-015"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": true,
+        "affectedScreenIds": [
+          "ordens",
+          "ordem-detalhe"
+        ],
+        "affectedComponentIds": [
+          "cmp-data-table",
+          "cmp-status-pill",
+          "cmp-metric-filter",
+          "cmp-faixa-filtro",
+          "cmp-bom-tree"
+        ],
+        "designArtifactPath": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+      }
+    },
+    {
+      "id": "sprint-017",
+      "index": 16,
+      "name": "Backend: dominio plano (PCP)",
+      "description": "Implementa os endpoints do plano de producao: fila e ordenacao, consolidacao de componentes, previa e geracao de ordens com congelamento de snapshot (US-04/US-07), componentes prontos, programacao do periodo e replanejamento.",
+      "coder_agent_id": "backend-developer",
+      "stack": [
+        "TypeScript",
+        "Deno",
+        "Supabase Edge Functions",
+        "Zod",
+        "Vitest"
+      ],
+      "features": [
+        {
+          "id": "feat-056",
+          "name": "Fila e ordenacao do plano",
+          "description": "GET /planejamento/cronograma (api-cronograma), PATCH /planos/atual/ordenacao (api-plano-priorizar) e PATCH /plano/ordenacao (api-plano-ordenacao) — dois paths distintos do contrato, implementados separadamente.",
+          "acceptance_criteria": [
+            "Cronograma retorna fila do plano atual com viabilidade de prazo (view/fn derivada)",
+            "api-plano-priorizar e api-plano-ordenacao existem como endpoints fisicos distintos conforme paths literais do contrato",
+            "Criterios de ordenacao (prioridade/prazo/folga/carga/manual) suportados"
+          ]
+        },
+        {
+          "id": "feat-057",
+          "name": "Consolidacao, previa e geracao de ordens",
+          "description": "GET /planos/atual/consolidacao (api-plano-consolidacao), POST /plano/previa (api-plano-previa, sem persistir), POST /planos/atual/ordens (api-plano-gerar-ordens: congela snapshot da ficha publicada+roteiro+configuracao, cria ordens_producao/itens_ordem/operacoes_ordem/linhas_os e vincula linhas_pedido.ordem_id) e GET /componentes/prontos (api-componentes-prontos).",
+          "acceptance_criteria": [
+            "Previa retorna o resultado da geracao sem gravar nenhuma linha (teste comprova ausencia de efeito)",
+            "Geracao cria snapshot imutavel por item e ordens vinculadas ao pedido (delta-021), gerando eventos_ordem",
+            "Consolidacao agrega componentes iguais entre itens do plano respeitando parametros_sistema.consolidar_componentes_padrao",
+            "Componentes prontos listados a partir de series_item/saldo para realocacao"
+          ]
+        },
+        {
+          "id": "feat-058",
+          "name": "Programacao e replanejamento",
+          "description": "GET /programacao (api-programacao, slots por periodo/setor com capacidade), GET /planejamento/projecao-consumo (api-projecao-consumo) e PATCH /programacao/ordens/{id} (api-programacao-replanejar: antecipar/adiar/mover/encaixar/desfazer, gravando programacao_operacao e programacao_ancora).",
+          "acceptance_criteria": [
+            "Programacao distribui horas por setor/maquina respeitando capacidade_horas_dia e horas_maquina_dia",
+            "Projecao de consumo cruza BOM dos snapshots planejados com saldo_estoque apontando rupturas projetadas",
+            "Replanejamento atualiza slots e registra motivo/responsavel em programacao_ancora",
+            "Schemas espelhados do design-contract.json"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/functions/pedidos/use-cases/ (api-plano-incluir ja implementado — sprint-011, reutilizar)",
+          "supabase/functions/ordens/ (sprint-015)",
+          "supabase/migrations/ (planos_producao, programacao_operacao, programacao_ancora, snapshots, views fn_* derivadas da sprint-004)"
+        ],
+        "key_interfaces": [
+          "snapshots (INSERT-only; congelamento US-04)",
+          "familias_construtivas.formula_bom / template_roteiro (base do congelamento)",
+          "Views derivadas: consolidacao-componentes, capacidade-plano, viabilidade-prazo, projecao-consumo (sprint-004)"
+        ],
+        "architecture_notes": "Dominio supabase/functions/plano/. A geracao de ordens e o coracao do sistema: transacao unica que congela snapshot -> cria ordem/itens/operacoes/linhas_os -> vincula pedido -> emite eventos. A logica de explosao/consolidacao fica em domain/ pura e testada por Vitest."
+      },
+      "dependencies": [
+        "sprint-003",
+        "sprint-004",
+        "sprint-005",
+        "sprint-011",
+        "sprint-015"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-018",
+      "index": 17,
+      "name": "Frontend: tela plano",
+      "description": "Implementa a tela #plano com as tres vistas (fila, programacao, previsibilidade), criterios de ordenacao, consolidacao de componentes, previa e geracao de ordens, capacidade por setor e replanejamento.",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "TypeScript",
+        "HTML",
+        "CSS",
+        "SVG"
+      ],
+      "features": [
+        {
+          "id": "feat-059",
+          "name": "Vista fila e geracao de ordens",
+          "description": "cmp-fila-plano com criterios (prioridade/prazo/folga/carga/manual), inclusao/retirada/priorizacao de itens, cmp-consolidacao-componentes, cmp-previa-geracao-ordens e geracao efetiva. Estados: vista-fila, criterio-*, fila-priorizada, fila-vazia, ordem-impedida, ordens-geradas.",
+          "acceptance_criteria": [
+            "Troca de criterio chama PATCH /plano/ordenacao e reordena a fila",
+            "Previa exibe resultado sem persistir; confirmacao chama POST /planos/atual/ordens e mostra ordens-geradas",
+            "Ordem impedida (bloqueio/sem material) destacada conforme contrato",
+            "Layout fiel ao artifact.html"
+          ]
+        },
+        {
+          "id": "feat-060",
+          "name": "Vistas programacao e previsibilidade",
+          "description": "cmp-gantt-plano/cmp-programacao-periodo/cmp-tira-periodos/cmp-carga-setor-periodo (SVG nativo) com replanejamento (antecipar/adiar/mover/encaixar/desfazer), cmp-viabilidade-prazo e projecao de consumo. Estados: vista-programacao, vista-previsibilidade, dia, mes, filtrado-por-setor, periodo-com-folga, periodo-sobrecarregado, ruptura-projetada, conclusao-apos-o-prazo, replanejado, idle, loading, error.",
+          "acceptance_criteria": [
+            "Todos os estados listados no contrato para a tela plano implementados",
+            "Replanejamento chama PATCH /programacao/ordens/{id} e reflete o estado replanejado",
+            "Ruptura projetada e conclusao apos o prazo destacadas visualmente",
+            "Gantt/heatmap em SVG nativo com tooltip unico compartilhado"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "apps/web/src/ (shell e telas anteriores)",
+          "supabase/functions/plano/schemas.ts (sprint-017)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+        ],
+        "key_interfaces": [
+          "cmp-fila-plano, cmp-capacidade-setor, cmp-consolidacao-componentes, cmp-gantt-plano, cmp-previa-geracao-ordens, cmp-viabilidade-prazo, cmp-tira-periodos, cmp-programacao-periodo, cmp-carga-setor-periodo",
+          "design-contract.json > screens[plano].states"
+        ],
+        "architecture_notes": "Tela desktop densa (PCP). Mapear os ~20 estados do contrato para condicoes de dados antes de codar. Dataviz SVG nativo obrigatorio."
+      },
+      "dependencies": [
+        "sprint-006",
+        "sprint-017"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": true,
+        "affectedScreenIds": [
+          "plano"
+        ],
+        "affectedComponentIds": [
+          "cmp-fila-plano",
+          "cmp-capacidade-setor",
+          "cmp-consolidacao-componentes",
+          "cmp-gantt-plano",
+          "cmp-previa-geracao-ordens",
+          "cmp-viabilidade-prazo",
+          "cmp-tira-periodos",
+          "cmp-programacao-periodo",
+          "cmp-carga-setor-periodo"
+        ],
+        "designArtifactPath": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+      }
+    },
+    {
+      "id": "sprint-019",
+      "index": 18,
+      "name": "Backend: dominios estoque e unidades-parametros",
+      "description": "Implementa os 7 endpoints de estoque (saldos, movimentos, reservas, separacoes, baixa por lote e sincronizacao offline idempotente) e os 4 de unidades/parametros (unidades, transferencias entre unidades, parametros do sistema).",
+      "coder_agent_id": "backend-developer",
+      "stack": [
+        "TypeScript",
+        "Deno",
+        "Supabase Edge Functions",
+        "Zod",
+        "Vitest"
+      ],
+      "features": [
+        {
+          "id": "feat-061",
+          "name": "Saldos e movimentos",
+          "description": "GET /estoque/saldos (api-saldos, por item/deposito/unidade com fisico/reservado/disponivel), POST /estoque/movimentos (api-movimento, tipos entrada/saida/devolucao/ajuste) e POST /estoque/baixa-por-lote (api-baixa-por-lote).",
+          "acceptance_criteria": [
+            "Movimento respeita parametros_sistema.estoque_negativo (recusa saldo negativo quando false)",
+            "Saldo atualizado exclusivamente pela trigger da sprint-004 (endpoint nunca escreve saldo direto)",
+            "Baixa por lote decrementa lotes_material.saldo e gera movimento com lote_id",
+            "Schemas espelhados do design-contract.json"
+          ]
+        },
+        {
+          "id": "feat-062",
+          "name": "Reservas e separacoes",
+          "description": "POST /ordens/{id}/reservas (api-reservar, com base na BOM do snapshot — US-11), DELETE /ordens/{ordemId}/reservas (api-reserva-liberar) e POST /ordens/{id}/separacoes (api-separacao — US-12).",
+          "acceptance_criteria": [
+            "Reserva calcula quantidades a partir do bom_snapshot da ordem e respeita reserva_obrigatoria",
+            "Saldo insuficiente muda status da ordem para aguardando_material (trigger RF-17 exercitada em teste)",
+            "Separacao registra quantidade separada contra a reserva e gera movimento/evento"
+          ]
+        },
+        {
+          "id": "feat-063",
+          "name": "Sincronizacao offline idempotente",
+          "description": "POST /estoque/movimentos/sincronizar (api-sincronizar): recebe lote de operacoes offline (movimentos/apontamentos/consumos) com client_generated_id, aplica idempotencia (tenant_id, client_generated_id), retorna por item o resultado confirmado/conflito (RNF-11/RNF-12).",
+          "acceptance_criteria": [
+            "Reenvio do mesmo lote nao duplica nenhum registro (teste com envio duplo)",
+            "Item conflitante retorna sync_status=conflito com detalhe, nunca confirmacao silenciosa",
+            "Resposta relaciona cada client_generated_id ao seu desfecho"
+          ]
+        },
+        {
+          "id": "feat-064",
+          "name": "Unidades, transferencias e parametros",
+          "description": "GET /unidades (api-unidades), POST /transferencias (api-transferencia-emitir), POST /transferencias/{id}/receber (api-transferencia-receber, tambem cancelamento) e PUT /configuracao/parametros (api-parametros-salvar).",
+          "acceptance_criteria": [
+            "Transferencia emitida gera movimentos de saida na origem e situacao transito; recebimento gera entrada no destino e preenche recebida_em",
+            "Usuario so opera unidades presentes em unidades_autorizadas",
+            "Salvar parametros valida os 16 campos da SPEC e gera auditoria",
+            "Schemas espelhados do design-contract.json"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/shared/idempotency/ (sprint-005)",
+          "supabase/migrations/ (saldo_estoque, movimentos_estoque, reservas, separacoes, lotes_material, transferencias_unidade, parametros_sistema + triggers da sprint-004)",
+          "supabase/functions/ordens/ (sprint-015)"
+        ],
+        "key_interfaces": [
+          "trg_saldo_estoque_movimento / trg_reserva_saldo / trg_ordem_status_material (sprint-004)",
+          "idempotency-guard (tenant_id, client_generated_id)",
+          "parametros_sistema (flags que condicionam regras)"
+        ],
+        "architecture_notes": "Dominios supabase/functions/estoque/ e unidades-parametros-viasign/. Movimentos sao kardex append-only: correcao e sempre movimento compensatorio. Toda regra condicionada por parametros_sistema deve ler o valor do tenant/unidade, nunca hardcode."
+      },
+      "dependencies": [
+        "sprint-004",
+        "sprint-005",
+        "sprint-015",
+        "sprint-017"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-020",
+      "index": 19,
+      "name": "Frontend: telas estoque, unidades e parametros",
+      "description": "Implementa a tela #estoque (saldos, movimentos, reservas, separacao, fila offline), a tela #unidades (seletor, transferencias, comparativo de saldo) e a tela #parametros (painel com efeito das alteracoes).",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "TypeScript",
+        "HTML",
+        "CSS",
+        "IndexedDB"
+      ],
+      "features": [
+        {
+          "id": "feat-065",
+          "name": "Tela estoque",
+          "description": "Tela #estoque com consulta de saldos (cmp-data-table, cmp-metric-filter), registro de movimentos, reserva por ordem (BOM do snapshot), separacao fisica, baixa por lote, anexo GED de NF/lote e fila offline com estados pendente-de-sincronizacao e conflito.",
+          "acceptance_criteria": [
+            "Saldos exibem fisico/reservado/disponivel por item e deposito",
+            "Movimento registrado offline entra em fila local com badge 'pendente de sincronizacao'; sincronizacao usa api-sincronizar e resolve conflito via modal (RNF-11/12)",
+            "Reserva e separacao integradas aos endpoints da sprint-019 com feedback de sucesso/erro",
+            "Todos os estados da tela no contrato implementados; layout fiel ao artifact.html"
+          ]
+        },
+        {
+          "id": "feat-066",
+          "name": "Tela unidades",
+          "description": "Tela #unidades com cmp-seletor-unidade, cmp-cartao-unidade, cmp-form-transferencia, cmp-razao-transferencias e cmp-comparativo-saldo. Estados: unidade-em-operacao, transferencia-em-transito, transferencia-recebida, transferencia-cancelada, sem-saldo-transferivel, sem-pedido-direcionavel.",
+          "acceptance_criteria": [
+            "Todos os 6 estados do contrato implementados",
+            "Troca de unidade em operacao revalida contra unidades_autorizadas sem novo login",
+            "Emissao/recebimento/cancelamento de transferencia integrados aos endpoints com razao atualizada",
+            "Comparativo de saldo entre unidades consome a view saldo-por-unidade"
+          ]
+        },
+        {
+          "id": "feat-067",
+          "name": "Tela parametros",
+          "description": "Tela #parametros com cmp-painel-parametros (16 parametros da SPEC) e cmp-efeito-parametros (explicacao do efeito de cada flag). Estados: padrao-de-fabrica, alteracoes-nao-salvas, salvo, somente-leitura.",
+          "acceptance_criteria": [
+            "Todos os 4 estados do contrato implementados (somente-leitura para perfil sem escrita)",
+            "Alteracao nao salva destacada; salvar chama PUT /configuracao/parametros",
+            "Efeito de cada parametro descrito conforme copy do design lock"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "apps/web/src/ (shell e telas anteriores)",
+          "supabase/functions/estoque/schemas.ts e unidades-parametros-viasign/schemas.ts (sprint-019)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+        ],
+        "key_interfaces": [
+          "api-sincronizar (fila offline por client_generated_id)",
+          "cmp-seletor-unidade, cmp-form-transferencia, cmp-razao-transferencias, cmp-comparativo-saldo, cmp-painel-parametros, cmp-efeito-parametros",
+          "design-contract.json > screens[estoque|unidades|parametros].states"
+        ],
+        "architecture_notes": "A fila offline (client_generated_id gerado no cliente, persistida em IndexedDB/localStorage) criada aqui sera reutilizada pela tela chao-de-fabrica na sprint-022 — implemente-a como modulo compartilhado em lib/."
+      },
+      "dependencies": [
+        "sprint-006",
+        "sprint-019"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": true,
+        "affectedScreenIds": [
+          "estoque",
+          "unidades",
+          "parametros"
+        ],
+        "affectedComponentIds": [
+          "cmp-data-table",
+          "cmp-metric-filter",
+          "cmp-seletor-unidade",
+          "cmp-cartao-unidade",
+          "cmp-form-transferencia",
+          "cmp-razao-transferencias",
+          "cmp-comparativo-saldo",
+          "cmp-painel-parametros",
+          "cmp-efeito-parametros"
+        ],
+        "designArtifactPath": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+      }
+    },
+    {
+      "id": "sprint-021",
+      "index": 20,
+      "name": "Backend: dominios chao-de-fabrica e qualidade",
+      "description": "Implementa os 10 endpoints de chao de fabrica (proxima operacao, apontamentos com estorno em 10 min, QR, consumos, perdas, bloqueios, baixa automatica, foto de conclusao) e os 2 de qualidade (inspecoes).",
+      "coder_agent_id": "backend-developer",
+      "stack": [
+        "TypeScript",
+        "Deno",
+        "Supabase Edge Functions",
+        "Zod",
+        "Supabase Storage",
+        "Vitest"
+      ],
+      "features": [
+        {
+          "id": "feat-068",
+          "name": "Operacao e apontamento",
+          "description": "GET /operadores/{id}/proxima-operacao (api-operacao-atual, com instrucoes do roteiro — US-15), GET /ordens/liberadas (api-ordens-liberadas), POST /ordens/{id}/apontamentos (api-apontamento, inicio/fim idempotente — US-16), POST /apontamentos/qr (api-apontar-por-qr) e POST /ordens/{ordemId}/operacoes/{operacaoId}/estorno (api-apontamento-estorno).",
+          "acceptance_criteria": [
+            "Apontamento com client_generated_id repetido nao duplica (idempotency-guard)",
+            "Fim de operacao calcula tempo_min via trigger e avanca status da operacao",
+            "Estorno so aceito em ate 10 minutos e cria contrapartida em estornos_apontamento (nunca DELETE)",
+            "Apontamento por QR resolve serie/ordem/operacao a partir do codigo lido"
+          ]
+        },
+        {
+          "id": "feat-069",
+          "name": "Consumo, perda, bloqueio e foto",
+          "description": "POST /ordens/{id}/consumos (api-consumo — US-17, respeita consumo_acima_separado), POST /ordens/{id}/perdas (api-perda — US-20), POST /ordens/{id}/bloqueios (api-bloquear — US-18), POST /ordens/{ordemId}/apontamentos/{operacaoId}/baixa (api-baixa-automatica) e POST /apontamentos/{ordemId}/fotos (api-foto-conclusao, obrigatoria conforme parametro foto_obrigatoria).",
+          "acceptance_criteria": [
+            "Consumo acima do separado segue parametros_sistema.consumo_acima_separado (bloquear|justificar|livre)",
+            "Consumo gera baixa automatica de estoque quando baixa_automatica=true (trigger exercitada)",
+            "Bloqueio muda status da ordem para bloqueada e gera evento; perda registra motivo e alimenta rastreio_consumo",
+            "Foto gravada em Storage com caminho por tenant/unidade; conclusao sem foto e recusada quando foto_obrigatoria=true"
+          ]
+        },
+        {
+          "id": "feat-070",
+          "name": "Qualidade",
+          "description": "POST /ordens/{id}/inspecoes (api-inspecao — US-19) e GET /inspecoes (api-listar-inspecoes, fila de qualidade). Reprovacao critica impede elegibilidade a expedicao (trigger RF-27).",
+          "acceptance_criteria": [
+            "Inspecao reprovada critica remove a ordem da elegibilidade de expedicao (teste comprova via trg_bloqueio_qualidade)",
+            "Fila retorna inspecoes pendentes/realizadas filtraveis por ordem/resultado",
+            "Registro vincula ordem e opcionalmente operacao, com responsavel e criterio"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/shared/idempotency/ (sprint-005)",
+          "supabase/functions/estoque/ (padrao de sincronizacao offline — sprint-019)",
+          "supabase/migrations/ (apontamentos, estornos_apontamento, consumos, perdas, bloqueios, inspecoes + triggers sprint-004)"
+        ],
+        "key_interfaces": [
+          "trg_apontamento_tempo, trg_baixa_automatica_consumo, trg_bloqueio_qualidade, trg_estorno_expira (sprint-004)",
+          "parametros_sistema.consumo_acima_separado / baixa_automatica / foto_obrigatoria",
+          "api-sincronizar (sprint-019, aceita apontamentos/consumos offline)"
+        ],
+        "architecture_notes": "Dominios supabase/functions/chao-de-fabrica/ e qualidade/. Todos os endpoints de escrita do chao sao offline-first: idempotencia obrigatoria por (tenant_id, client_generated_id). Estorno e compensating transaction com janela de 10 minutos."
+      },
+      "dependencies": [
+        "sprint-004",
+        "sprint-005",
+        "sprint-015",
+        "sprint-019"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-022",
+      "index": 21,
+      "name": "Frontend: telas chao-de-fabrica e qualidade",
+      "description": "Implementa a tela #chao-de-fabrica responsiva para tablet/celular com apontamento, timer, estorno, consumo, perda, bloqueio, foto e operacao offline com fila de sincronizacao, e a tela #qualidade com fila de inspecao.",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "TypeScript",
+        "HTML",
+        "CSS",
+        "IndexedDB"
+      ],
+      "features": [
+        {
+          "id": "feat-071",
+          "name": "Tela chao-de-fabrica: operacao e apontamento",
+          "description": "cmp-cards-os-operador (ordens liberadas), proxima operacao com instrucoes do roteiro (cmp-trilha-roteiro), cmp-timer-apontamento, cmp-confirmacao-apontamento, cmp-estorno-apontamento (janela 10 min) e apontamento por QR, com acoes grandes padrao tablet.",
+          "acceptance_criteria": [
+            "Iniciar/finalizar operacao integrado a api-apontamento com timer visivel",
+            "Estorno disponivel apenas dentro da janela de 10 minutos, com confirmacao",
+            "Estados aguardando, em-execucao e empty do contrato implementados",
+            "Layout responsivo tablet/celular fiel ao artifact.html"
+          ]
+        },
+        {
+          "id": "feat-072",
+          "name": "Tela chao-de-fabrica: consumo, perda, bloqueio e foto",
+          "description": "Registro de consumo (cmp-form-registro, estado consumo-excedente conforme parametro), perda, bloqueio com motivo e foto de conclusao (cmp-foto-conclusao, estados foto-solicitada/foto-registrada), alem dos estados baixa-automatica e transferencia-automatica.",
+          "acceptance_criteria": [
+            "Consumo acima do separado exibe bloqueio ou justificativa conforme parametro do sistema",
+            "Bloqueio exibe indicador com motivo e desabilita avanco (US-18)",
+            "Foto obrigatoria impede conclusao sem registro quando parametro ativo",
+            "Estados bloqueio, consumo-excedente, baixa-automatica, transferencia-automatica, foto-solicitada, foto-registrada e success implementados"
+          ]
+        },
+        {
+          "id": "feat-073",
+          "name": "Offline-first e tela qualidade",
+          "description": "Operacao offline: instrucoes da proxima operacao permanecem visiveis sem rede (RNF-10), apontamentos/consumos entram na fila offline compartilhada (client_generated_id) com estados offline-pendente e conflito com modal de resolucao. Tela #qualidade com cmp-fila-qualidade, registro de inspecao e destaque de reprovacao critica.",
+          "acceptance_criteria": [
+            "Com rede desligada, instrucoes ja carregadas permanecem visiveis e acoes entram na fila com badge 'pendente de sincronizacao'",
+            "Reconexao sincroniza via api-sincronizar; conflito abre modal antes de confirmar (nunca confirmacao silenciosa)",
+            "Tela qualidade registra inspecao e exibe reprovado critico com destaque; ordem some da elegibilidade de expedicao",
+            "Todos os estados das duas telas no contrato implementados"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "apps/web/src/lib/ (modulo de fila offline criado na sprint-020 — reutilizar)",
+          "supabase/functions/chao-de-fabrica/schemas.ts e qualidade/schemas.ts (sprint-021)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+        ],
+        "key_interfaces": [
+          "cmp-timer-apontamento, cmp-confirmacao-apontamento, cmp-estorno-apontamento, cmp-cards-os-operador, cmp-foto-conclusao, cmp-trilha-roteiro, cmp-form-registro, cmp-fila-qualidade",
+          "Fila offline compartilhada (client_generated_id, sprint-020)"
+        ],
+        "architecture_notes": "Telas responsivas tablet/celular com acoes grandes. Reutilizar o modulo de fila offline da sprint-020 — nao duplicar. Cache local das instrucoes da operacao atual para RNF-10."
+      },
+      "dependencies": [
+        "sprint-006",
+        "sprint-020",
+        "sprint-021"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": true,
+        "affectedScreenIds": [
+          "chao-de-fabrica",
+          "qualidade"
+        ],
+        "affectedComponentIds": [
+          "cmp-timer-apontamento",
+          "cmp-confirmacao-apontamento",
+          "cmp-estorno-apontamento",
+          "cmp-cards-os-operador",
+          "cmp-foto-conclusao",
+          "cmp-trilha-roteiro",
+          "cmp-form-registro",
+          "cmp-fila-qualidade"
+        ],
+        "designArtifactPath": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+      }
+    },
+    {
+      "id": "sprint-023",
+      "index": 22,
+      "name": "Backend: dominio expedicao",
+      "description": "Implementa os 8 endpoints de expedicao: fila por deposito, expedicao de ordem, leitura de series, remessas, romaneio com conferencia, saida parcial e espelho fiscal.",
+      "coder_agent_id": "backend-developer",
+      "stack": [
+        "TypeScript",
+        "Deno",
+        "Supabase Edge Functions",
+        "Zod",
+        "Vitest"
+      ],
+      "features": [
+        {
+          "id": "feat-074",
+          "name": "Fila, expedicao e series",
+          "description": "GET /expedicao/fila (api-fila-expedicao — US-22, exclui ordens com reprovacao critica ou retidas), POST /ordens/{id}/expedicao (api-expedicao — US-23) e GET /series (api-serie-item, leitura por QR/codigo).",
+          "acceptance_criteria": [
+            "Fila lista apenas ordens elegiveis: concluidas, sem reprovacao critica pendente (RF-27) e conforme qualidade_para_expedir",
+            "Expedicao muda status da ordem para expedida, atualiza series_item.status e gera evento/auditoria",
+            "GET /series resolve serie por codigo retornando status e vinculos",
+            "Schemas espelhados do design-contract.json"
+          ]
+        },
+        {
+          "id": "feat-075",
+          "name": "Remessa, romaneio, saida parcial e espelho",
+          "description": "POST /expedicoes/remessas (api-remessa, modos item|qr), GET /expedicoes/remessas/{id}/romaneio (api-romaneio), PATCH /romaneios/{id}/conferencia (api-romaneio-conferencia), POST /romaneios/{id}/saida (api-remessa-parcial, respeitando expedicao_parcial) e GET /expedicoes/remessas/{id}/espelho (api-espelho-fiscal).",
+          "acceptance_criteria": [
+            "Remessa agrega series/pedidos/ordens e gera romaneio com unidades e conferidas",
+            "Conferencia marca unidades conferidas incrementalmente; saida com pendencias so permitida quando expedicao_parcial=true (estado romaneio-encerrado-parcial)",
+            "Espelho fiscal retorna dados consolidados da remessa para impressao",
+            "Saida gera movimentos no deposito de expedicao e eventos das ordens envolvidas"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/functions/chao-de-fabrica/ (series geradas na producao — sprint-021)",
+          "supabase/migrations/ (series_item, series_deposito, remessas, romaneios, depositos tipo expedicao)"
+        ],
+        "key_interfaces": [
+          "trg_bloqueio_qualidade (RF-27)",
+          "parametros_sistema.expedicao_parcial / qualidade_para_expedir / deposito_expedicao_id",
+          "series_item.status (produzido|expedido)"
+        ],
+        "architecture_notes": "Dominio supabase/functions/expedicao/. A elegibilidade da fila e regra de dominio pura testavel por Vitest. Reabertura de ordem expedida bloqueada por padrao (RF-33, exige permissao explicita no rbac-guard)."
+      },
+      "dependencies": [
+        "sprint-004",
+        "sprint-005",
+        "sprint-019",
+        "sprint-021"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-024",
+      "index": 23,
+      "name": "Frontend: telas expedicao, os-impressa e item",
+      "description": "Implementa a tela #expedicao completa (fila, QR, carga, romaneio A4, conferencia, saida parcial, espelho fiscal), a tela #os-impressa (folhas A4 e etiquetas) e a tela #item/{id} (pagina do item/serie).",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "TypeScript",
+        "HTML",
+        "CSS"
+      ],
+      "features": [
+        {
+          "id": "feat-076",
+          "name": "Tela expedicao",
+          "description": "Tela #expedicao com cmp-retidas-expedicao, cmp-fila-expedicao, cmp-leitor-qr-expedicao, cmp-carga-expedicao, cmp-romaneio-a4 (impressao), cmp-conferencia-romaneio e cmp-espelho-fiscal. Todos os 18 estados do contrato (deposito, fila, selecao-por-item, leitura-qr, conferencia-qr, leitura-recusada, carga-montada, romaneio-aberto/concluido/cancelado/encerrado-parcial, espelho-emitido, com-foto/sem-foto, bloqueado-por-qualidade, empty, success, validation-error).",
+          "acceptance_criteria": [
+            "Todos os 18 estados do contrato implementados e alcancaveis",
+            "Ordem reprovada em qualidade critica aparece em retidas e nunca na fila (US-22/RF-27)",
+            "Saida parcial so oferecida quando expedicao_parcial ativo, resultando em romaneio-encerrado-parcial",
+            "Romaneio e espelho renderizados em formato A4 imprimivel fiel ao artifact.html"
+          ]
+        },
+        {
+          "id": "feat-077",
+          "name": "Tela os-impressa",
+          "description": "Tela #os-impressa com cmp-folha-a4, visao consolidada por setor, emissao de etiquetas (cmp-etiqueta-placa) e identificador estavel. Estados: vista-ordens, vista-etiquetas, consolidado, consolidada-por-setor, por-item, separada-por-especificidade, sem-unidade-identificada, sem-resultado, idle.",
+          "acceptance_criteria": [
+            "Todos os 9 estados do contrato implementados",
+            "Folha A4 imprimivel com pecas de linhas_os agrupadas por setor/maquina",
+            "Etiquetas emitidas com QR via api-etiquetas",
+            "Identificador estavel exibido na folha via api-os-id-estavel"
+          ]
+        },
+        {
+          "id": "feat-078",
+          "name": "Tela item",
+          "description": "Tela #item/{id} (cmp-pagina-item) resolvendo serie ou item de ordem: composicao, arquivos do projeto, foto, etiqueta com QR. Estados: unidade-identificada, item-da-ordem, com-foto, sem-foto, sem-composicao, sem-arquivos, sem-item-selecionado.",
+          "acceptance_criteria": [
+            "Todos os 7 estados do contrato implementados",
+            "Rota #item/{id} restaura a pagina em F5 e trata id inexistente/nao autorizado (delta-103)",
+            "Download de arquivo e emissao de etiqueta integrados aos endpoints existentes"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "apps/web/src/ (roteador com entityId, fila offline, telas anteriores)",
+          "supabase/functions/expedicao/schemas.ts (sprint-023), ged-orcamento-os/ (etiquetas/OS — sprint-013), itens-fichas/ (api-item — sprint-007)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+        ],
+        "key_interfaces": [
+          "cmp-fila-expedicao, cmp-leitor-qr-expedicao, cmp-carga-expedicao, cmp-romaneio-a4, cmp-conferencia-romaneio, cmp-espelho-fiscal, cmp-retidas-expedicao, cmp-folha-a4, cmp-etiqueta-placa, cmp-pagina-item, cmp-foto-conclusao",
+          "design-contract.json > screens[expedicao|os-impressa|item].states"
+        ],
+        "architecture_notes": "Expedicao e responsiva tablet/celular. Impressao A4 (romaneio, espelho, folha OS) usa CSS de midia print fiel ao artifact. Leitor QR pode usar input manual como fallback conforme modo item|qr do contrato."
+      },
+      "dependencies": [
+        "sprint-006",
+        "sprint-007",
+        "sprint-013",
+        "sprint-023"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": true,
+        "affectedScreenIds": [
+          "expedicao",
+          "os-impressa",
+          "item"
+        ],
+        "affectedComponentIds": [
+          "cmp-retidas-expedicao",
+          "cmp-fila-expedicao",
+          "cmp-leitor-qr-expedicao",
+          "cmp-carga-expedicao",
+          "cmp-romaneio-a4",
+          "cmp-conferencia-romaneio",
+          "cmp-espelho-fiscal",
+          "cmp-folha-a4",
+          "cmp-etiqueta-placa",
+          "cmp-pagina-item"
+        ],
+        "designArtifactPath": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+      }
+    },
+    {
+      "id": "sprint-025",
+      "index": 24,
+      "name": "Backend: dominio auditoria-painel e relatorios",
+      "description": "Implementa os endpoints de auditoria (consulta com filtros), indicadores do painel, resumo critico, indicador m2, relatorios (preview, exportacao e composicoes com auditoria obrigatoria) e atalhos do usuario.",
+      "coder_agent_id": "backend-developer",
+      "stack": [
+        "TypeScript",
+        "Deno",
+        "Supabase Edge Functions",
+        "Zod",
+        "Vitest"
+      ],
+      "features": [
+        {
+          "id": "feat-079",
+          "name": "Consulta de auditoria",
+          "description": "GET /auditoria (endpoint unico para api-auditoria e api-auditoria-consulta) com filtros por usuario, entidade, acao e periodo.",
+          "acceptance_criteria": [
+            "Consulta pagina e filtra a tabela auditoria respeitando tenant do JWT",
+            "Endpoint unico satisfaz os dois ids do contrato (mesmo operation)",
+            "Nenhuma rota de escrita/edicao de auditoria exposta"
+          ]
+        },
+        {
+          "id": "feat-080",
+          "name": "Indicadores do painel",
+          "description": "GET /painel/indicadores (api-painel), GET /operacao/resumo-critico (api-resumo-critico, compartilhado inicio/dashboard) e GET /indicadores/m2 (api-indicador-m2), consumindo as views/fns derivadas da sprint-004.",
+          "acceptance_criteria": [
+            "Indicadores calculados via views/fns derivadas, sem estado persistido duplicado",
+            "Resumo critico retorna ordens bloqueadas, rupturas e prazos em risco",
+            "Indicador m2 agrega area programada/produzida por periodo",
+            "Schemas espelhados do design-contract.json"
+          ]
+        },
+        {
+          "id": "feat-081",
+          "name": "Relatorios com auditoria obrigatoria",
+          "description": "POST /relatorios/preview (api-relatorio), POST /relatorios/exportar (api-relatorio-exportar, CSV/PDF) e POST /relatorios/composicoes (api-relatorio-salvar). Toda exportacao e salvamento de composicao grava auditoria com acao relatorio_exportado/relatorio_composicao_salva incluindo usuario_id, tipo, filtros e formato.",
+          "acceptance_criteria": [
+            "Preview monta dataset com agrupamentos sem persistir",
+            "Exportacao gera CSV valido e registra linha em auditoria com os 4 campos exigidos (teste comprova)",
+            "Salvar composicao persiste e registra auditoria correspondente"
+          ]
+        },
+        {
+          "id": "feat-082",
+          "name": "Atalhos do usuario",
+          "description": "PUT /usuarios/{usuarioId}/atalhos (api-atalhos-salvar) gravando em usuario_atalhos com ordem.",
+          "acceptance_criteria": [
+            "Usuario so altera os proprios atalhos (usuarioId validado contra JWT)",
+            "Atalhos persistem screen_id e ordem conforme SPEC",
+            "Schema espelhado do design-contract.json"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "supabase/shared/audit/ (audit-writer — sprint-005)",
+          "supabase/migrations/ (auditoria, usuario_atalhos, views fn_* derivadas — sprints 001/004)"
+        ],
+        "key_interfaces": [
+          "audit-writer (acoes relatorio_exportado/relatorio_composicao_salva)",
+          "Views: indicador-painel, resumo-critico, indicador-m2, base-rel-m2 (sprint-004)"
+        ],
+        "architecture_notes": "Dominio supabase/functions/auditoria-painel/. Auditoria e somente leitura via API. A obrigatoriedade de auditar exportacoes vem do design lock — implementar no use-case, nao depender de trigger."
+      },
+      "dependencies": [
+        "sprint-001",
+        "sprint-004",
+        "sprint-005"
+      ],
+      "complexity": "medium",
+      "estimated_rounds": 2,
+      "metadata": {
+        "touchesUI": false,
+        "affectedScreenIds": [],
+        "affectedComponentIds": []
+      }
+    },
+    {
+      "id": "sprint-026",
+      "index": 25,
+      "name": "Frontend: telas dashboard, inicio, relatorios e auditoria",
+      "description": "Fecha o produto com o painel da fabrica (#dashboard com dataviz SVG), a tela #inicio (atalhos e fila de atencao), o compositor de relatorios (#relatorios com exportacao) e a tela #auditoria (log filtravel e matriz de perfis).",
+      "coder_agent_id": "frontend-developer",
+      "stack": [
+        "TypeScript",
+        "HTML",
+        "CSS",
+        "SVG"
+      ],
+      "features": [
+        {
+          "id": "feat-083",
+          "name": "Tela dashboard",
+          "description": "Painel #dashboard com cmp-stat-strip, cmp-chart-kit (SVG nativo, tooltip unico), cmp-gantt e cmp-heatmap-consumo consumindo api-painel, api-resumo-critico e api-indicador-m2, com estados loading/empty/error do contrato.",
+          "acceptance_criteria": [
+            "Todos os graficos em SVG nativo com tokens de serie do design-contract.json > visual.dataviz",
+            "Indicadores, resumo critico e m2 integrados aos endpoints da sprint-025",
+            "Todos os estados da tela no contrato implementados; layout fiel ao artifact.html"
+          ]
+        },
+        {
+          "id": "feat-084",
+          "name": "Tela inicio",
+          "description": "Tela #inicio com cmp-cards-atalho (atalhos personalizaveis persistidos via api-atalhos-salvar), cmp-fila-atencao e cmp-stat-area-programada. Estados: idle, sem-atalho, sem-alerta, sem-permissao.",
+          "acceptance_criteria": [
+            "Todos os 4 estados do contrato implementados",
+            "Adicionar/remover/reordenar atalhos persiste via PUT /usuarios/{usuarioId}/atalhos e sobrevive a reload",
+            "Atalho para tela sem permissao do perfil nao e exibido (estado sem-permissao)"
+          ]
+        },
+        {
+          "id": "feat-085",
+          "name": "Tela relatorios",
+          "description": "Tela #relatorios com cmp-compositor-relatorio, cmp-janela-relatorio, cmp-base-rel-m2 e cmp-tabela-m2/cmp-card-m2: preview com agrupamento, exportacao CSV e impressao. Estados: composicao, com-agrupamento, sem-dados, exportado-csv, impresso.",
+          "acceptance_criteria": [
+            "Todos os 5 estados do contrato implementados",
+            "Exportacao chama POST /relatorios/exportar e baixa CSV; composicao salva via POST /relatorios/composicoes",
+            "Tela e somente leitura sobre os dados (nenhuma acao de edicao renderizada)"
+          ]
+        },
+        {
+          "id": "feat-086",
+          "name": "Tela auditoria",
+          "description": "Tela #auditoria com cmp-auditoria-filtros, cmp-data-table (log) e cmp-perm-matrix (matriz de perfis US-27), incluindo teste de isolamento por tenant. Estados: log, filtrado, empty, matriz-perfis, tenant-negado.",
+          "acceptance_criteria": [
+            "Todos os 5 estados do contrato implementados",
+            "Log filtravel por usuario/entidade/acao/periodo via GET /auditoria, somente leitura",
+            "Matriz de perfis exibe permissoes por modulo via GET /perfis",
+            "Teste de tenant via GET /tenants/{id}/ordens exibe estado tenant-negado quando negado"
+          ]
+        }
+      ],
+      "hints": {
+        "existing_files": [
+          "apps/web/src/ (shell, dataviz SVG das sprints 014/018 — reutilizar padroes)",
+          "supabase/functions/auditoria-painel/schemas.ts (sprint-025)",
+          "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+        ],
+        "key_interfaces": [
+          "cmp-stat-strip, cmp-chart-kit, cmp-gantt, cmp-heatmap-consumo, cmp-cards-atalho, cmp-fila-atencao, cmp-compositor-relatorio, cmp-janela-relatorio, cmp-auditoria-filtros, cmp-perm-matrix, cmp-card-m2, cmp-tabela-m2, cmp-stat-area-programada, cmp-base-rel-m2",
+          "design-contract.json > screens[dashboard|inicio|relatorios|auditoria].states"
+        ],
+        "architecture_notes": "Ultima sprint: alem das 4 telas, verificar que todas as 24 rotas do design lock estao registradas e navegaveis pela sidebar/paleta conforme permissao. Dataviz SVG nativo com tooltip unico compartilhado, reutilizando utilitarios das sprints 014/018."
+      },
+      "dependencies": [
+        "sprint-006",
+        "sprint-014",
+        "sprint-018",
+        "sprint-025"
+      ],
+      "complexity": "high",
+      "estimated_rounds": 3,
+      "metadata": {
+        "touchesUI": true,
+        "affectedScreenIds": [
+          "dashboard",
+          "inicio",
+          "relatorios",
+          "auditoria"
+        ],
+        "affectedComponentIds": [
+          "cmp-stat-strip",
+          "cmp-chart-kit",
+          "cmp-gantt",
+          "cmp-heatmap-consumo",
+          "cmp-cards-atalho",
+          "cmp-fila-atencao",
+          "cmp-stat-area-programada",
+          "cmp-compositor-relatorio",
+          "cmp-janela-relatorio",
+          "cmp-base-rel-m2",
+          "cmp-tabela-m2",
+          "cmp-card-m2",
+          "cmp-auditoria-filtros",
+          "cmp-perm-matrix",
+          "cmp-data-table"
+        ],
+        "designArtifactPath": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\docs\\Docs20260820_134109\\design\\artifact.html"
+      }
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "created_at": "2026-08-24T12:23:59.041Z",
+    "total_sprints": 26,
+    "total_features": 86
+  }
+}

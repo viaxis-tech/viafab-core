@@ -1,0 +1,491 @@
+{
+  "runId": "20260825_085318-4ff9ed",
+  "summary": "ViaFab e um ERP verticalizado para fabricas de sinalizacao viaria (placas CONTRAN), cobrindo engenharia de produto parametrica, explosao de BOM multinivel, roteiro de fabricacao, PCP (plano + programacao), reserva/movimentacao de estoque, apontamento de chao de fabrica, qualidade, expedicao com romaneio/remessa, rastreabilidade (GED/databook) e auditoria, sob multi-tenant e multi-unidade fabril. O repositorio hoje tem duas metades que nao se falam: (a) um prototipo navegavel single-file (prototype/index.html, 26.081 linhas / ~1,18 MB) que implementa todo o dominio em JavaScript com dados de demonstracao em memoria, e (b) um schema PostgreSQL/Supabase incremental (9 migrations) que cobre apenas nucleo multiempresa/seguranca/auditoria e catalogo de engenharia/recursos. Nao existe camada de aplicacao, nenhuma Edge Function, nenhum fetch/supabase-js: a SPEC atual (secao 3.0/3.5) declara explicitamente que o prototipo nao se conecta ao backend nesta fase.",
+  "domainVocabulary": [
+    { "term": "Tenant / Unidade de fabrica", "meaning": "Empresa (tenants) e planta fabril (unidades_fabrica). No prototipo, TENANTS['T-001'..'T-003'] e S.tenant; catalogo de engenharia e unico, saldo de estoque e por unidade (SALDO/RESERV)." },
+    { "term": "Perfil / perm(screen)", "meaning": "Papel de acesso (pcp, engenharia, almoxarifado, operador, qualidade, expedicao, compras, direcao). Matriz posicional P('r w - ...') sobre MODULOS; w=escrita, r=leitura, -=sem acesso (fail-closed)." },
+    { "term": "Item", "meaning": "Material, componente ou produto (item_tipo: materia_prima|componente|produto). Ids MAT-*, FT-*, PRD-*." },
+    { "term": "Familia construtiva", "meaning": "Catalogo parametrico versionado imutavel (familias_construtivas: parametros_schema, regras, formula_bom, template_roteiro)." },
+    { "term": "Ficha tecnica / linha de ficha", "meaning": "Cabecalho da BOM (fichas_tecnicas, versionada) e arvore multinivel (linhas_ficha, self-fk componente_pai_id + nivel). No prototipo: f.ficha[], f.rascunho, f.versao_publicada, f.ver." },
+    { "term": "Roteiro base / operacao", "meaning": "Sequencia de operacoes por item (roteiros_base, ROT_BASE, roteiroDe(ordem)), com setor, maquina padrao e tempo_padrao_min." },
+    { "term": "Componente gerado", "meaning": "Peca derivada automaticamente da parametrizacao da placa (componentes_gerados, papel corte|quadro|sinal|recorte|fix; gerarComponentesIND, estruturaIND)." },
+    { "term": "Nomenclatura / descricao auxiliar", "meaning": "Codigo CONTRAN da placa (R-19, A-14, ...) usado como identificacao da linha do pedido (NOMENCLATURAS, codDaIdent, categoriaPlaca)." },
+    { "term": "Pedido / demanda", "meaning": "Origem da demanda (DB.pedidos), manual ou via canal ViaSign; linhas com ident, ci (item de contrato), campo (implantacao), arqs." },
+    { "term": "Plano / backlog / fila", "meaning": "Fila priorizada de linhas de pedido antes de virar ordem (DB.plano, backlog(), CRITERIOS, ordenarPlano)." },
+    { "term": "Ordem de producao (OP)", "meaning": "DB.ordens com cfg, snap (snapshot), status (planejada|aguardando-material|em-producao|bloqueada|concluida|expedida), avanco, prazo, eh_lote." },
+    { "term": "Snapshot (SNP-*) / configuracao (CFG-*)", "meaning": "Congelamento imutavel de ficha+BOM+roteiro no momento da geracao da ordem." },
+    { "term": "Programacao", "meaning": "Distribuicao das operacoes da ordem em slots setor x dia util respeitando capacidade (programacao(), capSetorDia, replanejar)." },
+    { "term": "Reserva / separacao / consumo / perda", "meaning": "Ciclo do material: DB.reservas (qtd_necessaria/qtd_reservada/qtd_faltante), DB.separacoes, DB.consumos, DB.perdas." },
+    { "term": "Movimento de estoque / lote / rastreio", "meaning": "DB.movimentos (com sinc: pendente|ok), DB.lotes (saldo, NF, validade), DB.rastreio (lote consumido por ordem/operacao)." },
+    { "term": "Apontamento / estorno", "meaning": "Registro de tempo e consumo por operacao; correcao append-only via ESTORNO_APONTAMENTO dentro da janela de 10 min (JANELA_ESTORNO)." },
+    { "term": "Baixa automatica", "meaning": "Consumo de material da ficha do setor ao concluir a operacao (matDaOperacao, baixaAutomatica, PARAM.baixaAutomatica)." },
+    { "term": "Serie / unidade identificada", "meaning": "ID unitario por peca produzida (ITM-* produto, CMP-* componente) em DB.serie, com QR proprio." },
+    { "term": "Parecer de qualidade (ordem.qa)", "meaning": "{aprovado, motivo, motivo_detalhe, autor, criado_em}; motivos em vocabulario fechado (MOTIVOS_REPROVACAO)." },
+    { "term": "Romaneio / remessa / espelho fiscal", "meaning": "Conferencia de saida (DB.romaneios, ROM_ST), envio confirmado (DB.remessas) e relatorio fiscal/fotografico (espelhoFiscal)." },
+    { "term": "Databook", "meaning": "Dossie de rastreabilidade por pedido (lote + NF + certificado por material consumido)." },
+    { "term": "Custo aberto", "meaning": "Decomposicao material + processo + mao de obra + tempo. No banco: fn_custo_aberto(uuid) (recursao sobre linhas_ficha); no prototipo: custoAberto(tipo, cod)." },
+    { "term": "m2 (metro quadrado)", "meaning": "Indicador de desempenho do segmento, paralelo a contagem de pecas (m2Ordem, desempenhoM2)." },
+    { "term": "Pacote .vfb / viaxis.vfb/1", "meaning": "Contrato de integracao ViaSign -> ViaFab: ZIP com manifest.json de placas, lido e validado client-side (lerPacoteVfb, validarVfb, mapearPlacaVfb)." },
+    { "term": "screen_id / delta", "meaning": "Identificador de tela usado por roteamento/permissao; delta-NNN sao decisoes rastreadas no design contract." },
+    { "term": "Parametros de funcionamento", "meaning": "Chaves de comportamento por fabrica (PARAM: reservaObrigatoria, estoqueNegativo, baixaAutomatica, qualidadeParaExpedir, expedicaoParcial, ...), persistidas em localStorage." }
+  ],
+  "modules": [
+    {
+      "id": "prototype-shell",
+      "name": "PrototypeShell",
+      "path": "prototype/index.html (markup L902-3152; roteador/sessao/nav L15286-16014; listeners globais e boot L25918-26077)",
+      "role": "Shell do SPA: login simulado, sessao com expiracao (startSession/renovarSessao), troca de perfil e tenant, navegacao (NAV, renderNav, route/go, hash + popstate), autorizacao fail-closed (perm, aplicarSomenteLeitura, tela acesso-negado), tema, modal generico (abrirModal/trapModal), toast, paleta de comandos (Ctrl+K), atalhos de teclado, acessibilidade (a11yTabelas) e MutationObserver que reajusta graficos apos cada render.",
+      "callers": ["navegador (entrypoint route(...) na ultima linha do script)"],
+      "dependencies": ["app-state", "design-system", "todos os modules de tela (chama init* e render*)", "chart-kit", "trilha-auditoria"],
+      "risk": "high",
+      "layer": "frontend",
+      "kind": "ui"
+    },
+    {
+      "id": "design-system-tokens",
+      "name": "DesignSystemTokens",
+      "path": "prototype/index.html L7-900 (<style>), mais <style id=\"orient\"> (L888) usado por impressao",
+      "role": "Design system \"ui-obs\" inline: tokens de cor/tipografia/espaco em :root e [data-theme=\"light\"], camada de compatibilidade de nomes antigos, componentes visuais (btn, pill, card, tbl, tabs, split, gantt, heatmap, folha A4, posto do operador, responsivo tablet).",
+      "callers": ["todo o markup e todos os render*", "tools/contraste.mjs (le os tokens como texto)"],
+      "dependencies": [],
+      "risk": "medium",
+      "layer": "frontend",
+      "kind": "util"
+    },
+    {
+      "id": "embedded-design-contract",
+      "name": "EmbeddedDesignContract",
+      "path": "prototype/index.html L3153-15284 (<script type=\"application/json\" id=\"lionclaw-design-contract\">)",
+      "role": "Contrato de design embutido no proprio artefato: visual, navigation, screens, components, dataRequirements, apiExpectations, deltas (ate delta-108). ~12.100 linhas, nunca lido em runtime pelo JS do app (nenhuma leitura de #lionclaw-design-contract foi encontrada).",
+      "callers": ["ferramentas de pipeline/leitura humana"],
+      "dependencies": [],
+      "risk": "medium",
+      "layer": "shared",
+      "kind": "store"
+    },
+    {
+      "id": "app-state-store",
+      "name": "AppStateStore",
+      "path": "prototype/index.html L15339-15368 (PARAM), L15611-15726 (lerLocal/gravarLocal/DB/S), L15728-15757 (SALDO/RESERV/saldoUn)",
+      "role": "Unico store mutavel da aplicacao: DB (ordens, movimentos, reservas, separacoes, consumos, perdas, inspecoes, retrabalhos, eventos, auditoria, plano, prog, serie, romaneios, remessas, lotes, docs, rastreio, vfb, os_ids...), sessao S, saldo por unidade fabril e parametros de funcionamento. Persistencia seletiva em localStorage sob convencao versionada viafab.<estrutura>.v<N> — versao divergente e descartada, nunca migrada. Apenas auditoria, param, painel_periodo, usuario_atalhos e tema sobrevivem a sessao.",
+      "callers": ["praticamente todos os modules (acesso global direto, sem interface de acesso)"],
+      "dependencies": ["domain-catalog-seed"],
+      "risk": "high",
+      "layer": "data",
+      "kind": "store"
+    },
+    {
+      "id": "domain-catalog-seed",
+      "name": "DomainCatalogSeed",
+      "path": "prototype/index.html L15450-15535 (depositos, itens, maquinas, setores, status), L17918-18810 (COMPONENTES, PRODUTOS, FORMATOS, PELICULAS, NOMENCLATURAS, PROD_ATTR), L18806-18878 (CLIENTES, CONTRATOS), L19297-19334 (CARGOS, MAQ_HORA), L19137-19296 (PEDIDOS, TIPO_DOC, lotes/docs)",
+      "role": "Catalogo de dominio de demonstracao embutido como literais JS (origem declarada: seeds.json), mais os acessores canonicos (item, comp, prod, ficha, insumo, deposito, maquina, cliente, contrato).",
+      "callers": ["todos os modules de dominio"],
+      "dependencies": [],
+      "risk": "medium",
+      "layer": "data",
+      "kind": "store"
+    },
+    {
+      "id": "engenharia-fichas",
+      "name": "EngenhariaFichas",
+      "path": "prototype/index.html L17918-18527 (cadastro de itens/produtos, nomenclatura, estruturaIND, gerarComponentesIND, resolverProdutoPadrao), L18431-18527 (versionarFicha, fichaPendente), L20071-20782 (telas de itens e fichas, roteiro por ficha, publicacao/descarte)",
+      "role": "Engenharia de produto: nomenclatura composta em seis partes (nomeBase), geracao automatica de componentes por area/papel, edicao de BOM e roteiro por ficha, rascunho vs. versao publicada imutavel, deteccao de ordens abertas afetadas pela publicacao, esquema SVG da placa (placaEsquema).",
+      "callers": ["prototype-shell", "pedidos-demanda", "plano-producao-engine", "chao-de-fabrica-execucao"],
+      "dependencies": ["domain-catalog-seed", "app-state-store", "custo-engine", "chart-kit", "prototype-shell"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "engine"
+    },
+    {
+      "id": "custo-engine",
+      "name": "CustoEngine",
+      "path": "prototype/index.html L19472-19535 (custoMat, custoMO, custoProc, custoDe, custoAberto, tempoDe, explodir, necessidadeOrdem)",
+      "role": "Explosao recursiva da BOM com perda (qPerda) e composicao de custo aberto (material/processo/mao de obra) e tempo padrao. Deep: interface minima (custoAberto(tipo, cod), explodir(tipo, cod, qtd)) sobre recursao multinivel. Contraparte no banco: fn_custo_aberto(uuid) em supabase/migrations/20260824140400_fn_custo_aberto.sql — implementacao paralela, com formula documentada mas nao equivalente linha a linha a do prototipo.",
+      "callers": ["engenharia-fichas", "plano-producao-engine", "estoque-reservas", "relatorios-painel", "pedidos-demanda", "print-kit"],
+      "dependencies": ["domain-catalog-seed"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "engine"
+    },
+    {
+      "id": "plano-producao-engine",
+      "name": "PlanoProducaoEngine",
+      "path": "prototype/index.html L20783-20911 (previsibilidade: gantt de ordens, consumo projetado, cobertura/ruptura), L22624-23110 (backlog, criterios de prioridade, alocacao de componentes prontos, cronograma por capacidade, preview e geracao de ordens)",
+      "role": "PCP tatico: monta a fila (backlog), prioriza (PRIOS/CRITERIOS), reaproveita componentes ja produzidos (componentesProntos/alocarProntos), consolida linhas de pedidos distintos em ordem de lote, projeta cronograma por CAP_DIA, apura faltas de material e gera as ordens (previaOrdensDoPlano, confirmarGeracaoDoPlano, gerarOrdensDoPlano, criarOrdemDoPlano com CFG-*/SNP-*).",
+      "callers": ["prototype-shell", "pedidos-demanda"],
+      "dependencies": ["app-state-store", "domain-catalog-seed", "custo-engine", "estoque-reservas", "trilha-auditoria", "prototype-shell"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "engine"
+    },
+    {
+      "id": "programacao-engine",
+      "name": "ProgramacaoEngine",
+      "path": "prototype/index.html L23111-23607",
+      "role": "Programacao fina: calendario util, capacidade por setor/dia (capSetorDia), alocacao de cada operacao do roteiro em slots (programacao()), agregacao por periodo (dia/semana/mes), deteccao de sobrecarga e atraso previsto, replanejar(id, dia, motivo) com ancora persistida em DB.prog, exportacao CSV da programacao.",
+      "callers": ["prototype-shell"],
+      "dependencies": ["app-state-store", "domain-catalog-seed", "chao-de-fabrica-execucao", "estoque-reservas", "trilha-auditoria"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "engine"
+    },
+    {
+      "id": "estoque-reservas",
+      "name": "EstoqueReservas",
+      "path": "prototype/index.html L16407-16759 (reserva, recalculo, liberacao, separacao, movimentos, OCR de anexo de entrada)",
+      "role": "Necessidade por ordem, reserva parcial com qtd_faltante, recalculo com delta explicito, liberacao devolvendo saldo, separacao contra reserva, lancamento de movimento com lote e sinc pendente/ok, classificacao e extracao heuristica de dados de NF/certificado (classificarDoc, extrair, lerAnexos).",
+      "callers": ["prototype-shell", "plano-producao-engine", "chao-de-fabrica-execucao", "programacao-engine"],
+      "dependencies": ["app-state-store", "domain-catalog-seed", "custo-engine", "ged-rastreabilidade", "trilha-auditoria"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "service"
+    },
+    {
+      "id": "chao-de-fabrica-execucao",
+      "name": "ChaoDeFabricaExecucao",
+      "path": "prototype/index.html L16078-16406 (roteiro da ordem, ESTORNO_APONTAMENTO, desbloquearOperacao), L16760-17059 (posto do operador, timer, consumo, perda, bloqueio, finalizarOperacao, corrigirApontamento), L19349-19470 (emitirSeries, serializar), L21522-21639 (matDaOperacao, baixaAutomatica)",
+      "role": "Nucleo de execucao: cronometro por operacao, apontamento de tempo/consumo/perda, baixa automatica de material do setor com consumo FIFO de lote (baixarLote), transferencia de deposito do item pronto, emissao de unidades identificadas, trilha append-only de estorno com janela de 10 min e desbloqueio explicito por PCP (w) ou Qualidade (w) — nunca pelo operador.",
+      "callers": ["prototype-shell", "qualidade", "programacao-engine"],
+      "dependencies": ["app-state-store", "estoque-reservas", "ged-rastreabilidade", "qualidade", "trilha-auditoria", "prototype-shell"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "engine"
+    },
+    {
+      "id": "qualidade",
+      "name": "Qualidade",
+      "path": "prototype/index.html L15539-15610 (vocabulario fechado e criarParecerQA), L17060-17169 (fila de inspecao, registro de parecer, bloqueio da ordem)",
+      "role": "Fila \"aguardando inspecao\", registro de inspecao com criterio critico, parecer estruturado com motivo de vocabulario fechado, bloqueio/retencao da ordem reprovada e caminho de retrabalho que reabre operacao.",
+      "callers": ["prototype-shell", "expedicao-romaneio", "relatorios-painel"],
+      "dependencies": ["app-state-store", "chao-de-fabrica-execucao", "trilha-auditoria"],
+      "risk": "medium",
+      "layer": "main",
+      "kind": "service"
+    },
+    {
+      "id": "expedicao-romaneio",
+      "name": "ExpedicaoRomaneio",
+      "path": "prototype/index.html L17170-17741 (selecao item a item, carrinho, romaneio, conferencia por QR, confirmacao de saida parcial, remessas, folhas de romaneio/remessa), L25157-25218 (espelhoFiscal, csvEspelho)",
+      "role": "Expedicao unidade a unidade: agrupamento por pedido/item, leitura de QR (lerQR), romaneio em conferencia -> encerrado, remessa confirmada (com devolucao do saldo nao conferido ao deposito quando PARAM.expedicaoParcial), retencao por qualidade (retidasQA), espelho fiscal com fotos e itens de contrato.",
+      "callers": ["prototype-shell"],
+      "dependencies": ["app-state-store", "qualidade", "contratos-medicao", "qr-encoder", "print-kit", "trilha-auditoria"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "service"
+    },
+    {
+      "id": "ged-rastreabilidade",
+      "name": "GedRastreabilidade",
+      "path": "prototype/index.html L19167-19296 (lotes, documentos, baixarLote, databookDoPedido), L23608-23792 (acervo, busca com realce em OCR, databook por pedido, exportacao/impressao)",
+      "role": "Acervo documental por material/lote (NF, certificado, laudo, validade), consumo FIFO por lote com trilha DB.rastreio, cobertura de lastro documental e montagem do databook por pedido.",
+      "callers": ["estoque-reservas", "chao-de-fabrica-execucao", "prototype-shell"],
+      "dependencies": ["app-state-store", "domain-catalog-seed", "print-kit"],
+      "risk": "medium",
+      "layer": "main",
+      "kind": "service"
+    },
+    {
+      "id": "pedidos-demanda",
+      "name": "PedidosDemanda",
+      "path": "prototype/index.html L21640-22623 (pedidos, linhas, arquivos da placa, implantacao, template de planilha, importacao .vfb/demo, envio ao plano)",
+      "role": "Origem da demanda: cadastro/edicao de pedido e linhas com nomenclatura CONTRAN, item de contrato sugerido (ciSugerido), dados de implantacao (rodovia/km/coordenada), anexos por linha, importacao por planilha CSV/TSV (parsePlanilha) e por pacote ViaSign, verificacao de viabilidade de prazo contra capacidade e envio ao plano.",
+      "callers": ["prototype-shell"],
+      "dependencies": ["viasign-vfb-adapter", "engenharia-fichas", "contratos-medicao", "custo-engine", "plano-producao-engine", "estoque-reservas", "trilha-auditoria"],
+      "risk": "high",
+      "layer": "main",
+      "kind": "service"
+    },
+    {
+      "id": "viasign-vfb-adapter",
+      "name": "ViaSignVfbAdapter",
+      "path": "prototype/index.html L18902-19118 (VFB_SCHEMA='viaxis.vfb/1', lerZip, extrairZip, lerPacoteVfb, validarVfb, mapearPlacaVfb, arqsVfb, marcarColisoesDimensao, avisoReimportVfb)",
+      "role": "Adapter do contrato de integracao com o ViaSign: leitor de ZIP proprio (EOCD + DecompressionStream('deflate-raw')), validacao de manifesto, traducao do vocabulario ViaSign para o vocabulario ViaFab (VFB_FORMA/VFB_PEL/VFB_SUBS/VFB_INST), deteccao de colisao de chave dimensional e de reimportacao de revisao. Nao ha rede: o pacote entra por <input type=file>.",
+      "callers": ["pedidos-demanda"],
+      "dependencies": ["engenharia-fichas", "domain-catalog-seed"],
+      "risk": "medium",
+      "layer": "external",
+      "kind": "adapter"
+    },
+    {
+      "id": "contratos-medicao",
+      "name": "ContratosMedicao",
+      "path": "prototype/index.html L18812-18878 (CONTRATOS, valorLinha, itemCtr), L24701-24995 (telas de contrato, medicao, importacao de itens de contrato)",
+      "role": "Contrato do cliente como planilha de itens com preco por un ou m2, criterio de faturamento (area nominal vs. geometrica) e medicao por unidade expedida.",
+      "callers": ["pedidos-demanda", "expedicao-romaneio", "relatorios-painel", "prototype-shell"],
+      "dependencies": ["app-state-store", "domain-catalog-seed", "expedicao-romaneio"],
+      "risk": "medium",
+      "layer": "main",
+      "kind": "service"
+    },
+    {
+      "id": "relatorios-painel",
+      "name": "RelatoriosPainel",
+      "path": "prototype/index.html L19782-20070 (indicador m2 e painel da fabrica), L21158-21237 (clientes/previsao de entrega), L21238-21521 (relatorios configuraveis + exportacao), L23793-23864 (mao de obra), L23865-24044 (orcamento e BI de custo)",
+      "role": "Camada analitica: KPIs de ordens/atraso/ruptura, aderencia de prazo, conversao em m2 por dia/semana/mes, relatorios parametrizaveis (RELS, colunas, janela de datas, agrupamento, CSV/PDF), precificacao com margem/imposto e paineis de custo.",
+      "callers": ["prototype-shell"],
+      "dependencies": ["app-state-store", "custo-engine", "chart-kit", "print-kit", "domain-catalog-seed"],
+      "risk": "medium",
+      "layer": "main",
+      "kind": "service"
+    },
+    {
+      "id": "chart-kit",
+      "name": "ChartKit",
+      "path": "prototype/index.html L19531-19736 (chStack, chLine, chHBar, chDonut, chSpark, eixoY, ajustarCharts, alinharTabelas, tipMove, stat)",
+      "role": "Kit de graficos SVG proprio, sem dependencia externa, com compensacao de escala de viewBox e tooltip global. Deep: interface pequena (chLine(labels, series, opts)), muito comportamento atras.",
+      "callers": ["relatorios-painel", "plano-producao-engine", "programacao-engine", "engenharia-fichas", "prototype-shell"],
+      "dependencies": ["design-system-tokens"],
+      "risk": "low",
+      "layer": "shared",
+      "kind": "util"
+    },
+    {
+      "id": "print-kit",
+      "name": "PrintKit",
+      "path": "prototype/index.html L24996-25156 (etiquetas de placa, foto de conclusao), L25219-25288 (folhaA4, orientar, imprimirFolhas), L25289-25539 (OS impressa: consolidacao de linhas, idOS estavel, folhaOS)",
+      "role": "Molde unico de documento impresso A4 (cabecalho, kv, blocos, apontamento manual, assinaturas) reutilizado por OS, databook, romaneio, remessa, espelho fiscal, proposta, auditoria e etiquetas; consolidacao de linhas de emissao por setor/maquina/cliente/produto e id de OS estavel por grupo (DB.os_ids).",
+      "callers": ["expedicao-romaneio", "ged-rastreabilidade", "relatorios-painel", "trilha-auditoria", "prototype-shell"],
+      "dependencies": ["qr-encoder", "design-system-tokens", "custo-engine"],
+      "risk": "medium",
+      "layer": "shared",
+      "kind": "util"
+    },
+    {
+      "id": "qr-encoder",
+      "name": "QrEncoder",
+      "path": "prototype/index.html L24045-24311",
+      "role": "Implementacao propria de QR Code modelo 2, modo byte, nivel M, versoes 1-10: Reed-Solomon sobre GF(256), mascaras com escolha por penalidade, BCH de formato/versao, saida SVG. Exemplo mais claro de module deep do repositorio: interface QR.svg(texto, opts).",
+      "callers": ["print-kit", "expedicao-romaneio"],
+      "dependencies": [],
+      "risk": "low",
+      "layer": "shared",
+      "kind": "util"
+    },
+    {
+      "id": "trilha-auditoria",
+      "name": "TrilhaAuditoria",
+      "path": "prototype/index.html L15759-15777 (audit, evento, toast), L17742-17917 (tela de auditoria: filtros, busca, paginacao, matriz de perfis, exportacao CSV/PDF)",
+      "role": "Trilha append-only de acoes por tenant/usuario/modulo, linha do tempo de eventos por ordem (DB.eventos) e a unica estrutura de DB persistida entre sessoes (viafab.auditoria.v1). Contraparte no banco: tabela auditoria com append-only garantido em duas camadas (ausencia de policy + REVOKE UPDATE/DELETE inclusive de service_role).",
+      "callers": ["todos os modules de dominio (chamadas diretas a audit(...)/evento(...))"],
+      "dependencies": ["app-state-store", "print-kit"],
+      "risk": "medium",
+      "layer": "main",
+      "kind": "service"
+    },
+    {
+      "id": "admin-config",
+      "name": "AdminConfig",
+      "path": "prototype/index.html L24312-24535 (pagina inicial: atalhos por perfil, resumoCritico, fila de atencao), L25540-25795 (unidades e transferencias), L25796-25962 (parametros do sistema)",
+      "role": "Configuracao operacional e entrada do usuario: atalhos personalizados por perfil persistidos, resumo critico transversal (atrasos, falta de material, rupturas, pendencias de sync, fila de QA), gestao de unidades fabris/transferencia e edicao dos PARAM com explicacao do efeito de cada chave.",
+      "callers": ["prototype-shell"],
+      "dependencies": ["app-state-store", "todos os modules de dominio (leitura para o resumo)", "trilha-auditoria"],
+      "risk": "medium",
+      "layer": "main",
+      "kind": "service"
+    },
+    {
+      "id": "supabase-core-schema",
+      "name": "SupabaseCoreSchema",
+      "path": "supabase/migrations/20260824130246_enable_extensions.sql, supabase/migrations/20260824130346_core_multiempresa_tables.sql, supabase/migrations/20260824130446_auditoria_append_only.sql, supabase/migrations/20260824130546_rls_fail_closed_policies.sql",
+      "role": "Fundacao multiempresa e seguranca: tenants, unidades_fabrica, perfis (matriz de permissao em jsonb), usuarios_perfil, usuarios_unidades_concedidas, usuario_atalhos, auditoria. Padrao arquitetural explicito: schema e policy em migrations separadas, RLS fail-closed com claims lidos so de auth.jwt() -> 'app_metadata', GRANT minimo por tabela (nunca DELETE).",
+      "callers": [],
+      "dependencies": ["auth.users (Supabase Auth)", "supabase/config.toml"],
+      "risk": "medium",
+      "layer": "data",
+      "kind": "store"
+    },
+    {
+      "id": "supabase-engenharia-schema",
+      "name": "SupabaseEngenhariaSchema",
+      "path": "supabase/migrations/20260824140000_engenharia_catalogo_tables.sql, supabase/migrations/20260824140100_engenharia_recursos_tables.sql, supabase/migrations/20260824140200_engenharia_versionamento_triggers.sql, supabase/migrations/20260824140300_engenharia_rls_policies.sql, supabase/migrations/20260824140400_fn_custo_aberto.sql",
+      "role": "Catalogo de engenharia (familias_construtivas, normas_tecnicas, itens, produtos_padrao, fichas_tecnicas, linhas_ficha, componentes_gerados, roteiros_base) e recursos (setores, maquinas, cargos), com imutabilidade versionada por trigger (bloqueio de UPDATE/DELETE, versao calculada no INSERT, BOM de ficha publicada congelada) e fn_custo_aberto recursiva security invoker. Nenhum chamador no repositorio; fn_custo_aberto tem grant execute para authenticated/service_role, prevendo GET /itens/{itemId}/custo.",
+      "callers": [],
+      "dependencies": ["supabase-core-schema"],
+      "risk": "medium",
+      "layer": "data",
+      "kind": "store"
+    },
+    {
+      "id": "supabase-tests",
+      "name": "SupabaseTests",
+      "path": "supabase/tests/*.sql (5 arquivos: isolamento RLS, auditoria append-only, RLS de engenharia, versionamento, custo aberto)",
+      "role": "Testes SQL que exercem as invariantes de seguranca e versionamento — a superficie de teste do backend hoje e a interface do banco (policies, triggers, funcao), nao uma API.",
+      "callers": ["execucao manual via Supabase CLI (nao ha CI no repositorio)"],
+      "dependencies": ["supabase-core-schema", "supabase-engenharia-schema", "seed-data"],
+      "risk": "low",
+      "layer": "data",
+      "kind": "util"
+    },
+    {
+      "id": "seed-data",
+      "name": "SeedData",
+      "path": "supabase/seed.sql (492 linhas), seeds.json (~100 KB, raiz)",
+      "role": "Dados de partida. seeds.json e a origem declarada do catalogo de materiais embutido no prototipo (campos sku/nome/custo/estoque/seg/lead/loteMin/loteMult/perda, mais startDate/horizon/modo:\"demanda\" — vocabulario de MRP).",
+      "callers": ["supabase-tests", "prototype (por copia manual, nao por leitura em runtime)"],
+      "dependencies": ["supabase-core-schema", "supabase-engenharia-schema"],
+      "risk": "low",
+      "layer": "data",
+      "kind": "store"
+    },
+    {
+      "id": "contraste-tool",
+      "name": "ContrasteTool",
+      "path": "tools/contraste.mjs (218 linhas)",
+      "role": "Unico \"teste\" executavel do frontend: le os blocos :root e [data-theme=\"light\"] como texto de prototype/index.html e valida pares de contraste WCAG AA nos dois temas, com exit code != 0 em violacao. Node >= 18, sem dependencias.",
+      "callers": ["execucao manual (node tools/contraste.mjs)"],
+      "dependencies": ["design-system-tokens (acoplamento textual via regex sobre o HTML)"],
+      "risk": "low",
+      "layer": "shared",
+      "kind": "util"
+    },
+    {
+      "id": "docs-pipeline-artifacts",
+      "name": "DocsPipelineArtifacts",
+      "path": "docs/Docs20260820_134109/ (PRD, SPEC, stories, sprints, design/design-contract.json 318 KB, design/artifact.html 1,18 MB), docs/Docs20260824_151851/, docs/auditoria-design-20260823.md, docs/decisoes-fase0-20260824.md, PRD.md, stories-requisitos.md, discovery-notes.md, plano-discovery-viafab.md, CLAUDE.md",
+      "role": "Cadeia de artefatos do pipeline de produto (discovery -> PRD -> SPEC -> sprints -> design lock -> auditoria -> decisoes de fase). A SPEC e normativa sobre o codigo: define contrato de funcoes fn_* client-side, regras de janela de estorno, escopo de fallback de publicacao e o que nao deve ser feito nesta fase.",
+      "callers": ["agentes do pipeline", "leitura humana"],
+      "dependencies": [],
+      "risk": "low",
+      "layer": "shared",
+      "kind": "util"
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow-auth-routing",
+      "name": "Autenticacao, roteamento e autorizacao fail-closed",
+      "steps": [
+        "route(destino) normaliza hash/popstate e resolve o screen (MODULOS.indexOf(alvo)), caindo para PERFIS[S.perfil].home quando o alvo nao existe.",
+        "perm(screen) consulta a matriz posicional do perfil; '-' desvia para acesso-negado e audita a tentativa; 'r' aplica aplicarSomenteLeitura(screen) desabilitando controles.",
+        "renderNav() reconstroi a sidebar somente com o que o perfil enxerga; a paleta (Ctrl+K) e os atalhos g+letra filtram pelo mesmo perm.",
+        "Sessao expira por inatividade (PARAM.sessaoMin); qualquer click|keydown|wheel|touchstart renova."
+      ]
+    },
+    {
+      "id": "flow-demanda-plano-ordens",
+      "name": "Demanda -> plano -> ordens de producao",
+      "steps": [
+        "Pedido nasce manual, por planilha (parsePlanilha) ou por pacote ViaSign; linhas recebem nomenclatura, item de contrato e prazo.",
+        "incluirNoPlano(...) empurra as linhas nao planejadas para DB.plano; ordenarPlano() aplica o criterio vigente.",
+        "alocarProntos() desconta componentes ja produzidos em DB.serie; cronogramaPlano() distribui por CAP_DIA; materiaisDoPlano() apura cobertura.",
+        "previaOrdensDoPlano() monta o preview (primeiras 20 + resumo agregado) e confirmarEfeito() exige confirmacao explicita.",
+        "gerarOrdensDoPlano() -> criarOrdemDoPlano() cria OP-* com CFG-*/SNP-*; falta de material nao bloqueia: a ordem nasce com bloqueio_motivo visivel ao operador em leitura."
+      ]
+    },
+    {
+      "id": "flow-reserva-separacao",
+      "name": "Reserva e separacao de material",
+      "steps": [
+        "necessidadeDe(ordem) explode a BOM (explodir + perda) menos o que ja esta reservado.",
+        "reservarMaterial() estorna a reserva vigente antes de gravar a nova e registra reserva parcial com qtd_faltante (saldo negativo proibido).",
+        "recalcularReserva() e preview puro (sem gravar); liberarReserva() devolve saldo e e reversivel, entao nao pede confirmacao.",
+        "Separacao debita fis/res do item na unidade corrente e alimenta sepDe(ordem, item)."
+      ]
+    },
+    {
+      "id": "flow-chao-de-fabrica",
+      "name": "Execucao no chao de fabrica",
+      "steps": [
+        "Operador escolhe a ordem no posto; setorAtualDe aponta a primeira operacao nao concluida do roteiroDe(ordem).",
+        "Timer roda; consumo e perda sao apontados contra o separado, com bloqueio/justificativa conforme PARAM.consumoAcimaSeparado.",
+        "finalizarOperacao(min) -> baixaAutomatica(o, op): matDaOperacao calcula o material daquele setor, baixarLote consome lotes FIFO gravando DB.rastreio, transfere o item pronto de deposito e marca baixado=true.",
+        "serializar(o, op) emite unidades identificadas (CMP-*/ITM-*) e, na ultima operacao, a foto de conclusao quando exigida.",
+        "Correcao so por corrigirApontamento() dentro de JANELA_ESTORNO (10 min), gerando nova linha em ESTORNO_APONTAMENTO; passada a janela, so desbloquearOperacao() por PCP(w) ou Qualidade(w), com escolha explicita entre retrabalho com ou sem novo material."
+      ]
+    },
+    {
+      "id": "flow-qualidade-expedicao",
+      "name": "Qualidade -> expedicao",
+      "steps": [
+        "Ordem concluida entra em ordensAguardandoInspecao(); a inspecao grava DB.inspecoes e criarParecerQA preenche ordem.qa.",
+        "Reprovacao bloqueia a ordem e abre o caminho de retrabalho (reabre operacao via desbloqueio de Qualidade).",
+        "Unidades produzidas no deposito de expedicao entram em serieAptas(); retidasQA() segrega o que PARAM.qualidadeParaExpedir retem.",
+        "Selecao item a item -> gerarRomaneio() -> conferencia (checkbox ou leitura de QR via lerQR) -> confirmarSaida() gera REM-*; o nao conferido volta ao deposito quando PARAM.expedicaoParcial.",
+        "espelhoFiscal(remessa) e folhasRemessa(...) imprimem via folhaA4; medicao de contrato consome as unidades expedidas."
+      ]
+    },
+    {
+      "id": "flow-engenharia-publicacao",
+      "name": "Engenharia: rascunho -> publicacao",
+      "steps": [
+        "abrirFicha(cod) carrega a ficha; edicoes de BOM/roteiro marcam FI.sujo e vivem em f.rascunho.",
+        "descartarFicha() reverte para f.versao_publicada (incluindo rot[]).",
+        "Publicar chama ordensAbertasDaFicha(cod) e segmenta ordens afetadas/nao afetadas; a escolha de fallback (manter snapshot ou herdar) e unica e global, com ordens que ja tem operacao baixado=true forcadas a manter o snapshot.",
+        "versionarFicha() grava nova versao — nunca UPDATE de conteudo. No banco, a mesma invariante e imposta por trg_versao_ficha + trg_ficha_update_restrito + trg_bloqueia_linha_ficha_publicada."
+      ]
+    },
+    {
+      "id": "flow-importacao-vfb",
+      "name": "Importacao de pacote ViaSign (.vfb)",
+      "steps": [
+        "Usuario solta o .vfb; lerPacoteVfb abre o ZIP (parse de EOCD + DecompressionStream) e extrai manifest.json.",
+        "validarVfb checa schema viaxis.vfb/1, coerencia de area/bbox e duplicidade; mapearPlacaVfb traduz forma/pelicula/substrato/implantacao para o vocabulario ViaFab.",
+        "marcarColisoesDimensao sinaliza placas que colapsam na mesma chave dimensional; a importacao so habilita apos conferencia linha a linha.",
+        "importarVfb(cliente, prazo) cria o pedido, resolve/cria produtos padrao (resolverProdutoPadrao -> gerarComponentesIND) e audita quantas colisoes foram confirmadas e por quem."
+      ]
+    },
+    {
+      "id": "flow-backend-supabase",
+      "name": "Backend Supabase (fluxo declarado, sem consumidor)",
+      "steps": [
+        "Migrations criam tabelas sem RLS; migration dedicada por dominio habilita RLS force, concede GRANT minimo e cria policies baseadas em auth.jwt() -> 'app_metadata' ->> 'tenant_id'.",
+        "Triggers impoem versionamento imutavel independentemente de RLS (valem inclusive para service_role, que tem BYPASSRLS).",
+        "auditoria bloqueia UPDATE/DELETE em duas camadas independentes (ausencia de policy + REVOKE).",
+        "fn_custo_aberto(item) percorre linhas_ficha recursivamente e soma roteiro/cargo — prevista para GET /itens/{itemId}/custo, sem chamador implementado."
+      ]
+    }
+  ],
+  "hotspots": [
+    {
+      "id": "hotspot-1",
+      "title": "Monolito single-file prototype/index.html (26.081 linhas, ~1,18 MB, um unico escopo global)",
+      "paths": ["prototype/index.html"],
+      "reason": "Um arquivo concentra CSS (L7-900), markup de 25 telas (L902-3152), o design contract embutido de ~12.100 linhas (L3153-15284) e ~10.800 linhas de JavaScript (L15286-26078). Nao existe seam: nao ha modulos ES, nenhum import/export, e cada module do dominio conversa com os outros por identificadores globais (DB, S, PARAM, ITENS, ficha, item). A interface de qualquer parte e \"o arquivo inteiro\", entao locality e leverage sao proximos de zero: mudar PARAM.baixaAutomatica implica ler finalizarOperacao, baixaAutomatica, matDaOperacao, renderParametros e renderChao sem nenhuma fronteira que limite a busca. A superficie de teste hoje e apenas tools/contraste.mjs, que le o arquivo como texto. Merece triagem: onde cortar o primeiro seam sem quebrar o design lock.",
+      "suggestedNextPhase": "target-triage"
+    },
+    {
+      "id": "hotspot-2",
+      "title": "Motor de PCP (plano + programacao + geracao de ordens) com logica de dominio lendo o DOM",
+      "paths": [
+        "prototype/index.html L20783-20911",
+        "prototype/index.html L22624-23607"
+      ],
+      "reason": "~2.800 linhas concentram a maior parte da regra de negocio do repositorio (prioridade, consolidacao em ordem de lote, alocacao de componentes prontos, capacidade por setor/dia, replanejamento com ancora, faltas). Duas decisoes de dominio sao lidas direto da UI dentro das funcoes de geracao — $('#pn-consol button[data-c=\"1\"]').getAttribute('aria-pressed') === 'true' aparece em previaOrdensDoPlano() (L22960) e novamente em gerarOrdensDoPlano() (L23042). Alem de duplicar a leitura, isso torna o motor intestavel sem DOM e faz o preview e a execucao dependerem de dois momentos distintos de leitura do mesmo botao. Ha ainda logica de capacidade repetida em tres lugares (CAP_DIA, capSetorDia, cargaPorSetor).",
+      "suggestedNextPhase": "target-triage"
+    },
+    {
+      "id": "hotspot-3",
+      "title": "Dupla fonte de verdade do dominio: prototipo JS vs. schema Supabase, sem ponte",
+      "paths": [
+        "prototype/index.html L19472-19535",
+        "supabase/migrations/20260824140400_fn_custo_aberto.sql",
+        "supabase/migrations/20260824140200_engenharia_versionamento_triggers.sql",
+        "supabase/migrations/20260824130346_core_multiempresa_tables.sql"
+      ],
+      "reason": "O mesmo dominio esta modelado duas vezes, com formas diferentes e nenhuma verificacao cruzada. Custo aberto existe como custoAberto()/custoMat/custoMO/custoProc (L19472-19503) e como fn_custo_aberto SQL, com regras de composicao declaradamente decididas na migration (\"a SPEC define as colunas de saida mas nao a formula interna\"); versionamento de ficha existe como versionarFicha() e como trg_versao_ficha/trg_ficha_update_restrito; permissao existe como matriz posicional P('r w - ...') em JS e como perfis.permissoes jsonb no banco; saldo por unidade existe como SALDO/RESERV em memoria e nao existe no schema (nenhuma migration de estoque/ordens/qualidade/expedicao foi criada ainda). Nao ha fetch, createClient nem supabase-js no repositorio. A fase 4 tera de decidir qual lado e a interface e qual e implementacao — hoje ambos se comportam como implementacao sem interface comum.",
+      "suggestedNextPhase": "target-triage"
+    },
+    {
+      "id": "hotspot-4",
+      "title": "Cadeia de apontamento/baixa/estorno/desbloqueio com transacionalidade emulada",
+      "paths": [
+        "prototype/index.html L16109-16406",
+        "prototype/index.html L16760-17059",
+        "prototype/index.html L21522-21639"
+      ],
+      "reason": "E o ponto de maior risco de corrupcao de dado do sistema e esta espalhado por tres regioes distantes do arquivo. finalizarOperacao orquestra baixaAutomatica -> baixarLote (FIFO sobre DB.lotes) -> transferencia de deposito -> serializar -> evento/audit, e guarda um snapshot manual de contadores (ev0, se0, au0, r0, c0, m0) para conseguir reverter parcialmente — ou seja, transacionalidade emulada por indice de array. O estorno vive em ESTORNO_APONTAMENTO, declarado no proprio comentario como \"estrutura volatil\" nao persistida, e a janela de 10 min usa o relogio do cliente (limitacao reconhecida na SPEC). Qualquer refatoracao aqui precisa preservar a invariante que a SPEC chama de \"zero duplicacao de baixa de estoque\".",
+      "suggestedNextPhase": "target-triage"
+    }
+  ],
+  "unknowns": [
+    "Leitura parcial do prototipo. Foram lidas integralmente ~2.500 linhas de prototype/index.html (shell, permissoes, store, boot, listeners, trechos de dominio) e indexadas todas as declaracoes de funcao/constante de topo e todos os comentarios de secao. Afirmacoes sobre o interior de funcoes nao lidas linha a linha (por exemplo, o corpo completo de renderProg, folhaOS, renderRelatorios) foram inferidas de nome, assinatura e comentario de secao — suposicao, nao verificacao.",
+    "Historico git nao consultado. O diretorio .git/ existe, mas git log retornou 'fatal: not a git repository' no ambiente desta execucao. Nao foi possivel verificar autoria, cronologia real das migrations nem divergencia entre prototype/index.html e docs/.../design/artifact.html (1.182.768 vs 1.181.632 bytes — diferenca de ~1 KB nao foi diffada).",
+    "Documentos de produto lidos apenas por indice. PRD.md (78 KB), stories-requisitos.md, discovery-notes.md, plano-discovery-viafab.md, .spec-enricher-suggestions.md, design-brief.md, open-design-prompt.md e os dois sprints*.json nao foram lidos; da SPEC atual foi lida a secao 3 completa e os cabecalhos das demais; da auditoria de design, apenas os cabecalhos. Os 22 P0, os 14 grupos P1 e as 13 decisoes D-01..D-13 nao foram lidos item a item.",
+    "Migrations lidas: 7 de 9 integralmente. 20260824140300_engenharia_rls_policies.sql (389 linhas) foi verificado apenas quanto ao padrao geral (o padrao completo foi confirmado em 20260824130546), e 20260824130546 foi lido ate a linha 90 de 227. supabase/seed.sql (492 linhas) e os 5 arquivos de supabase/tests/ nao foram abertos — a descricao deles vem do nome do arquivo e dos comentarios das migrations correspondentes.",
+    "Nada foi executado. Nao ha evidencia de que as migrations aplicam, de que os testes SQL passam ou de que tools/contraste.mjs termina com exit 0. Nao ha CI no repositorio (.github/ ausente).",
+    "Binarios e artefatos nao inspecionados: .codegraph/codegraph.db (SQLite, 139 KB), prototype/index.preview-*.png, docs/.../design/artifact.html, e os logs em .lionclaw/pipelines/development-v2/.../runtime/logs/.",
+    ".agents/ esta vazio e supabase/snippets/ esta vazio — nenhuma configuracao de agente ou snippet a mapear.",
+    "Nao verificado se o design contract embutido e consumido em runtime. A busca por leitura do id lionclaw-design-contract no JS nao encontrou ocorrencia, o que sustenta a leitura de 'artefato inerte', mas a busca foi por nome do id apenas.",
+    "Cobertura de screens vs. SPEC nao conferida. Existem 25 <section class=\"screen\"> no markup e 22 entradas em MODULOS; a diferenca (login, acesso-negado, e telas fora de NAV) foi observada mas nao reconciliada item a item com o mapa de paginas da SPEC 4.1."
+  ]
+}

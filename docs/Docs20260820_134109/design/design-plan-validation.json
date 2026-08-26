@@ -1,0 +1,41 @@
+{
+  "inputHash": "a650aaee5bee7af9c3dd66e94c1247489b0ed7fd36b8c2a93260cce9731db0d7",
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": [],
+    "knownStoryIds": [
+      "US-01",
+      "US-02",
+      "US-03",
+      "US-04",
+      "US-05",
+      "US-06",
+      "US-07",
+      "US-08",
+      "US-09",
+      "US-10",
+      "US-11",
+      "US-12",
+      "US-13",
+      "US-14",
+      "US-15",
+      "US-16",
+      "US-17",
+      "US-18",
+      "US-19",
+      "US-20",
+      "US-21",
+      "US-22",
+      "US-23",
+      "US-24",
+      "US-25",
+      "US-26",
+      "US-27",
+      "US-28"
+    ]
+  },
+  "validatorReport": null,
+  "fallback": false,
+  "source": "deterministic"
+}

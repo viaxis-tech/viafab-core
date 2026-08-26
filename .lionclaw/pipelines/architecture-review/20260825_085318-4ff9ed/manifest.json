@@ -1,0 +1,22 @@
+{
+  "pipelineType": "architecture-review",
+  "runId": "20260825_085318-4ff9ed",
+  "projectId": "5cb29c5c3df7bedfb70951e61b215ac0",
+  "projectPath": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core",
+  "createdAt": "2026-08-25T11:53:18.681Z",
+  "updatedAt": "2026-08-25T13:13:14.551Z",
+  "selectedCandidateId": "C1",
+  "documents": {
+    "mapMd": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\.lionclaw\\pipelines\\architecture-review\\20260825_085318-4ff9ed\\ArchitectureMap-20260825_085318-4ff9ed.md",
+    "mapJson": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\.lionclaw\\pipelines\\architecture-review\\20260825_085318-4ff9ed\\ArchitectureMap-20260825_085318-4ff9ed.json",
+    "candidatesMd": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\.lionclaw\\pipelines\\architecture-review\\20260825_085318-4ff9ed\\ArchitectureCandidates-20260825_085318-4ff9ed.md",
+    "candidatesJson": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\.lionclaw\\pipelines\\architecture-review\\20260825_085318-4ff9ed\\ArchitectureCandidates-20260825_085318-4ff9ed.json",
+    "diagnosisMd": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\.lionclaw\\pipelines\\architecture-review\\20260825_085318-4ff9ed\\ArchitectureDiagnosis-20260825_085318-4ff9ed.md",
+    "diagnosisJson": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\.lionclaw\\pipelines\\architecture-review\\20260825_085318-4ff9ed\\ArchitectureDiagnosis-20260825_085318-4ff9ed.json",
+    "decisionsMd": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\.lionclaw\\pipelines\\architecture-review\\20260825_085318-4ff9ed\\ArchitectureDecisions-20260825_085318-4ff9ed.md",
+    "decisionsJson": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\.lionclaw\\pipelines\\architecture-review\\20260825_085318-4ff9ed\\ArchitectureDecisions-20260825_085318-4ff9ed.json",
+    "specSourceMd": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\.lionclaw\\pipelines\\architecture-review\\20260825_085318-4ff9ed\\ArchitectureSpecSource-20260825_085318-4ff9ed.md",
+    "specMd": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\.lionclaw\\pipelines\\architecture-review\\20260825_085318-4ff9ed\\SPEC-20260825_085318-4ff9ed.md",
+    "sprintsJson": "C:\\Users\\Claudio Fernandes\\Desktop\\repo-files\\viafab-core\\.lionclaw\\pipelines\\architecture-review\\20260825_085318-4ff9ed\\sprints-20260825_085318-4ff9ed.json"
+  }
+}

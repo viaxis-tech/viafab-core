@@ -1,0 +1,14 @@
+{
+  "name": "viafab-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ViaFab — ERP verticalizado para fabricacao de sinalizacao viaria. Prototipo e nucleo de dominio.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test",
+    "contraste": "node tools/contraste.mjs"
+  }
+}
