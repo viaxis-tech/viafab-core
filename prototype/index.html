@@ -15760,6 +15760,12 @@ ITENS.forEach(i => {
   });
 });
 const saldoUn = (cod, t) => (SALDO[t] || {})[cod] || 0;
+/* F-2.1: pontes sem colisão de nome para o <script type="module"> instanciar
+   a porta de dados (WP-1.2) sobre o MESMO SALDO/RESERV que os acessores
+   fis/res acima leem — mesmo motivo de window.__item/__ficha/__comp
+   (achado 27/08): const não vira propriedade de window. */
+window.__SALDO = SALDO;
+window.__RESERV = RESERV;
 
 function audit(mod, acao, alvo, dado){
   /* P0-21: sem a unidade no registro não existe trilha por tenant */
@@ -16125,6 +16131,7 @@ function roteiroDe(id){
    (tipo 'baixa' em aberto × 'correcao'/'desbloqueio' já tratada).
    ============================================================ */
 let EST_SEQ = 0;
+let GRUPO_ESCRITA_SEQ = 0;
 const ESTORNO_APONTAMENTO = [];
 /* chave estável de correlação — mesmo formato já usado em audit()/evento() */
 const opKey = (ordemId, op) => ordemId + ' / ' + op.op;
@@ -16475,15 +16482,19 @@ function renderEstoque(){
 }
 /* P0-10: liberar é reversível e não pede confirmação (RNF-03) — devolve o saldo ao disponível
    e grava liberada_em no próprio registro, em vez de apagá-lo (histórico da ordem, US-06). */
-function liberarReserva(id, avisar){
+async function liberarReserva(id, avisar){
   const ts = now();
   let n = 0;
-  reservasAtivas(id).forEach(r => {
+  for(const r of reservasAtivas(id)){
     const it = item(r.item);
-    if(it) it.res = window.aplicarSaldo(it.res, -r.res, { estoqueNegativo: false });
+    if(it){
+      const atual = it.res;
+      const novo = window.aplicarSaldo(atual, -r.res, { estoqueNegativo: false });
+      await window.PORTA.ajustarSaldo(r.item, S.tenant, { res: novo - atual });
+    }
     r.liberada_em = ts;
     n++;
-  });
+  }
   if(avisar){
     const o = ordem(id);
     if(o && PARAM.reservaObrigatoria && o.status === 'planejada') o.status = 'aguardando-material';
@@ -16498,24 +16509,26 @@ function liberarReserva(id, avisar){
 /* P0-10: reservar sempre estorna a reserva vigente antes de gravar a nova — nunca soma
    (RF-12). Saldo insuficiente vira reserva parcial: reserva o disponível e registra a
    diferença em qtd_faltante; saldo negativo é proibido. Chamada só após confirmarEfeito(). */
-function reservarMaterial(id){
+async function reservarMaterial(id){
   const need = necessidadeDe(id);
-  liberarReserva(id, false);
+  await liberarReserva(id, false);
   const ts = now();
   let totNec = 0, totRes = 0, totFalta = 0;
   const faltaItens = [];
-  need.forEach(n => {
-    const it = item(n.item); if(!it) return;
+  for(const n of need){
+    const it = item(n.item); if(!it) continue;
     const disp = Math.max(0, it.fis - it.res);
     const res = Math.round(Math.min(disp, n.nec) * 100) / 100;
     const falta = Math.round(Math.max(0, n.nec - res) * 100) / 100;
-    it.res = window.aplicarSaldo(it.res, res, { estoqueNegativo: false });
+    const atual = it.res;
+    const novo = window.aplicarSaldo(atual, res, { estoqueNegativo: false });
+    await window.PORTA.ajustarSaldo(n.item, S.tenant, { res: novo - atual });
     totNec += n.nec; totRes += res; totFalta += falta;
     if(falta > 0.001) faltaItens.push(n.item);
     DB.reservas.push({ordem:id, item:n.item, dep:n.dep, nec:n.nec, res:res,
       qtd_necessaria:n.nec, qtd_reservada:res, qtd_faltante:falta,
       criada_em:ts, liberada_em:null});
-  });
+  }
   const o = ordem(id);
   if(faltaItens.length){
     if(o && PARAM.reservaObrigatoria) o.status = 'aguardando-material';
@@ -16573,17 +16586,17 @@ function initEstoque(){
       'A reserva vigente desta ordem será estornada e substituída pela nova necessidade calculada.',
       `<tbody><tr><td>Ordem</td><td class="mono">${esc(id)}</td></tr></tbody>`,
       'O saldo reservado anterior será devolvido ao disponível antes da nova reserva.',
-      'Reservar materiais', () => { reservarMaterial(id); });
+      'Reservar materiais', async () => { await reservarMaterial(id); });
   });
   $('#res-recalc').addEventListener('click', () => {
     const id = $('#res-ordem').value;
     if(!id) return;
     recalcularReserva(id);
   });
-  $('#res-free').addEventListener('click', () => {
+  $('#res-free').addEventListener('click', async () => {
     const id = $('#res-ordem').value;
     if(!reservasAtivas(id).length){ toast('Esta ordem não tem reserva ativa.'); return; }
-    liberarReserva(id, true);
+    await liberarReserva(id, true);
   });
   $('#sp-ordem').addEventListener('change', atualizarItensSeparacao);
   $('#sp-item').addEventListener('change', atualizarItensSeparacao);
@@ -16934,7 +16947,7 @@ function initChao(){
     confirmarEfeito('Finalizar ' + op.op, lead, tabela,
       'A baixa de material não pode ser desfeita após 10 minutos.',
       'Finalizar e baixar material',
-      () => finalizarOperacao(min));
+      async () => { await finalizarOperacao(min); });
   });
   $('#cf-undo').addEventListener('click', corrigirApontamento);
   $('#form-cons').addEventListener('submit', e => {
@@ -16997,12 +17010,15 @@ function pararTimer(){ clearInterval(CF.tick); CF.tick = null; CF.ini = null; }
    botão "Corrigir apontamento" continua visível, porém desabilitado com o
    aviso para solicitar desbloqueio ao PCP — nunca some da tela (renderChao). */
 const JANELA_ESTORNO = 10 * 60 * 1000;
-function finalizarOperacao(min){
+async function finalizarOperacao(min){
   pararTimer();
   const o = ordem(CF.ordem), op = CF.op;
   const skip = !!op.pularBaixa;
   const antes = {status:o.status, avanco:o.avanco, fim:o.fim, setor:o.setor, maquina:o.maquina};
-  const ev0 = (DB.eventos[o.id] || []).length, se0 = DB.serie.length, au0 = DB.auditoria.length;
+  /* F-2.1: grupo_escrita_id substitui ev0/se0/au0 (proposta de WP-1.4, resolve
+     Q2, ratificada 27/08/2026) — identifica o que esta chamada escreveu por
+     conteúdo, não por posição no array no momento da chamada. */
+  const grupoEscritaId = window.proximoGrupoEscrita(++GRUPO_ESCRITA_SEQ);
   op.status = 'Concluída';
   const rot = roteiroDe(o.id);
   o.avanco = Math.round(rot.filter(r => r.status === 'Concluída').length / rot.length * 100);
@@ -17012,10 +17028,10 @@ function finalizarOperacao(min){
   audit('Produção', 'Operação finalizada', o.id + ' / ' + op.op, 'tempo = ' + min + ' min'
     + (skip ? ' · sem baixa (retrabalho sem novo material)' : ''));
   const matList = skip ? [] : (PARAM.baixaAutomatica ? matDaOperacao(o, op.setor) : []);
-  const auto = skip ? {baixas:0, transf:0, rev:{itens:[], rastreio:0, consumos:0, movimentos:0}}
+  const auto = skip ? {baixas:0, transf:0, rev:{itens:[]}}
     : ((PARAM.baixaAutomatica || PARAM.transfDepAuto)
-        ? baixaAutomatica(o, op) : {baixas:0, transf:0, rev:{itens:[], rastreio:0, consumos:0, movimentos:0}});
-  const novos = serializar(o, op);
+        ? await baixaAutomatica(o, op, grupoEscritaId) : {baixas:0, transf:0, rev:{itens:[]}});
+  const novos = serializar(o, op, grupoEscritaId);
   if(novos.length){
     const prd = novos.filter(s => s.tipo === 'produto').length;
     evento(o.id, 'Identificação unitária emitida',
@@ -17026,7 +17042,7 @@ function finalizarOperacao(min){
   op.pularBaixa = false;
   registrarEstorno(opKey(o.id, op), 'baixa', matList.map(b => ({cod:b.cod, qtd:b.qtd})), S.usuario);
   CF.und = {ordem:o.id, op:op, ts:Date.now(), min:min, antes:antes,
-            ev0:ev0, se0:se0, au0:au0, rev:auto.rev || {itens:[], rastreio:0, consumos:0, movimentos:0}};
+            grupoEscritaId, rev:auto.rev || {itens:[]}};
   renderChao(); renderNav();
   const prods = novos.filter(x => x.tipo === 'produto');
   if(prods.length) setTimeout(() => modalFotoConclusao(prods, o), 260);
@@ -17045,27 +17061,58 @@ function corrigirApontamento(){
     toast('Janela de correção expirada — solicite desbloqueio ao PCP.'); return;
   }
   const o = ordem(u.ordem);
+  /* F-2.1: conta por grupo_escrita_id, não por comprimento de array — a
+     contagem antiga (DB.serie.length - u.se0) confundia com o que outras
+     ordens/usuários gravaram em DB.serie no meio da janela de 10 min */
+  const qtdSerie = DB.serie.filter(s => s.grupo_escrita_id === u.grupoEscritaId).length;
   abrirModal('Corrigir apontamento de ' + u.op.op,
     `<p class="mo-lead">Devolve <b>${u.rev.itens.length} material(is)</b> ao saldo e ao lote de origem,
-      remove <b>${DB.serie.length - u.se0} identificação(ões)</b> emitida(s) e reabre a operação
+      remove <b>${qtdSerie} identificação(ões)</b> emitida(s) e reabre a operação
       em <b>${esc(u.ordem)}</b>.</p>
      <p class="mo-nota">A correção fica registrada em estorno_apontamento e na auditoria com o responsável.</p>`,
-    'Confirmar correção', () => {
-      /* devolve saldo físico e reservado */
-      u.rev.itens.forEach(x => { const it = item(x.cod); if(it){
-        it.fis = window.aplicarSaldo(it.fis, x.q, { estoqueNegativo: PARAM.estoqueNegativo });
-        it.res = window.aplicarSaldo(it.res, x.q, { estoqueNegativo: false });
-      } });
-      /* devolve o saldo aos lotes exatamente como saiu */
-      DB.rastreio.splice(DB.rastreio.length - u.rev.rastreio, u.rev.rastreio).forEach(r => {
+    'Confirmar correção', async () => {
+      /* F-2.1 (proposta de WP-1.4, resolve Q2, ratificada 27/08/2026): nenhuma
+         remoção física (D3) — devolve saldo pelo guardião + porta, e anula por
+         registro inverso (anula_id) ou por marcação (anulado_por em DB.serie),
+         nunca por splice de índice. O texto acima ("remove") não muda — a
+         palavra descreve o efeito observado pelo operador (a identificação
+         para de contar como ativa), não o mecanismo interno; trocar a palavra
+         tocaria o design lock e fica para revisão formal se o dono quiser. */
+      const grupoCorrecao = window.proximoGrupoEscrita(++GRUPO_ESCRITA_SEQ);
+      /* devolve saldo físico e reservado, através da porta (WP-1.2) */
+      for(const x of u.rev.itens){
+        const it = item(x.cod); if(!it) continue;
+        const atualFis = it.fis, atualRes = it.res;
+        const novoFis = window.aplicarSaldo(atualFis, x.q, { estoqueNegativo: PARAM.estoqueNegativo });
+        const novoRes = window.aplicarSaldo(atualRes, x.q, { estoqueNegativo: false });
+        await window.PORTA.ajustarSaldo(x.cod, S.tenant, { fis: novoFis - atualFis, res: novoRes - atualRes });
+      }
+      /* devolve o saldo aos lotes exatamente como saiu (estado corrente, não
+         log — mesma classe de mutação direta que fis/res antes do guardião)
+         e registra o retorno como linha nova de rastreio, nunca apagando a
+         original */
+      DB.rastreio.filter(r => r.grupo_escrita_id === u.grupoEscritaId).forEach(r => {
         const l = DB.lotes.find(x => x.lote === r.lote && x.item === r.item);
         if(l) l.saldo = Math.round((l.saldo + r.qtd) * 100) / 100;
+        DB.rastreio.push({ts:now(), ordem:r.ordem, item:r.item, lote:r.lote, qtd:-r.qtd, op:r.op,
+          perda:r.perda, semLote:r.semLote, grupo_escrita_id:grupoCorrecao, anula_id:u.grupoEscritaId});
       });
-      DB.consumos.splice(DB.consumos.length - u.rev.consumos, u.rev.consumos);
-      DB.movimentos.splice(0, u.rev.movimentos);
-      DB.serie.splice(u.se0, DB.serie.length - u.se0);
-      (DB.eventos[u.ordem] || []).splice(u.ev0, (DB.eventos[u.ordem] || []).length - u.ev0);
-      DB.auditoria.splice(0, DB.auditoria.length - u.au0);
+      DB.consumos.filter(c => c.grupo_escrita_id === u.grupoEscritaId).forEach(c => {
+        DB.consumos.push({ordem:c.ordem, op:c.op, item:c.item, qtd:-c.qtd, auto:c.auto, lotes:c.lotes,
+          grupo_escrita_id:grupoCorrecao, anula_id:u.grupoEscritaId});
+      });
+      DB.movimentos.filter(m => m.grupo_escrita_id === u.grupoEscritaId).forEach(m => {
+        DB.movimentos.unshift({ts:now(), tipo:'Estorno de ' + m.tipo.toLowerCase(), item:m.item, dep:m.dep,
+          qtd:-m.qtd, resp:S.usuario, sinc:'ok', lote:m.lote, grupo_escrita_id:grupoCorrecao, anula_id:u.grupoEscritaId});
+      });
+      /* DB.serie: marcação, não remoção — mesma classe de mutação já usada em
+         DB.reservas (liberada_em). Telas fora da cadeia saldo/apontamento
+         (expedição, PCP, GED, relatórios) ainda não filtram anulado_por —
+         registrado como pendência em docs/registro-execucao.md, fora do
+         escopo desta fatia */
+      DB.serie.filter(s => s.grupo_escrita_id === u.grupoEscritaId).forEach(s => {
+        s.status = 'anulado'; s.anulado_por = grupoCorrecao;
+      });
       u.op.status = 'Pendente'; u.op.baixado = false; u.op.pularBaixa = false;
       Object.assign(o, u.antes);
       registrarEstorno(opKey(u.ordem, u.op), 'correcao', u.rev.itens, S.usuario);
@@ -19280,7 +19327,7 @@ const lote     = l  => DB.lotes.find(x => x.lote === l);
 const docsDoItem  = c => DB.docs.filter(d => d.item === c);
 const lotesDoItem = c => DB.lotes.filter(l => l.item === c);
 /* baixa de lote por FEFO: vence antes, sai antes; sem validade, entra antes sai antes */
-function baixarLote(cod, dep, q, ordem, op, perda){
+function baixarLote(cod, dep, q, ordem, op, perda, grupoEscritaId){
   let resta = q;
   const fila = DB.lotes.filter(l => l.item === cod && l.saldo > 0)
     .sort((a, b) => (a.validade || '9999') === (b.validade || '9999')
@@ -19291,11 +19338,11 @@ function baixarLote(cod, dep, q, ordem, op, perda){
     const t = Math.min(l.saldo, resta);
     l.saldo = Math.round((l.saldo - t) * 100) / 100;
     resta = Math.round((resta - t) * 100) / 100;
-    DB.rastreio.push({ts:now(), ordem, item:cod, lote:l.lote, qtd:t, op, perda:!!perda});
+    DB.rastreio.push({ts:now(), ordem, item:cod, lote:l.lote, qtd:t, op, perda:!!perda, grupo_escrita_id:grupoEscritaId});
     usados.push(l.lote);
   });
   if(resta > 0.0001){
-    DB.rastreio.push({ts:now(), ordem, item:cod, lote:'—', qtd:resta, op, perda:!!perda, semLote:true});
+    DB.rastreio.push({ts:now(), ordem, item:cod, lote:'—', qtd:resta, op, perda:!!perda, semLote:true, grupo_escrita_id:grupoEscritaId});
     usados.push('—');
   }
   return usados;
@@ -19400,11 +19447,14 @@ const serie     = id => DB.serie.find(s => s.id === id);
 const proxSerie = t => (t === 'produto' ? 'ITM-' : 'CMP-') + String(++SEQ_SERIE).padStart(6, '0');
 const qrSerie   = s => `VIAFAB|ITEM|${s.id}|${s.ordem}|${s.pedido || '-'}`;
 const qrRemessa = r => `VIAFAB|REM|${r.id}|${r.pedidos.join(',')}|${r.itens.length}`;
-function emitirSeries(o, tipo, f, qtd, oi){
+function emitirSeries(o, tipo, f, qtd, oi, grupoEscritaId){
   /* o que a ordem pediu vai para o depósito de expedição ao ser concluído;
      o componente interno fica no depósito da própria ficha, aguardando consumo */
   const ehTopo = (o.itens || []).some(x => x.cod === f.cod);
-  const feitos = DB.serie.filter(s => s.ordem === o.id && s.cod === f.cod).length;
+  /* F-2.1: exclui anulados da contagem — senão uma correção seguida de novo
+     apontamento subconta quantas identificações já existem de verdade
+     (proposta de WP-1.4, resolve Q2) */
+  const feitos = DB.serie.filter(s => s.ordem === o.id && s.cod === f.cod && s.status !== 'anulado').length;
   const falta = Math.max(0, Math.round(qtd) - feitos), out = [];
   for(let i = 0; i < falta; i++){
     const seq = feitos + i + 1;
@@ -19418,24 +19468,25 @@ function emitirSeries(o, tipo, f, qtd, oi){
       dep:ehTopo ? DEP_EXP : (f.dep || null),
       /* só o que a ordem pediu vai para a fila de expedição; o resto sai dentro do produto */
       topo:ehTopo,
-      /* o produto herda os componentes de mesma posição na ordem */
+      /* o produto herda os componentes de mesma posição na ordem, excluindo anulados */
       sub:tipo === 'produto'
-        ? DB.serie.filter(x => x.ordem === o.id && x.tipo === 'componente' && x.seq === seq).map(x => x.id)
-        : []};
+        ? DB.serie.filter(x => x.ordem === o.id && x.tipo === 'componente' && x.seq === seq && x.status !== 'anulado').map(x => x.id)
+        : [],
+      grupo_escrita_id:grupoEscritaId};
     DB.serie.push(s); out.push(s);
   }
   return out;
 }
 /* serializa o que o setor concluiu — chamada no fim do apontamento */
-function serializar(o, op){
+function serializar(o, op, grupoEscritaId){
   const novos = [];
   (o.itens || []).forEach(oi => {
     const f = ficha(oi.cod); if(!f) return;
     f.ficha.filter(l => l.tipo === 'componente').forEach(l => {
       const c = comp(l.cod);
-      if(c && c.setor === op.setor) novos.push.apply(novos, emitirSeries(o, 'componente', c, qPerda(l) * oi.qtd, oi));
+      if(c && c.setor === op.setor) novos.push.apply(novos, emitirSeries(o, 'componente', c, qPerda(l) * oi.qtd, oi, grupoEscritaId));
     });
-    if(f.setor === op.setor) novos.push.apply(novos, emitirSeries(o, oi.tipo, f, oi.qtd, oi));
+    if(f.setor === op.setor) novos.push.apply(novos, emitirSeries(o, oi.tipo, f, oi.qtd, oi, grupoEscritaId));
   });
   return novos;
 }
@@ -21555,22 +21606,22 @@ function baixar(nome, conteudo, mime){
 /* WP-1.1: extraída para prototype/core/matDaOperacao.mjs (testada por
    matDaOperacao.test.mjs); reexposta em window.matDaOperacao pelo <script
    type="module"> no fim deste arquivo. */
-function baixaAutomatica(o, op){
+async function baixaAutomatica(o, op, grupoEscritaId){
   const baixas = PARAM.baixaAutomatica ? matDaOperacao(o, op.setor) : [];
-  /* P0-04: marcas do início para permitir estorno exato do apontamento */
-  const r0 = DB.rastreio.length, c0 = DB.consumos.length, m0 = DB.movimentos.length;
   const revItens = [];
-  baixas.forEach(b => {
-    const it = item(b.cod); if(!it) return;
+  for(const b of baixas){
+    const it = item(b.cod); if(!it) continue;
     const q = Math.round(b.qtd * 100) / 100;
-    it.fis = window.aplicarSaldo(it.fis, -q, { estoqueNegativo: PARAM.estoqueNegativo });
-    it.res = window.aplicarSaldo(it.res, -q, { estoqueNegativo: false });
+    const atualFis = it.fis, atualRes = it.res;
+    const novoFis = window.aplicarSaldo(atualFis, -q, { estoqueNegativo: PARAM.estoqueNegativo });
+    const novoRes = window.aplicarSaldo(atualRes, -q, { estoqueNegativo: false });
+    await window.PORTA.ajustarSaldo(b.cod, S.tenant, { fis: novoFis - atualFis, res: novoRes - atualRes });
     revItens.push({cod:b.cod, q:q});
-    const lotes = baixarLote(b.cod, b.dep, q, o.id, op.op);
-    DB.consumos.push({ordem:o.id, op:op.op, item:b.cod, qtd:q, auto:true, lotes:lotes.join(', ')});
+    const lotes = baixarLote(b.cod, b.dep, q, o.id, op.op, false, grupoEscritaId);
+    DB.consumos.push({ordem:o.id, op:op.op, item:b.cod, qtd:q, auto:true, lotes:lotes.join(', '), grupo_escrita_id:grupoEscritaId});
     DB.movimentos.unshift({ts:now(), tipo:'Baixa automática por apontamento', item:b.cod, dep:b.dep,
-      qtd:-q, resp:S.usuario, sinc:'ok', lote:lotes.join(', ')});
-  });
+      qtd:-q, resp:S.usuario, sinc:'ok', lote:lotes.join(', '), grupo_escrita_id:grupoEscritaId});
+  }
 
   /* transferência dos componentes concluídos neste setor para o depósito de destino */
   const transf = [];
@@ -21586,7 +21637,7 @@ function baixaAutomatica(o, op){
   transf.forEach(t => {
     if(vistos[t.cod]) return; vistos[t.cod] = 1;
     DB.movimentos.unshift({ts:now(), tipo:'Transferência entre depósitos', item:t.cod, dep:t.dep,
-      qtd:Math.round(t.qtd * 100) / 100, resp:S.usuario, sinc:'ok'});
+      qtd:Math.round(t.qtd * 100) / 100, resp:S.usuario, sinc:'ok', grupo_escrita_id:grupoEscritaId});
     evento(o.id, 'Item transferido', `${t.cod} · ${nf(t.qtd, 2)} un → ${(deposito(t.dep) || {}).nome || t.dep}`, 'Produção');
   });
 
@@ -21596,9 +21647,7 @@ function baixaAutomatica(o, op){
     evento(o.id, 'Baixa automática de material',
       baixas.map(b => `${b.cod} ${nf(b.qtd, 2)}`).join(' · ') || 'sem material vinculado ao setor', 'Produção');
   }
-  return {baixas:baixas.length, transf:Object.keys(vistos).length,
-          rev:{itens:revItens, rastreio:DB.rastreio.length - r0,
-               consumos:DB.consumos.length - c0, movimentos:DB.movimentos.length - m0}};
+  return {baixas:baixas.length, transf:Object.keys(vistos).length, rev:{itens:revItens}};
 }
 
 /* ---------- itens e composição da ordem (multi-item) — US-07, US-11 ---------- */
@@ -26098,11 +26147,19 @@ a11yTabelas();
   import { createCustoAberto } from './core/custoAberto.mjs';
   import { aplicarSaldo } from './core/saldoGuardiao.mjs';
   import { criarLinhaEstorno, dentroDaJanela } from './core/estorno.mjs';
+  import { createPortaMemoria } from './core/portaDados.mjs';
+  import { proximoGrupoEscrita } from './core/grupoEscrita.mjs';
 
   window.qPerda = qPerda;
   window.aplicarSaldo = aplicarSaldo;
   window.criarLinhaEstorno = criarLinhaEstorno;
   window.dentroDaJanela = dentroDaJanela;
+  window.proximoGrupoEscrita = proximoGrupoEscrita;
+  /* F-2.1: porta instanciada sobre o MESMO SALDO/RESERV que os acessores
+     fis/res do legado leem (pontes __SALDO/__RESERV, :15763+) — não sobre
+     mapas isolados como nos testes do WP-1.2. É o primeiro consumidor real
+     da porta (portaDados.mjs, WP-1.2 não tinha nenhum). */
+  window.PORTA = createPortaMemoria({ saldo: window.__SALDO, reserva: window.__RESERV });
   /* Achado 27/08: window.item/window.ficha/window.comp não resolvem para as
      funções do legado (const não vira propriedade de window; window.item
      ainda colide com <section id="item">) — usa as pontes __item/__ficha/__comp
