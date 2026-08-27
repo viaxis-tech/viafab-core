@@ -16979,27 +16979,6 @@ function initChao(){
     audit('Produção', 'Perda registrada', CF.ordem + ' / ' + cod, `${nf(q, 2)} ${it.un} · ${$('#pd-mot').value}`);
     $('#pd-qtd').value = 0; renderChao(); toast('Perda registrada e refletida no estoque reservado.');
   });
-  /* A-01: o card de bloqueio de ordem nunca foi construido no HTML (#cf-block,
-     #cf-block-card, #cf-block-close, #form-block, #bk-mot, #bk-desc e #e-bk-desc
-     nao existem). Sem esta guarda a excecao aqui abortava a cadeia de boot de
-     :25918 em diante, deixando 23 dos 29 modulos e todo o shell sem wiring.
-     A funcionalidade em si segue ausente e esta registrada como pendencia. */
-  if($('#cf-block') && $('#cf-block-card') && $('#cf-block-close') && $('#form-block')){
-    $('#cf-block').addEventListener('click', () => { $('#cf-block-card').hidden = false; });
-    $('#cf-block-close').addEventListener('click', () => { $('#cf-block-card').hidden = true; });
-    $('#form-block').addEventListener('submit', e => {
-      e.preventDefault();
-      const d = $('#bk-desc').value.trim();
-      $('#e-bk-desc').hidden = d.length >= 5; if(d.length < 5) return;
-      const o = ordem(CF.ordem);
-      o.status = 'bloqueada'; o.bloqueio = $('#bk-mot').value + ' — ' + d.slice(0, 48);
-      pararTimer();
-      evento(o.id, 'Ordem bloqueada', `${$('#bk-mot').value} · ${d}`, 'Produção');
-      audit('Produção', 'Ordem bloqueada', o.id, 'motivo = ' + $('#bk-mot').value);
-      $('#cf-block-card').hidden = true; $('#bk-desc').value = '';
-      renderChao(); renderNav(); toast(o.id + ' bloqueada e sinalizada no dashboard do PCP.');
-    });
-  }
 }
 function pararTimer(){ clearInterval(CF.tick); CF.tick = null; CF.ini = null; }
 
