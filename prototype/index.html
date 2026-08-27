@@ -19345,6 +19345,18 @@ const horaMaquina = id => (maquina(id) || {}).hora || 0;
 const comp    = c => COMPONENTES.find(x => x.cod === c);
 const prod    = c => PRODUTOS.find(x => x.cod === c);
 const ficha   = c => comp(c) || prod(c);
+/* Achado 27/08 (verificação em navegador do WP-1.5): item/ficha/comp são
+   `const`, então não viram propriedade de `window` como `function` vira —
+   diferente de custoMat/custoProc/custoMO (:19499+), que são `function` e
+   por isso já funcionavam via window.* no <script type="module"> de baixo.
+   `item` tem agravante: existe <section id="item"> (:2937), então
+   `window.item` resolve por named access do DOM para essa section, não para
+   esta função — nem convertendo para `function` isso mudaria com segurança.
+   Pontes explícitas e sem colisão de nome, só para o módulo abaixo
+   consumir (ver reexposição em window.explodir/window.matDaOperacao). */
+window.__item = item;
+window.__ficha = ficha;
+window.__comp = comp;
 const insumo  = (t, c) => t === 'material' ? item(c) : ficha(c);
 const insNome = (t, c) => (insumo(t, c) || {}).nome || c;
 const insUn   = (t, c) => (insumo(t, c) || {}).un   || 'un';
@@ -26091,13 +26103,17 @@ a11yTabelas();
   window.aplicarSaldo = aplicarSaldo;
   window.criarLinhaEstorno = criarLinhaEstorno;
   window.dentroDaJanela = dentroDaJanela;
+  /* Achado 27/08: window.item/window.ficha/window.comp não resolvem para as
+     funções do legado (const não vira propriedade de window; window.item
+     ainda colide com <section id="item">) — usa as pontes __item/__ficha/__comp
+     expostas em :19347+ em vez disso. */
   window.explodir = createExplodir({
-    item: cod => window.item(cod),
-    ficha: cod => window.ficha(cod)
+    item: cod => window.__item(cod),
+    ficha: cod => window.__ficha(cod)
   });
   window.matDaOperacao = createMatDaOperacao({
-    ficha: cod => window.ficha(cod),
-    comp: cod => window.comp(cod)
+    ficha: cod => window.__ficha(cod),
+    comp: cod => window.__comp(cod)
   });
   window.custoAberto = createCustoAberto({
     custoMat: (tipo, cod, prof) => window.custoMat(tipo, cod, prof),
