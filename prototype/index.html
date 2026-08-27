@@ -16137,9 +16137,10 @@ const opKey = (ordemId, op) => ordemId + ' / ' + op.op;
  * @returns {{id:string, operacao_ordem_id:string, tipo:string, delta:Array, criado_em:number, janela_expira_em:number, autor:string}}
  */
 function registrarEstorno(operacaoOrdemId, tipo, delta, autor){
-  const criado_em = Date.now();
-  const linha = {id:'EST-' + (++EST_SEQ), operacao_ordem_id:operacaoOrdemId, tipo, delta:delta || [],
-    criado_em, janela_expira_em:criado_em + JANELA_ESTORNO, autor:autor || S.usuario};
+  const linha = window.criarLinhaEstorno({
+    seq: ++EST_SEQ, operacaoOrdemId, tipo, delta, autor: autor || S.usuario,
+    agora: Date.now(), janelaMs: JANELA_ESTORNO
+  });
   ESTORNO_APONTAMENTO.push(linha);
   return linha;
 }
@@ -17039,7 +17040,7 @@ function corrigirApontamento(){
   const u = CF.und;
   if(!u){ toast('Nenhum apontamento recente para corrigir.'); return; }
   const linha = estornoAberto(opKey(u.ordem, u.op));
-  if(!linha || Date.now() > linha.janela_expira_em){
+  if(!window.dentroDaJanela(linha, Date.now())){
     renderChao();
     toast('Janela de correção expirada — solicite desbloqueio ao PCP.'); return;
   }
@@ -26084,9 +26085,12 @@ a11yTabelas();
   import { createMatDaOperacao } from './core/matDaOperacao.mjs';
   import { createCustoAberto } from './core/custoAberto.mjs';
   import { aplicarSaldo } from './core/saldoGuardiao.mjs';
+  import { criarLinhaEstorno, dentroDaJanela } from './core/estorno.mjs';
 
   window.qPerda = qPerda;
   window.aplicarSaldo = aplicarSaldo;
+  window.criarLinhaEstorno = criarLinhaEstorno;
+  window.dentroDaJanela = dentroDaJanela;
   window.explodir = createExplodir({
     item: cod => window.item(cod),
     ficha: cod => window.ficha(cod)
