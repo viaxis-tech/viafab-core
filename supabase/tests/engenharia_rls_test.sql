@@ -6,7 +6,7 @@
 -- Executar: supabase test db
 -- =============================================================================
 begin;
-select plan(19);
+select plan(22);
 
 -- -----------------------------------------------------------------------------
 -- Fixtures: dois tenants ficticios (A e B), cada um com unidade, item,
@@ -158,14 +158,6 @@ select is((select count(*)::int from public.produtos_padrao where item_id = 'c11
 -- (alem do bloqueio via trigger) -- confirma "ausencia de policy = acesso
 -- negado" tambem por RLS, com throws_ok verificando o codigo 42501.
 -- -----------------------------------------------------------------------------
--- DIAGNOSTICO TEMPORARIO (achado 27/08, remover apos investigacao) --------
-select diag('DEBUG current_user=' || current_user || ' session_user=' || session_user);
-select diag('DEBUG rolbypassrls=' || (select rolbypassrls::text from pg_roles where rolname = current_user));
-select diag('DEBUG jwt.claims=' || coalesce(current_setting('request.jwt.claims', true), '<null>'));
-select diag('DEBUG grants=' || (select string_agg(privilege_type, ',') from information_schema.role_table_grants where table_name = 'familias_construtivas' and grantee = current_user));
-select diag('DEBUG row_count_visivel=' || (select count(*)::text from public.familias_construtivas where tenant_id = 'c2222222-2222-2222-2222-222222222222'));
--- FIM DIAGNOSTICO TEMPORARIO -------------------------------------------------
-
 select throws_ok(
   $$ update public.familias_construtivas set nome = 'Tentativa'
      where tenant_id = 'c2222222-2222-2222-2222-222222222222' $$,
@@ -174,6 +166,38 @@ select throws_ok(
   'familias_construtivas: UPDATE negado para o proprio tenant (sem policy de UPDATE = fail-closed)'
 );
 
+-- -----------------------------------------------------------------------------
+-- Achado 27/08 (docs/registro-execucao.md): a asserção acima só passava
+-- localmente por acaso — o "postgres" que roda as migrations aqui não tem a
+-- "alter default privileges for role supabase_admin" que a plataforma
+-- hospedada/CI aplica, e que concede UPDATE/DELETE a authenticated/anon em
+-- toda tabela nova por padrão. A brecha real também cobria DELETE (nunca
+-- testado nesta suíte) e o papel `anon` (nunca testado). Corrigida em
+-- 20260827160000_revoke_default_priv_leak_multiempresa_engenharia.sql com o
+-- padrão "revoke all" já usado em auditoria_append_only. As 3 asserções
+-- abaixo cobrem a classe do bug, não só o sintoma original.
+-- -----------------------------------------------------------------------------
+select throws_ok(
+  $$ delete from public.familias_construtivas where tenant_id = 'c2222222-2222-2222-2222-222222222222' $$,
+  '42501',
+  null::text,
+  'familias_construtivas: DELETE negado para authenticated (nunca concedido, revoke all explicito)'
+);
+
+select throws_ok(
+  $$ delete from public.itens where tenant_id = 'c2222222-2222-2222-2222-222222222222' $$,
+  '42501',
+  null::text,
+  'itens: DELETE negado para authenticated mesmo tendo select/insert/update (revoke all explicito)'
+);
+
 reset role;
+
+select is(
+  (select count(*)::int from information_schema.role_table_grants
+   where table_schema = 'public' and table_name = 'itens' and grantee = 'anon'),
+  0,
+  'itens: anon nao tem nenhum privilegio SQL (nem herdado de default privileges)'
+);
 select * from finish();
 rollback;
