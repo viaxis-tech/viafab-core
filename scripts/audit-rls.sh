@@ -9,6 +9,16 @@
 #
 # Uso: bash scripts/audit-rls.sh [diretorio-de-migrations]
 # Saida: 0 quando limpo, 1 quando ha violacao.
+#
+# Achado 27/08 (docs/registro-execucao.md): toda checagem usa `grep -qE ...
+# <<< "$corpus"` (herestring), nunca `echo "$corpus" | grep -qE ...` (pipe).
+# Com `set -o pipefail`, um `grep -q` que encontra o padrao cedo e sai antes
+# do `echo` terminar de escrever um corpus grande derruba o `echo` com
+# SIGPIPE -- e pipefail conta isso como falha da pipeline inteira, mesmo o
+# grep tendo encontrado o padrao. Reproduzido localmente (~1 em 4-8 rodadas)
+# e no CI (100% das vezes, com 10 migrations) como falsos-positivos em
+# tabelas aleatorias. Herestring elimina o processo escritor concorrente,
+# entao nao ha o que receber SIGPIPE.
 
 set -uo pipefail
 
@@ -28,6 +38,11 @@ if [ -z "$CORPUS" ]; then
   exit 1
 fi
 
+# Variante em uma linha so, para a checagem de view (security_invoker pode
+# estar em outra linha do mesmo create view). Calculada uma vez aqui, nunca
+# via pipe direto para grep -q mais abaixo -- ver nota sobre SIGPIPE.
+CORPUS_FLAT="$(tr '\n' ' ' <<< "$CORPUS")"
+
 violacoes=0
 tabelas=0
 views=0
@@ -42,13 +57,13 @@ while IFS= read -r tabela; do
   tabelas=$((tabelas + 1))
   faltando=""
 
-  echo "$CORPUS" | grep -qE "alter table (if exists )?(public\.)?${tabela}\b[^;]*enable row level security" \
+  grep -qE "alter table (if exists )?(public\.)?${tabela}\b[^;]*enable row level security" <<< "$CORPUS" \
     || faltando="${faltando} enable-rls"
 
-  echo "$CORPUS" | grep -qE "alter table (if exists )?(public\.)?${tabela}\b[^;]*force row level security" \
+  grep -qE "alter table (if exists )?(public\.)?${tabela}\b[^;]*force row level security" <<< "$CORPUS" \
     || faltando="${faltando} force-rls"
 
-  echo "$CORPUS" | grep -qE "create policy [a-z0-9_]+ on (public\.)?${tabela}\b" \
+  grep -qE "create policy [a-z0-9_]+ on (public\.)?${tabela}\b" <<< "$CORPUS" \
     || faltando="${faltando} policy"
 
   if [ -n "$faltando" ]; then
@@ -63,7 +78,7 @@ while IFS= read -r view; do
   views=$((views + 1))
 
   # A clausula security_invoker tem de estar dentro do proprio create view.
-  if echo "$CORPUS" | tr '\n' ' ' | grep -qE "create (or replace )?view public\.${view}\b[^;]*security_invoker"; then
+  if grep -qE "create (or replace )?view public\.${view}\b[^;]*security_invoker" <<< "$CORPUS_FLAT"; then
     echo "PASSA  view public.${view}"
   else
     reprovar "view public.${view}: sem security_invoker"
